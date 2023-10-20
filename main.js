@@ -1,7 +1,10 @@
-var http = require('http');
-var fs = require('fs');
-var app = http.createServer(function(request,response){
-  var url = request.url;
+import http from 'http';
+import  fs  from 'fs';
+import { DataTypes, Model, Sequelize } from 'sequelize';
+
+
+const app = http.createServer((request,response)=>{
+  const url = request.url;
   if(request.url == '/'){
     url = '/index.html';
   }
@@ -15,3 +18,7 @@ var app = http.createServer(function(request,response){
 
 });
 app.listen(3000);
+
+
+
+
