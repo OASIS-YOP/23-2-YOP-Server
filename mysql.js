@@ -133,8 +133,6 @@ Collection.init(
     }
 );
 
-User.hasMany(PhotoCard);
-
 //도안
 class Polaroid extends Model {
 }
@@ -185,6 +183,34 @@ User.hasMany(Post, {
 })
 
 // 좋아요 ( 회원: 포스트 = 다대다)
+class Like extends Model {
+}
+Like.init(
+  {
+    userId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: User, 
+        key: 'id'
+      }
+    },
+    postId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: Post,
+        key: 'id'
+      }
+    },
+    likeDateTime: DataTypes.DATE,
+  }
+  ,
+  {
+      sequelize,
+      modelName: "Like", 
+      timestamps: false
+  }
+);
+
 User.belongsToMany(Post, {
   through: 'Like',
   })
@@ -192,41 +218,53 @@ Post.belongsToMany(User, {
   through: 'Like',
   })
 
-class Like extends Model {
-}
-Like.init(
-    {
-      likeDateTime: DataTypes.DATE,
-    }
-    ,
-    {
-        sequelize,
-        modelName: "Like", 
-        timestamps: false
-    }
-);
 
 
 // 즐겨찾기 (회원: 아티스트 = 다대다)
-User.belongsToMany(Artist, {
-  through: 'Like',
-  })
-Artist.belongsToMany(User, {
-  through: 'Like',
-  })
-
 class Favorite extends Model {
 }
 Favorite.init(
-    {
-      favoriteDateTime: DataTypes.DATE,
-    }
-    ,
-    {
-        sequelize,
-        modelName: "Favorite", 
-        timestamps: false
-    }
+  {
+    userId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: User, 
+        key: 'id'
+      }
+    },
+    artistId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: Artist,
+        key: 'id'
+      }
+    },
+    favoriteDateTime: DataTypes.DATE,
+  }
+  ,
+  {
+      sequelize,
+      modelName: "favorite", 
+      timestamps: false
+  }
 );
 
-await sequelize.sync({force: true});
+User.belongsToMany(Artist, {
+  through: 'Favorite',
+  })
+Artist.belongsToMany(User, {
+  through: 'Favorite',
+  })
+
+
+// 포토카드
+User.hasMany(PhotoCard, {
+  foreignKey: 'userId'
+})
+// 컬렉션
+User.hasMany(Collection, {
+  foreignKey: 'userId'
+})
+
+//await sequelize.sync({alter:true});
+await sequelize.sync();
