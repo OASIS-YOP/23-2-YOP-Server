@@ -34,6 +34,7 @@ sequelize.authenticate().then(() => {
   console.error('Unable to connect to the database: ', error);
 });
 
+//회원
 //userId, email, nickname, password, avatar, biography
 class User extends Model {}
 User.init(
@@ -57,8 +58,8 @@ User.init(
     }
 );
 
-//await sequelize.sync({force: true});
 
+//아티스트
 //artistId, enterComp, groupName, memberName, collectionQuant
 class Artist extends Model {}
 Artist.init(
@@ -70,7 +71,8 @@ Artist.init(
       },
         enterComp: DataTypes.STRING,
         groupName: DataTypes.STRING,
-        memberName: DataTypes.STRING,
+        memberNum: DataTypes.STRING,
+        members: DataTypes.JSON,
         collectionQuant: DataTypes.INTEGER,
     }
     ,
@@ -81,4 +83,150 @@ Artist.init(
     }
 );
 
-//await sequelize.sync();
+
+
+//포토카드
+//enterComp, groupName, memberName, albumName, version
+class PhotoCard extends Model {
+}
+PhotoCard.init(
+    {
+      memberName: {
+        type: DataTypes.STRING,
+        primaryKey: true,
+      },
+      version: {
+        type: DataTypes.STRING,
+        primaryKey: true,
+      },
+      albumName: DataTypes.STRING,
+      enterComp: DataTypes.STRING,
+      groupName: DataTypes.STRING,
+      activeDateTime: DataTypes.DATE
+    }
+    ,
+    {
+        sequelize,
+        modelName: "photoCard", 
+        timestamps: false
+    }
+);
+
+//컬렉션
+//enterComp, groupName, memberName, albumName, version
+class Collection extends Model {
+}
+Collection.init(
+    {
+      albumName: {
+        type: DataTypes.STRING,
+        primaryKey: true,
+      },
+      photoCardQuant: DataTypes.INTEGER,
+      activeDateTime: DataTypes.DATE
+    }
+    ,
+    {
+        sequelize,
+        modelName: "collection", 
+        timestamps: false
+    }
+);
+
+User.hasMany(PhotoCard);
+
+//도안
+class Polaroid extends Model {
+}
+Polaroid.init(
+    {
+      polaroidId: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+      },
+      saveDateTime: DataTypes.DATE,
+    }
+    ,
+    {
+        sequelize,
+        modelName: "Polaroid", 
+        timestamps: false
+    }
+);
+
+//포스트
+class Post extends Model {
+}
+Post.init(
+    {
+      postId: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+      },
+      postDateTime: DataTypes.DATE,
+    }
+    ,
+    {
+        sequelize,
+        modelName: "Post", 
+        timestamps: false
+    }
+);
+
+// 릴레이션
+// 회원 : 도안 = 일대다
+User.hasMany(Polaroid, {
+  foreignKey: 'userId'
+})
+
+// 회원: 포스트 = 일대다
+User.hasMany(Post, {
+  foreignKey: 'userId'
+})
+
+// 좋아요 ( 회원: 포스트 = 다대다)
+User.belongsToMany(Post, {
+  through: 'Like',
+  })
+Post.belongsToMany(User, {
+  through: 'Like',
+  })
+
+class Like extends Model {
+}
+Like.init(
+    {
+      likeDateTime: DataTypes.DATE,
+    }
+    ,
+    {
+        sequelize,
+        modelName: "Like", 
+        timestamps: false
+    }
+);
+
+
+// 즐겨찾기 (회원: 아티스트 = 다대다)
+User.belongsToMany(Artist, {
+  through: 'Like',
+  })
+Artist.belongsToMany(User, {
+  through: 'Like',
+  })
+
+class Favorite extends Model {
+}
+Favorite.init(
+    {
+      favoriteDateTime: DataTypes.DATE,
+    }
+    ,
+    {
+        sequelize,
+        modelName: "Favorite", 
+        timestamps: false
+    }
+);
+
+await sequelize.sync({force: true});
