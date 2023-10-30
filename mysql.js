@@ -60,7 +60,7 @@ User.init(
 
 
 //아티스트
-//artistId, enterComp, groupName, memberName, collectionQuant
+//artistId, enterComp, groupName, memberNum, members, photo, collectionQuant
 class Artist extends Model {}
 Artist.init(
     {
@@ -73,6 +73,7 @@ Artist.init(
         groupName: DataTypes.STRING,
         memberNum: DataTypes.STRING,
         members: DataTypes.JSON,
+        photo: DataTypes.STRING,
         collectionQuant: DataTypes.INTEGER,
     }
     ,
@@ -201,7 +202,7 @@ Like.init(
         key: 'id'
       }
     },
-    likeDateTime: DataTypes.DATE,
+    likeNum: DataTypes.INTEGER,
   }
   ,
   {
@@ -239,7 +240,7 @@ Favorite.init(
         key: 'id'
       }
     },
-    favoriteDateTime: DataTypes.DATE,
+    favoriteNum: DataTypes.INTEGER,
   }
   ,
   {
