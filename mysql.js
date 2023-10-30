@@ -71,7 +71,7 @@ Artist.init(
       },
         enterComp: DataTypes.STRING,
         groupName: DataTypes.STRING,
-        memberNum: DataTypes.STRING,
+        memberNum: DataTypes.INTEGER,
         members: DataTypes.JSON,
         photo: DataTypes.STRING,
         collectionQuant: DataTypes.INTEGER,
@@ -267,5 +267,94 @@ User.hasMany(Collection, {
   foreignKey: 'userId'
 })
 
-//await sequelize.sync({alter:true});
-await sequelize.sync();
+
+
+//---------DATA------------------------------
+// 아티스트 
+Artist.create({
+  userId: '1',
+  enterComp: 'Big Hit Entertainment',
+  groupName: '방탄소년단',
+  memberNum: 7,
+  members: {
+    "group" : "방탄소년단",
+    "member" : ["정국", "뷔", "지민", "슈가", "진", "RM", "제이홉"]
+  },
+  collectionQuant: 18
+})
+.then(result => {
+  res.json(result);
+})
+.catch(err => {
+  console.error(err);
+});
+
+Artist.create({
+  userId: '2',
+  enterComp: 'SM Entertainment',
+  groupName: '에스파',
+  memberNum: 4,
+  members: {
+    "group" : "에스파",
+    "member" : ["카리나", "윈터", "지젤", "닝닝"]
+  },
+  collectionQuant: 6
+})
+.then(result => {
+  res.json(result);
+})
+.catch(err => {
+  console.error(err);
+});
+
+Artist.create({
+  userId: '3',
+  enterComp: 'ADOR Entertainment',
+  groupName: '뉴진스',
+  memberNum: 4,
+  members: {
+    "group" : "뉴진스",
+    "member" : ["하니", "해린", "민지", "다니엘"]
+  },
+  collectionQuant: 3
+})
+.then(result => {
+  res.json(result);
+})
+.catch(err => {
+  console.error(err);
+});
+
+Artist.create({
+  userId: '4',
+  enterComp: 'EDAM Entertainment',
+  groupName: '아이유',
+  memberNum: 1,
+  members: {
+    "group" : "아이유",
+    "member" : ["아이유"]
+  },
+  collectionQuant: 16
+})
+.then(result => {
+  res.json(result);
+})
+.catch(err => {
+  console.error(err);
+});
+
+
+// Dummy data
+// 유저
+User.create({userID: '1', email: 'ohnpol1004@naver.com', nickname: 'ohnpol1004', 
+  password: '1234', avatar: '', biography: '자기소개'
+})
+.then(result => {
+  res.json(result);
+})
+.catch(err => {
+  console.error(err);
+});
+
+  //await sequelize.sync({alter:true});
+//await sequelize.sync();
