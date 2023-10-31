@@ -285,6 +285,7 @@ await sequelize.sync();
 
 // // "jane" is now saved to the database!
 
+// ------artist-------
 const BTS = Artist.build(
   {
     // artistId: 1,
@@ -334,8 +335,26 @@ const newJeans = Artist.build(
     collectionQuant: 3
 })
 
+
+// ------collection-------
+
+//-------user----------
+const userTemp = User.build(
+  {
+    // userId: 1,
+    email: 'ohnpol1004@naver.com',
+    nickname: 'ohnpol1004',
+    password: '1111',
+    avatar: '',
+    biography: '자기소개'
+})
+
+
+
+
 // await BTS.save();
 // await aespa.save();
 // await IU.save();
 // await newJeans.save();
+await userTemp.save();
 
