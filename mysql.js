@@ -343,6 +343,11 @@ Artist.create({
   console.error(err);
 });
 
+// 컬렉션
+
+// 포토카드
+
+
 
 // Dummy data
 // 유저

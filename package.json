@@ -15,5 +15,9 @@
     "mysql": "^2.18.1",
     "mysql2": "^3.6.2",
     "sequelize": "^6.33.0"
+  },
+  "devDependencies": {
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.0"
   }
 }

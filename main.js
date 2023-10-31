@@ -2,12 +2,25 @@ import http from 'http';
 import  fs  from 'fs';
 import express from 'express';
 import cors from 'cors';
+import { swaggerUi, specs } from './modules/swagger.js'
 
 const app = express();
 const port = 3000
 
-app.get('/', (req, res)=>{
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
+
+app.get('/', async(req, res)=>{
   res.send('Hello World!');
+  // 즐겨찾는 아티스트
+  //const favArtist = await client.query('select photo, groupName from artist', [req.body.id, ]);
+
+  // 폴꾸 Hot10
+  // const hot10 = await client.query(`
+  //   SELECT * 
+  //   FROM posts
+  //   ORDER BY likeNum DESC
+  //   LIMIT 10;
+  // `, [req.body.id, ]);
 })
 
 app.listen(port, ()=>{
@@ -20,6 +33,8 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+
 
 
 
