@@ -54,9 +54,13 @@ app.use(cors(corsOptions));
 // app.listen(3000);
 
 app.get('/mainpage', (req, res)=>{
-  const allArtist = connection;
-  console.log(allArtist);
+  const num = getRandomInt(1,4) //4 = record quant
+  //const anArtist = connection.query(`select enterComp, photo, groupName from artists WHERE artistId = $${num}` );
+  const anArtist = connection.query(`SELECT enterComp, photo, groupName from artists WHERE artistId = $3` );
+  console.log(anArtist);
 
 })
+
+
 
 
