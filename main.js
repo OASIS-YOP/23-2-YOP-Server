@@ -55,6 +55,8 @@ app.use(cors(corsOptions));
 // });
 // app.listen(3000);
 
-
+app.get('/mainpage', (req, res)=>{
+  //const 
+})
 
 

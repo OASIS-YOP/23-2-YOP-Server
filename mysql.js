@@ -201,7 +201,10 @@ Like.init(
     //     key: 'postId'
     //   }
     // },
-    likeQuant: DataTypes.INTEGER,
+    likeQuant: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+    }
   }
   ,
   {
@@ -241,7 +244,10 @@ Favorite.init(
     //     key: 'artistId'
     //   }
     // },
-    favoriteQuant: DataTypes.INTEGER,
+    favoriteQuant: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+    }
   }
   ,
   {
@@ -349,6 +355,9 @@ const userTemp = User.build(
     biography: '자기소개'
 })
 
+//-------favorite----------
+
+
 
 
 
@@ -356,5 +365,8 @@ const userTemp = User.build(
 // await aespa.save();
 // await IU.save();
 // await newJeans.save();
-await userTemp.save();
+
+//await userTemp.save();
+
+
 
