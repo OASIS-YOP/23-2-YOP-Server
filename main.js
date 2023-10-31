@@ -1,11 +1,14 @@
 import http from 'http';
 import  fs  from 'fs';
+import bodyParser from 'body-parser';
 import express from 'express';
 import cors from 'cors';
 import { swaggerUi, specs } from './modules/swagger.js'
+import { connection } from './mysql.js';
 
 const app = express();
-const port = 3000
+const port = 3000;
+app.use(bodyParser.json());
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 
@@ -34,11 +37,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-
-
-
-
-
 // const app = http.createServer((request,response)=>{
 //   const url = request.url;
 //   if(request.url == '/'){
@@ -56,7 +54,9 @@ app.use(cors(corsOptions));
 // app.listen(3000);
 
 app.get('/mainpage', (req, res)=>{
-  //const 
+  const allArtist = connection;
+  console.log(allArtist);
+
 })
 
 
