@@ -10,14 +10,14 @@ const sequelize = new Sequelize(
     storage: 'ohnpol.db'
 });
 
-const connection = mysql.createConnection({
-  host     : '3.34.95.156',
-  user     : 'root',
-  password : '',
-  database : 'ohnpol'
-});
+// const connection = mysql.createConnection({
+//   host     : '3.34.95.156',
+//   user     : 'root',
+//   password : '',
+//   database : 'ohnpol'
+// });
 
-connection.connect();
+// connection.connect();
 
 // connection.query('SELECT * from topic', (error, results, fields)=> {
 //   if (error){
@@ -270,5 +270,72 @@ User.hasMany(Collection, {
   foreignKey: 'userId'
 })
 
+
 //await sequelize.sync({alter:true});
 await sequelize.sync();
+
+
+//-------------------DATA-----------------------
+// const jane = User.build({ firstName: "Jane", lastName: "Doe" });
+
+// // "jane" has not been saved to the database yet!
+// // You can change any of its properties here, and call `save()` later to persist them all at once.
+
+// await jane.save();
+
+// // "jane" is now saved to the database!
+
+const BTS = Artist.build(
+  {
+    // artistId: 1,
+    enterComp: '빅히트 엔터테인먼트(Big Hit Entertainment)',
+    groupName: '방탄소년단(BTS)',
+    memberNum: 7,
+    members: {
+      "name": ["정국", "뷔", "지민", "슈가", "진","RM", "제이홉"],
+    },
+    collectionQuant: 18
+  }
+);
+
+const aespa = Artist.build(
+  {
+    // artistId: 2,
+    enterComp: '에스엠 엔터테인먼트(SM Entertainment)',
+    groupName: '에스파(aespa)',
+    memberNum: 4,
+    members: {
+      "name": ["카리나", "닝닝", "윈터", "지젤"],
+    },
+    collectionQuant: 6
+})
+
+const IU = Artist.build(
+  {
+    // artistId: 3,
+    enterComp: '이담 엔터테인먼트(EDAM Entertainment)',
+    groupName: '아이유(IU)',
+    memberNum: 1,
+    members: {
+      "name": ["아이유"],
+    },
+    collectionQuant: 16
+})
+
+const newJeans = Artist.build(
+  {
+    // artistId: 4,
+    enterComp: '어도어 엔터테인먼트(ADOR Entertainment)',
+    groupName: '뉴진스(New Jeans)',
+    memberNum: 4,
+    members: {
+      "name": ["다니엘", "민지", "해린", "하니"],
+    },
+    collectionQuant: 3
+})
+
+// await BTS.save();
+// await aespa.save();
+// await IU.save();
+// await newJeans.save();
+
