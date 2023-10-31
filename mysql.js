@@ -10,14 +10,14 @@ const sequelize = new Sequelize(
     storage: 'ohnpol.db'
 });
 
-// const connection = mysql.createConnection({
-//   host     : 'localhost',
-//   user     : 'root',
-//   password : '',
-//   database : 'ohnpol'
-// });
+const connection = mysql.createConnection({
+  host     : '3.34.95.156',
+  user     : 'root',
+  password : '',
+  database : 'ohnpol'
+});
 
-// connection.connect();
+connection.connect();
 
 // connection.query('SELECT * from topic', (error, results, fields)=> {
 //   if (error){
@@ -60,7 +60,7 @@ User.init(
 
 
 //아티스트
-//artistId, enterComp, groupName, memberNum, members, photo, collectionQuant
+//artistId, enterComp, groupName, memberName, collectionQuant
 class Artist extends Model {}
 Artist.init(
     {
@@ -71,9 +71,8 @@ Artist.init(
       },
         enterComp: DataTypes.STRING,
         groupName: DataTypes.STRING,
-        memberNum: DataTypes.INTEGER,
+        memberNum: DataTypes.STRING,
         members: DataTypes.JSON,
-        photo: DataTypes.STRING,
         collectionQuant: DataTypes.INTEGER,
     }
     ,
@@ -188,21 +187,21 @@ class Like extends Model {
 }
 Like.init(
   {
-    userId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: User, 
-        key: 'id'
-      }
-    },
-    postId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: Post,
-        key: 'id'
-      }
-    },
-    likeNum: DataTypes.INTEGER,
+    // userId: {
+    //   type: DataTypes.INTEGER,
+    //   references: {
+    //     model: User, 
+    //     key: 'userId'
+    //   }
+    // },
+    // postId: {
+    //   type: DataTypes.INTEGER,
+    //   references: {
+    //     model: Post,
+    //     key: 'postId'
+    //   }
+    // },
+    likeQuant: DataTypes.INTEGER,
   }
   ,
   {
@@ -214,9 +213,11 @@ Like.init(
 
 User.belongsToMany(Post, {
   through: 'Like',
+  foreignKey: 'userId',
   })
 Post.belongsToMany(User, {
   through: 'Like',
+  foreignKey: 'postId',
   })
 
 
@@ -226,35 +227,37 @@ class Favorite extends Model {
 }
 Favorite.init(
   {
-    userId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: User, 
-        key: 'id'
-      }
-    },
-    artistId: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: Artist,
-        key: 'id'
-      }
-    },
-    favoriteNum: DataTypes.INTEGER,
+    // userId: {
+    //   type: DataTypes.INTEGER,
+    //   references: {
+    //     model: User, 
+    //     key: 'userId'
+    //   }
+    // },
+    // artistId: {
+    //   type: DataTypes.INTEGER,
+    //   references: {
+    //     model: Artist,
+    //     key: 'artistId'
+    //   }
+    // },
+    favoriteQuant: DataTypes.INTEGER,
   }
   ,
   {
       sequelize,
-      modelName: "favorite", 
+      modelName: "Favorite", 
       timestamps: false
   }
 );
 
 User.belongsToMany(Artist, {
   through: 'Favorite',
+  foreignKey: 'userId',
   })
 Artist.belongsToMany(User, {
   through: 'Favorite',
+  foreignKey: 'artistId',
   })
 
 
@@ -267,99 +270,5 @@ User.hasMany(Collection, {
   foreignKey: 'userId'
 })
 
-
-
-//---------DATA------------------------------
-// 아티스트 
-Artist.create({
-  userId: '1',
-  enterComp: 'Big Hit Entertainment',
-  groupName: '방탄소년단',
-  memberNum: 7,
-  members: {
-    "group" : "방탄소년단",
-    "member" : ["정국", "뷔", "지민", "슈가", "진", "RM", "제이홉"]
-  },
-  collectionQuant: 18
-})
-.then(result => {
-  res.json(result);
-})
-.catch(err => {
-  console.error(err);
-});
-
-Artist.create({
-  userId: '2',
-  enterComp: 'SM Entertainment',
-  groupName: '에스파',
-  memberNum: 4,
-  members: {
-    "group" : "에스파",
-    "member" : ["카리나", "윈터", "지젤", "닝닝"]
-  },
-  collectionQuant: 6
-})
-.then(result => {
-  res.json(result);
-})
-.catch(err => {
-  console.error(err);
-});
-
-Artist.create({
-  userId: '3',
-  enterComp: 'ADOR Entertainment',
-  groupName: '뉴진스',
-  memberNum: 4,
-  members: {
-    "group" : "뉴진스",
-    "member" : ["하니", "해린", "민지", "다니엘"]
-  },
-  collectionQuant: 3
-})
-.then(result => {
-  res.json(result);
-})
-.catch(err => {
-  console.error(err);
-});
-
-Artist.create({
-  userId: '4',
-  enterComp: 'EDAM Entertainment',
-  groupName: '아이유',
-  memberNum: 1,
-  members: {
-    "group" : "아이유",
-    "member" : ["아이유"]
-  },
-  collectionQuant: 16
-})
-.then(result => {
-  res.json(result);
-})
-.catch(err => {
-  console.error(err);
-});
-
-// 컬렉션
-
-// 포토카드
-
-
-
-// Dummy data
-// 유저
-User.create({userID: '1', email: 'ohnpol1004@naver.com', nickname: 'ohnpol1004', 
-  password: '1234', avatar: '', biography: '자기소개'
-})
-.then(result => {
-  res.json(result);
-})
-.catch(err => {
-  console.error(err);
-});
-
-  //await sequelize.sync({alter:true});
-//await sequelize.sync();
+//await sequelize.sync({alter:true});
+await sequelize.sync();
