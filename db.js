@@ -57,6 +57,7 @@ Artist.init(
         groupName: DataTypes.STRING,
         memberNum: DataTypes.STRING,
         members: DataTypes.JSON,
+        memberPhoto: DataTypes.JSON,
         collectionQuant: DataTypes.INTEGER,
     }
     ,
@@ -109,7 +110,14 @@ Collection.init(
       },
       albumJacket: DataTypes.STRING,
       photoCardQuant: DataTypes.INTEGER,
-      activeDateTime: DataTypes.DATE
+      activeDateTime: DataTypes.DATE,
+      // artistId: {
+      //   type: DataTypes.INTEGER,
+      //   references: {
+      //     model: Artist,  // Polaroid 모델을 참조
+      //     key: 'artistId' // Polaroid 모델의 기본 키를 참조
+      //   }
+      // }
     }
     ,
     {
@@ -130,6 +138,13 @@ Polaroid.init(
       },
       polaroid: DataTypes.STRING,
       saveDateTime: DataTypes.DATE,
+      // photocardId: {
+      //   type: DataTypes.INTEGER,
+      //   references: {
+      //     model: PhotoCard,  // Polaroid 모델을 참조
+      //     key: 'photocardId' // Polaroid 모델의 기본 키를 참조
+      //   }
+      // }
     }
     ,
     {
@@ -150,6 +165,13 @@ Post.init(
       },
       post: DataTypes.STRING,
       postDateTime: DataTypes.DATE,
+      // polaroidId: {
+      //   type: DataTypes.INTEGER,
+      //   references: {
+      //     model: Polaroid,  // Polaroid 모델을 참조
+      //     key: 'polaroidId' // Polaroid 모델의 기본 키를 참조
+      //   }
+      // }
     }
     ,
     {
@@ -264,6 +286,30 @@ User.hasMany(Collection, {
   foreignKey: 'userId'
 })
 
+// 포토카드: 도안 = 일대일
+Polaroid.belongsTo(PhotoCard, 
+//   {
+//   foreignKey: 'photocardId' 
+// }
+);
+// 도안:포스트 = 일대일
+Post.belongsTo(Polaroid);
+
+// 아티스트:컬렉션 = 일대일
+Collection.belongsTo(Artist, 
+//   {
+//   foreignKey: 'artistId'
+// }
+);
+
+Polaroid.sync();
+Post.sync();
+Collection.sync();
+
+// 컬렉션: 포토카드 = 일대다
+Collection.hasMany(PhotoCard, {
+  foreignKey: 'collectionId'
+})
 
 //await sequelize.sync({alter:true});
 await sequelize.sync();
@@ -290,6 +336,38 @@ const BTS = Artist.build(
     members: {
       "name": ["정국", "뷔", "지민", "슈가", "진","RM", "제이홉"],
     },
+    memberPhoto: 
+      [
+        {
+          "name": "정국",
+          "memphoto":""
+        },
+        {
+          "name": "뷔",
+          "memphoto":""
+        },
+        {
+          "name": "지민",
+          "memphoto":""
+        },
+        {
+          "name": "슈가",
+          "memphoto":""
+        },
+        {
+          "name": "진",
+          "memphoto":""
+        },
+        {
+          "name": "RM",
+          "memphoto":""
+        },
+        {
+          "name": "제이홉",
+          "memphoto":""
+        }
+      ]
+    ,
     collectionQuant: 18
   }
 );
@@ -304,6 +382,26 @@ const aespa = Artist.build(
     members: {
       "name": ["카리나", "닝닝", "윈터", "지젤"],
     },
+    memberPhoto: 
+      [
+        {
+          "name": "카리나",
+          "memphoto":""
+        },
+        {
+          "name": "닝닝",
+          "memphoto":""
+        },
+        {
+          "name": "윈터",
+          "memphoto":""
+        },
+        {
+          "name": "지젤",
+          "memphoto":""
+        }
+      ]
+    ,
     collectionQuant: 6
 })
 
@@ -330,6 +428,26 @@ const newJeans = Artist.build(
     members: {
       "name": ["다니엘", "민지", "해린", "하니"],
     },
+    memberPhoto: 
+      [
+        {
+          "name": "다니엘",
+          "memphoto":""
+        },
+        {
+          "name": "민지",
+          "memphoto":""
+        },
+        {
+          "name": "해린",
+          "memphoto":""
+        },
+        {
+          "name": "하니",
+          "memphoto":""
+        }
+      ]
+    ,
     collectionQuant: 3
 })
 
@@ -352,13 +470,13 @@ const userTemp = User.build(
 
 
 
-//----------------------save!!---------------------------------
+//----------------------saved---------------------------------
 // await BTS.save();
 // await aespa.save();
 // await IU.save();
 // await newJeans.save();
 
-//await userTemp.save();
+// await userTemp.save();
 
 
 
