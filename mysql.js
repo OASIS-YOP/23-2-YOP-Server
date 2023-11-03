@@ -1,11 +1,13 @@
 import mysql from 'mysql';
-import { rds_password } from './pw';
+import configFile from './db-config.json' assert { type: 'json' };
+
+const { database, user, password, host } = configFile; // configFile에서 필요한 변수 추출
 
 const connection = mysql.createConnection({
-  host     : 'ohnpol.cso5gnftja7i.ap-northeast-2.rds.amazonaws.com',
-  user     : 'admin',
-  password : rds_password,
-  database : 'ohnpol_rds'
+  host     : host,
+  user     : user,
+  password : password,
+  database : database
 });
 
 //connection.connect();

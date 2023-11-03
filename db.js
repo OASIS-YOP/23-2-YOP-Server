@@ -1,16 +1,18 @@
-import { DataTypes, Model, Sequelize } from "sequelize";
-import { rds_password } from "./pw";
+import { DataTypes, Model, Sequelize } from 'sequelize';
+import configFile from './db-config.json' assert { type: 'json' };
+
+const { database, user, password, host } = configFile; // configFile에서 필요한 변수 추출
 
 const sequelize = new Sequelize(
-  'ohnpol_rds',
-  'admin',
-  rds_password,
+  database,
+  user,
+  password,
   {
-    host: 'ohnpol.cso5gnftja7i.ap-northeast-2.rds.amazonaws.com',
+    host: host,
     dialect: 'mysql',
     //storage: 'ohnpol.db'
-});
-
+  }
+);
 
 
 sequelize.authenticate().then(() => {
