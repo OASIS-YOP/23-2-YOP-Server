@@ -3,7 +3,7 @@ import { DataTypes, Model, Sequelize } from "sequelize";
 const sequelize = new Sequelize(
   'ohnpol',
   'root',
-  '',
+  'ohnpol',
   {
     dialect: 'mysql',
     //storage: 'ohnpol.db'
