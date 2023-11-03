@@ -5,6 +5,7 @@ import express from 'express';
 import cors from 'cors';
 import { swaggerUi, specs } from './modules/swagger.js'
 import { connection } from './mysql.js';
+import { Sequelize } from 'sequelize';
 
 const app = express();
 const port = 3000;
@@ -14,6 +15,25 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 
 app.get('/', async(req, res)=>{
   res.send('Hello World!');
+})
+
+app.listen(port, ()=>{
+  console.log(`Example app listening on ${port}`);
+  
+})
+
+const corsOptions = {
+  origin: "http://localhost:3000",
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+
+app.get('/mainpage/:id', async(req, res)=>{
+  const id = req.params.id;
+  const favArtist = await client.query('select photo, groupName from artist', [req.body.id, ]);
+  res.status(200).send(favArtist);
+  
   // 즐겨찾는 아티스트
   //const favArtist = await client.query('select photo, groupName from artist', [req.body.id, ]);
 
@@ -26,16 +46,13 @@ app.get('/', async(req, res)=>{
   // `, [req.body.id, ]);
 })
 
-app.listen(port, ()=>{
-  console.log(`Example app listening on ${port}`);
+app.get('/mainpage', (req, res)=>{
+  const num = getRandomInt(1,4) //4 = record quant
+  //const anArtist = connection.query(`select enterComp, photo, groupName from artists WHERE artistId = $${num}` );
+  const anArtist = connection.query('SELECT enterComp, photo, groupName from artists WHERE artistId = $3' );
+  console.log('anArtis:', anArtist);
+
 })
-
-const corsOptions = {
-  origin: "http://localhost:3000",
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
 
 // const app = http.createServer((request,response)=>{
 //   const url = request.url;
@@ -52,15 +69,6 @@ app.use(cors(corsOptions));
 
 // });
 // app.listen(3000);
-
-app.get('/mainpage', (req, res)=>{
-  const num = getRandomInt(1,4) //4 = record quant
-  //const anArtist = connection.query(`select enterComp, photo, groupName from artists WHERE artistId = $${num}` );
-  const anArtist = connection.query(`SELECT enterComp, photo, groupName from artists WHERE artistId = $3` );
-  console.log(anArtist);
-
-})
-
 
 
 
