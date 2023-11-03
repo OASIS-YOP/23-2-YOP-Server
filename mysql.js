@@ -2,7 +2,7 @@ import mysql from 'mysql';
 
 const connection = mysql.createConnection({
   host     : 'localhost',
-  user     : 'bitnami',
+  user     : 'root',
   password : 'ohnpol',
   database : 'ohnpol'
 });

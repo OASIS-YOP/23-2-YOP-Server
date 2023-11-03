@@ -6,7 +6,7 @@ const sequelize = new Sequelize(
   '',
   {
     dialect: 'mysql',
-    storage: 'ohnpol.db'
+    //storage: 'ohnpol.db'
 });
 
 
