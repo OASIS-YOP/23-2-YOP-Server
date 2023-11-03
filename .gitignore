@@ -1,4 +1,3 @@
 node_modules
 ! mysql.js
-pw.js
-db-config.json
+! db-config.json
