@@ -7,7 +7,7 @@ const connection = mysql.createConnection({
   database : 'ohnpol'
 });
 
-connection.connect();
+//connection.connect();
 
 connection.query('SELECT * from artists', (error, results, fields)=> {
   if (error){
@@ -16,6 +16,6 @@ connection.query('SELECT * from artists', (error, results, fields)=> {
   console.log(results);
 });
 
-connection.end();
+//connection.end();
 
 export {connection};
