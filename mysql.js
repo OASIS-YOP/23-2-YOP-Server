@@ -1,10 +1,11 @@
 import mysql from 'mysql';
+import { rds_password } from './pw';
 
 const connection = mysql.createConnection({
-  host     : 'localhost',
-  user     : 'root',
-  password : '',
-  database : 'ohnpol'
+  host     : 'ohnpol.cso5gnftja7i.ap-northeast-2.rds.amazonaws.com',
+  user     : 'admin',
+  password : rds_password,
+  database : 'ohnpol_rds'
 });
 
 //connection.connect();

@@ -1,10 +1,12 @@
 import { DataTypes, Model, Sequelize } from "sequelize";
+import { rds_password } from "./pw";
 
 const sequelize = new Sequelize(
-  'ohnpol',
-  'root',
-  '',
+  'ohnpol_rds',
+  'admin',
+  rds_password,
   {
+    host: 'ohnpol.cso5gnftja7i.ap-northeast-2.rds.amazonaws.com',
     dialect: 'mysql',
     //storage: 'ohnpol.db'
 });
@@ -97,6 +99,7 @@ PhotoCard.init(
         timestamps: false
     }
 );
+await sequelize.sync();
 
 //컬렉션
 //enterComp, groupName, memberName, albumName, version
