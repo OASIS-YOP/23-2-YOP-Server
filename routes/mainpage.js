@@ -18,9 +18,9 @@
  *      schema:
  *       properties:
  *        userId:
- *         type: string
+ *         type: integer
  *        artistId:
- *         type: string
+ *         type: integer
  *        photo:
  *         type: string
  *        groupName:
@@ -62,4 +62,29 @@
  *         type: string
  *
  *
+ * @swagger
+ * paths:
+ *  /mainpage:
+ *   get:
+ *    summary: 실시간 도안 조회(5개)
+ *    tags: [mainpage]
+ *    responses:
+ *     200:
+ *      description: 정상처리
+ *      schema:
+ *       type: array
+ *         items:
+ *          type: object
+ *            properties:
+ *              postId:
+ *                type: integer
+ *              photo:
+ *                type: string
+ *    
+ *     401:
+ *      description: 에러처리
+ *      schema:
+ *       properties:
+ *        message:
+ *         type: string
  */
