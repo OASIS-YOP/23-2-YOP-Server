@@ -16,9 +16,11 @@ connection.query('SELECT * from artists', (error, results, fields)=> {
   if (error){
     console.log(error);
   };
-  console.log(results);
+  //console.log(results);
 });
 
 //connection.end();
 
 export {connection};
+
+//3.35.139.153:3000

@@ -1,11 +1,9 @@
-import http from 'http';
-import  fs  from 'fs';
 import bodyParser from 'body-parser';
 import express from 'express';
 import cors from 'cors';
 import { swaggerUi, specs } from './modules/swagger.js'
 import { connection } from './mysql.js';
-import { Sequelize } from 'sequelize';
+
 
 const app = express();
 const port = 3000;
