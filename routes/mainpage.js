@@ -33,40 +33,34 @@
  *         type: string
  *
  *
- *
- *
  * @swagger
  * paths:
  *  /mainpage:
  *   get:
- *    summary: 실시간 도안 조회(5개)
+ *    summary: 폴꾸 hot10
  *    tags: [mainpage]
+ * 
  *    responses:
  *     200:
  *      description: 정상처리
  *      schema:
  *       properties:
  *        userId:
- *         type: integer
+ *         type: string
  *        artistId:
- *         type: integer
+ *         type: string
  *        photo:
  *         type: string
  *        groupName:
- *         type: string
- *      schema:
- *       type: array
- *       items:
- *        properties:
- *          postId:
- *            type: integer
- *          photo:
- *            type: string
- *    
+ *         type: string,
+ *        
  *     401:
  *      description: 에러처리
  *      schema:
  *       properties:
  *        message:
  *         type: string
+ *
+ *
+ * 
  */
