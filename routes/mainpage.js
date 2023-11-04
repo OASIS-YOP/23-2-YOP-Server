@@ -73,13 +73,12 @@
  *      description: 정상처리
  *      schema:
  *       type: array
- *         items:
- *          type: object
- *            properties:
- *              postId:
- *                type: integer
- *              photo:
- *                type: string
+ *       items:
+ *        properties:
+ *          postId:
+ *            type: integer
+ *          photo:
+ *            type: string
  *    
  *     401:
  *      description: 에러처리
