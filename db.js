@@ -319,6 +319,19 @@ Collection.hasMany(PhotoCard, {
 //await sequelize.sync({alter:true});
 await sequelize.sync();
 
+//------------------EXPORT---------------------
+export { Artist, 
+  Collection, 
+  Favorite, 
+  Like, 
+  PhotoCard, 
+  Polaroid, 
+  Post, 
+  User}
+
+
+
+
 
 //-------------------DATA-----------------------
 // const jane = User.build({ firstName: "Jane", lastName: "Doe" });
@@ -334,7 +347,7 @@ await sequelize.sync();
 const BTS = Artist.build(
   {
     // artistId: 1,
-    photo: '',
+    photo: 'a',
     enterComp: '빅히트 엔터테인먼트(Big Hit Entertainment)',
     groupName: '방탄소년단(BTS)',
     memberNum: 7,
@@ -380,7 +393,7 @@ const BTS = Artist.build(
 const aespa = Artist.build(
   {
     // artistId: 2,
-    photo: '',
+    photo: 'a',
     enterComp: '에스엠 엔터테인먼트(SM Entertainment)',
     groupName: '에스파(aespa)',
     memberNum: 4,
@@ -413,7 +426,7 @@ const aespa = Artist.build(
 const IU = Artist.build(
   {
     // artistId: 3,
-    photo: '',
+    photo: 'a',
     enterComp: '이담 엔터테인먼트(EDAM Entertainment)',
     groupName: '아이유(IU)',
     memberNum: 1,
@@ -426,7 +439,7 @@ const IU = Artist.build(
 const newJeans = Artist.build(
   {
     // artistId: 4,
-    photo: '',
+    photo: 'a',
     enterComp: '어도어 엔터테인먼트(ADOR Entertainment)',
     groupName: '뉴진스(New Jeans)',
     memberNum: 4,
@@ -472,7 +485,13 @@ const userTemp = User.build(
 
 //-------favorite----------
 
-
+const fav1 = Favorite.build(
+  {
+    favoriteQuant: 1,
+    userId: 1,
+    artistId: 1
+  }
+)
 
 
 //----------------------saved---------------------------------
@@ -483,5 +502,6 @@ const userTemp = User.build(
 
 // await userTemp.save();
 
+// await fav1.save();
 
 
