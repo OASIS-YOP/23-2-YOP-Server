@@ -79,6 +79,12 @@
  *            type: integer
  *          photo:
  *            type: string
+ *        items:
+ *        properties:
+ *          postId:
+ *            type: integer
+ *          photo:
+ *            type: string
  *    
  *     401:
  *      description: 에러처리
