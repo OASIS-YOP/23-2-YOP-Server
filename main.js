@@ -86,9 +86,27 @@ app.get('/mainpage', async (req, res) => {
   con.query(sql, (err, result, fields)=>{
     if(err) throw err;
     res.status(200).send(result);
+    console.log("hot10", result);
   })
 });
 //실시간도안
+app.get('/mainpage', async (req, res) => {
+  
+  const sql = `
+              SELECT postId, post
+              FROM Posts
+              ORDER BY postId DESC
+              LIMIT 5;
+            `
+  con.query(sql, (err, result, fields)=>{
+    if(err) throw err;
+    res.status(200).send(result);
+    console.log("실시간도안", result);
+  })
+  
+});
+
+//랜덤 아티스트
 app.get('/mainpage', async (req, res) => {
   
   const sql = `SELECT 
@@ -112,8 +130,6 @@ app.get('/mainpage', async (req, res) => {
     res.status(200).send(result);
   })
 });
-
-
 
 app.listen(port, ()=>{
   console.log(`Example app listening on ${port}`);
