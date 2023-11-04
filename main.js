@@ -49,18 +49,9 @@ app.get('/', async(req, res)=>{
   res.send('Hello World!');
 })
 
-// app.get('/mainpage', (req, res)=>{
-//   // 쿼리 스트링을 통해 id 값을 가져옴
-//   const id = req.query.id;
-//   const sql = 'SELECT artistId FROM Favorites WHERE userid = 1';
-//   const sql2 = `SELECT artistId, photo, groupName WHERE artistId = ${sql}`
-//   con.query(sql2, [id], (err, result, fields) => {
-//     if (err) throw err;
-//     res.status(200).send(result);
-//   })
-// })
-
-app.get('/mainpage', async (req, res) => {
+//mainpage
+//즐겨찾는 아티스트
+app.get('/mainpage:userId', async (req, res) => {
   const userId = req.query.userId; // 요청된 userId
 
   const sql = `SELECT artists.photo, artists.artistId, artists.groupName
@@ -68,6 +59,55 @@ app.get('/mainpage', async (req, res) => {
               INNER JOIN artists ON Favorites.artistId = artists.artistId
               WHERE Favorites.userId = ?;`;
   con.query(sql, [userId], (err, result, fields)=>{
+    if(err) throw err;
+    res.status(200).send(result);
+  })
+});
+//hot10
+app.get('/mainpage', async (req, res) => {
+  
+  const sql = `SELECT 
+              pc.photocard,
+              pc.enterComp,
+              pc.groupName,
+              pc.memberName,
+              pc.albumName,
+              l.userId,
+              l.postId
+            FROM (
+              SELECT postId, userId
+              FROM Likes
+              ORDER BY likeQuant DESC
+              LIMIT 10
+            ) l
+            INNER JOIN Posts p ON l.postId = p.postId
+            INNER JOIN Polaroids pr ON p.PolaroidPolaroidId = pr.PhotoCardMemberName
+            INNER JOIN photoCards pc ON pr.photoCardMemberName = pc.memberName;`;
+  con.query(sql, (err, result, fields)=>{
+    if(err) throw err;
+    res.status(200).send(result);
+  })
+});
+//실시간도안
+app.get('/mainpage', async (req, res) => {
+  
+  const sql = `SELECT 
+              pc.enterComp,
+              pc.groupName,
+              pc.memberName,
+              pc.albumName,
+              l.userId,
+              l.postId
+            FROM (
+              SELECT postId, userId
+              FROM Likes
+              ORDER BY likeQuant DESC
+              LIMIT 10
+            ) l
+            INNER JOIN Posts p ON l.postId = p.postId
+            INNER JOIN Polaroids pr ON p.PolaroidPolaroidId = pr.PhotoCardMemberName
+            INNER JOIN photoCards pc ON pr.photoCardMemberName = pc.memberName;`;
+  con.query(sql, (err, result, fields)=>{
     if(err) throw err;
     res.status(200).send(result);
   })
