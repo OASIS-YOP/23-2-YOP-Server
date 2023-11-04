@@ -1,0 +1,6 @@
+{
+    "host": "ohnpol.cso5gnftja7i.ap-northeast-2.rds.amazonaws.com",
+    "user": "admin",
+    "password": "ohnpol1004",
+    "database": "ohnpol_rds"
+}

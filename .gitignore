@@ -1,1 +1,3 @@
 node_modules
+! mysql.js
+! db-config.json
