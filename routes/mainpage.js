@@ -2,15 +2,11 @@
 /**
  * 
  * @swagger
- * tags:
- *  name: Mainpage
- *  description: 메인페이지 API
- * 
- * @swagger
  * paths:
  *  /mainpage/:nickname:
  *   get:
  *    summary: 즐겨찾는 아티스트 조회
+ *    tags: [mainpage]
  *    parameters:
  *    - name: nickname
  *      in: query
@@ -42,6 +38,8 @@
  *  /mainpage:
  *   get:
  *    summary: 폴꾸 hot10
+ *    tags: [mainpage]
+ * 
  *    responses:
  *     200:
  *      description: 정상처리
