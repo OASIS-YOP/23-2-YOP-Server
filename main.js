@@ -121,8 +121,27 @@ app.get('/mainpage', async (req, res) => {
   con.query(sql,[randomInt], (err, result, fields)=>{
     if(err) throw err;
     res.status(200).send(result);
+    console.log("랜덤아티스트", result);
   })
 });
+
+
+//artistpage
+app.get('/artistpage', async (req, res) => {
+  
+  const sql = `SELECT 
+              enterComp,
+              groupName,
+              photo
+            FROM artists
+            ORDER BY enterComp DESC;`;
+  con.query(sql, (err, result, fields)=>{
+    if(err) throw err;
+    res.status(200).send(result);
+    console.log("아티스트페이지", result);
+  })
+});
+
 
 app.listen(port, ()=>{
   console.log(`Example app listening on ${port}`);
