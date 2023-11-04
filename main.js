@@ -108,24 +108,17 @@ app.get('/mainpage', async (req, res) => {
 
 //랜덤 아티스트
 app.get('/mainpage', async (req, res) => {
-  
+  function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+  }
+  const randomInt = getRandomInt(4)+1 //
   const sql = `SELECT 
-              pc.enterComp,
-              pc.groupName,
-              pc.memberName,
-              pc.albumName,
-              l.userId,
-              l.postId
-            FROM (
-              SELECT postId, userId
-              FROM Likes
-              ORDER BY likeQuant DESC
-              LIMIT 10
-            ) l
-            INNER JOIN Posts p ON l.postId = p.postId
-            INNER JOIN Polaroids pr ON p.PolaroidPolaroidId = pr.PhotoCardMemberName
-            INNER JOIN photoCards pc ON pr.photoCardMemberName = pc.memberName;`;
-  con.query(sql, (err, result, fields)=>{
+              enterComp,
+              groupName,
+              photo
+            FROM artists
+            WHERE artistId=?;`;
+  con.query(sql,[randomInt], (err, result, fields)=>{
     if(err) throw err;
     res.status(200).send(result);
   })
