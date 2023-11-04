@@ -72,6 +72,16 @@
  *     200:
  *      description: 정상처리
  *      schema:
+ *       properties:
+ *        userId:
+ *         type: integer
+ *        artistId:
+ *         type: integer
+ *        photo:
+ *         type: string
+ *        groupName:
+ *         type: string
+ *      schema:
  *       type: array
  *       items:
  *        properties:
