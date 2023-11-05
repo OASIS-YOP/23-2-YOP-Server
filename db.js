@@ -1,14 +1,15 @@
 import { DataTypes, Model, Sequelize } from 'sequelize';
 import configFile from './db-config.json' assert { type: 'json' };
-
+import { config } from "dotenv";
+config();
 const { database, user, password, host } = configFile; // configFile에서 필요한 변수 추출
 
 const sequelize = new Sequelize(
-  database,
-  user,
-  password,
+  process.env.DB_DATABASE,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
   {
-    host: host,
+    host: process.env.DB_HOST,
     dialect: 'mysql',
     //storage: 'ohnpol.db'
   }
