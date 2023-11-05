@@ -1,8 +1,8 @@
 import { DataTypes, Model, Sequelize } from 'sequelize';
-import configFile from './db-config.json' assert { type: 'json' };
+//import configFile from './db-config.json' assert { type: 'json' };
+//const { database, user, password, host } = configFile; // configFile에서 필요한 변수 추출
 import { config } from "dotenv";
 config();
-//const { database, user, password, host } = configFile; // configFile에서 필요한 변수 추출
 
 const sequelize = new Sequelize(
   process.env.DB_DATABASE,
