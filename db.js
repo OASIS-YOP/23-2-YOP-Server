@@ -2,7 +2,7 @@ import { DataTypes, Model, Sequelize } from 'sequelize';
 import configFile from './db-config.json' assert { type: 'json' };
 import { config } from "dotenv";
 config();
-const { database, user, password, host } = configFile; // configFile에서 필요한 변수 추출
+//const { database, user, password, host } = configFile; // configFile에서 필요한 변수 추출
 
 const sequelize = new Sequelize(
   process.env.DB_DATABASE,
@@ -11,7 +11,6 @@ const sequelize = new Sequelize(
   {
     host: process.env.DB_HOST,
     dialect: 'mysql',
-    //storage: 'ohnpol.db'
   }
 );
 
