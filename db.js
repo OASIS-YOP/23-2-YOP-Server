@@ -320,6 +320,26 @@ class UserCollection extends Model {
 }
 UserCollection.init(
   {
+    // userId: {
+    //   type: DataTypes.INTEGER,
+    //   references: {
+    //     model: User, 
+    //     key: 'userId'
+    //   }
+    // },
+    // artistId: {
+    //   type: DataTypes.INTEGER,
+    //   references: {
+    //     model: Artist,
+    //     key: 'artistId'
+    //   }
+    // },
+    collectionQuant: {
+      type: DataTypes.INTEGER,
+      // autoIncrement: true,
+    }
+  },
+  {
       sequelize,
       modelName: "UserCollection", 
       timestamps: false
@@ -340,6 +360,26 @@ Collection.belongsToMany(User, {
 class UserPhotoCard extends Model {
 }
 UserPhotoCard.init(
+  {
+    // userId: {
+    //   type: DataTypes.INTEGER,
+    //   references: {
+    //     model: User, 
+    //     key: 'userId'
+    //   }
+    // },
+    // artistId: {
+    //   type: DataTypes.INTEGER,
+    //   references: {
+    //     model: Artist,
+    //     key: 'artistId'
+    //   }
+    // },
+    collectionQuant: {
+      type: DataTypes.INTEGER,
+      // autoIncrement: true,
+    }
+  },
   {
       sequelize,
       modelName: "UserPhotoCard", 
