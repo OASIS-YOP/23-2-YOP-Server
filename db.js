@@ -427,7 +427,7 @@ export { Artist,
 const BTS = Artist.build(
   {
     // artistId: 1,
-    photo: 'a',
+    photo: 'https://ohnpol.s3.ap-northeast-2.amazonaws.com/artist/bts.jpg',
     enterComp: '빅히트 엔터테인먼트(Big Hit Entertainment)',
     groupName: '방탄소년단(BTS)',
     memberNum: 7,
@@ -473,7 +473,7 @@ const BTS = Artist.build(
 const aespa = Artist.build(
   {
     // artistId: 2,
-    photo: 'a',
+    photo: 'https://ohnpol.s3.ap-northeast-2.amazonaws.com/artist/aespa.jpeg',
     enterComp: '에스엠 엔터테인먼트(SM Entertainment)',
     groupName: '에스파(aespa)',
     memberNum: 4,
@@ -506,7 +506,7 @@ const aespa = Artist.build(
 const IU = Artist.build(
   {
     // artistId: 3,
-    photo: 'a',
+    photo: 'https://ohnpol.s3.ap-northeast-2.amazonaws.com/artist/IU.png',
     enterComp: '이담 엔터테인먼트(EDAM Entertainment)',
     groupName: '아이유(IU)',
     memberNum: 1,
@@ -519,7 +519,7 @@ const IU = Artist.build(
 const newJeans = Artist.build(
   {
     // artistId: 4,
-    photo: 'a',
+    photo: 'https://ohnpol.s3.ap-northeast-2.amazonaws.com/artist/NewJeans.jpeg',
     enterComp: '어도어 엔터테인먼트(ADOR Entertainment)',
     groupName: '뉴진스(New Jeans)',
     memberNum: 4,
@@ -583,5 +583,10 @@ const fav1 = Favorite.build(
 // await userTemp.save();
 
 // await fav1.save();
+
+// await sequelize.drop();
+// console.log('All tables dropped!');
+// await Collection.truncate();
+// await Artist.truncate();
 
 
