@@ -1,6 +1,4 @@
 import { DataTypes, Model, Sequelize } from 'sequelize';
-//import configFile from './db-config.json' assert { type: 'json' };
-//const { database, user, password, host } = configFile; // configFile에서 필요한 변수 추출
 import { config } from "dotenv";
 config();
 
@@ -315,6 +313,48 @@ Collection.sync();
 Collection.hasMany(PhotoCard, {
   foreignKey: 'collectionId'
 })
+
+// 회원: 컬렉션 = 다대다
+
+class UserCollection extends Model {
+}
+UserCollection.init(
+  {
+      sequelize,
+      modelName: "UserCollection", 
+      timestamps: false
+  }
+);
+
+User.belongsToMany(Collection, {
+  through: 'UserCollection',
+  foreignKey: 'userId',
+  })
+Collection.belongsToMany(User, {
+  through: 'UserCollection',
+  foreignKey: 'collectionId',
+  })
+
+// 회원: 포토카드 = 다대다
+
+class UserPhotoCard extends Model {
+}
+UserPhotoCard.init(
+  {
+      sequelize,
+      modelName: "UserPhotoCard", 
+      timestamps: false
+  }
+);
+
+User.belongsToMany(PhotoCard, {
+  through: 'UserPhotoCard',
+  foreignKey: 'userId',
+  })
+PhotoCard.belongsToMany(User, {
+  through: 'UserPhotoCard',
+  foreignKey: 'photoCardId',
+  })
 
 //await sequelize.sync({alter:true});
 await sequelize.sync();
