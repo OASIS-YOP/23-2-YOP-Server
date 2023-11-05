@@ -2,11 +2,9 @@ import bodyParser from 'body-parser';
 import express from 'express';
 import cors from 'cors';
 import { swaggerUi, specs } from './modules/swagger.js'
-//import { connection } from './mysql.js';
 import mysql from 'mysql';
 import { config } from 'dotenv';
 config();
-//import configFile from './db-config.json' assert { type: 'json' };
 import { Artist, 
   Favorite, 
   Collection, 
@@ -26,8 +24,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 
-
-//const { database, user, password, host } = configFile; // configFile에서 필요한 변수 추출
 const con = mysql.createConnection({
   host     : process.env.DB_HOST,
   user     : process.env.DB_USER,
