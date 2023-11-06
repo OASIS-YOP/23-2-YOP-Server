@@ -59,7 +59,10 @@ app.get('/mainpage:userId', async (req, res) => {
               WHERE Favorites.userId = ?;`;
   con.query(sql, [userId], (err, result, fields)=>{
     if(err) throw err;
-    res.status(200).send(result);
+    const r = {
+      favAritst: result // 여기에서 result는 변수명입니다. 원하는 결과 데이터로 대체되어야 합니다.
+    };
+    res.status(200).send(r);
   })
 });
 //hot10
@@ -84,7 +87,10 @@ app.get('/mainpage/hot10', async (req, res) => {
             INNER JOIN photoCards pc ON pr.photoCardMemberName = pc.memberName;`;
   con.query(sql, (err, result, fields)=>{
     if(err) throw err;
-    res.status(200).send(result);
+    const r = {
+      hot10List: result // 여기에서 result는 변수명입니다. 원하는 결과 데이터로 대체되어야 합니다.
+    };
+    res.status(200).send(r);
     console.log("hot10", result);
   })
 });
@@ -99,7 +105,10 @@ app.get('/mainpage/now5', async (req, res) => {
             `
   con.query(sql, (err, result, fields)=>{
     if(err) throw err;
-    res.status(200).send(result);
+    const r = {
+      now5List: result // 여기에서 result는 변수명입니다. 원하는 결과 데이터로 대체되어야 합니다.
+    };
+    res.status(200).send(r);
     console.log("실시간도안", result);
   })
   
@@ -119,7 +128,11 @@ app.get('/mainpage/artist', async (req, res) => {
             WHERE artistId=?;`;
   con.query(sql,[randomInt], (err, result, fields)=>{
     if(err) throw err;
-    res.status(200).send(result);
+    //res.status(200).send(`randomArtistList: ${result}`);
+    const r = {
+      randomArtistList: result // 여기에서 result는 변수명입니다. 원하는 결과 데이터로 대체되어야 합니다.
+    };
+    res.status(200).send(r);
     console.log("랜덤아티스트", result);
   })
 });
