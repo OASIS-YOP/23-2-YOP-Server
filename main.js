@@ -66,7 +66,7 @@ app.get('/mainpage/:userId', async (req, res) => {
   })
 });
 //hot10
-app.get('/mainpage/hot10', async (req, res) => {
+app.get('/mainpage/:userId/hot10', async (req, res) => {
   
   const sql = `SELECT 
               pc.photocard,
@@ -95,7 +95,7 @@ app.get('/mainpage/hot10', async (req, res) => {
   })
 });
 //실시간도안
-app.get('/mainpage/now5', async (req, res) => {
+app.get('/mainpage/:userId/now5', async (req, res) => {
   
   const sql = `
               SELECT postId, post
@@ -115,7 +115,7 @@ app.get('/mainpage/now5', async (req, res) => {
 });
 
 //랜덤 아티스트
-app.get('/mainpage/artist', async (req, res) => {
+app.get('/mainpage/:userId/artist', async (req, res) => {
   function getRandomInt(max) {
     return Math.floor(Math.random() * max);
   }
