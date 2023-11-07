@@ -50,8 +50,8 @@ app.get('/', async(req, res)=>{
 
 //mainpage
 //즐겨찾는 아티스트
-app.get('/mainpage:userId', async (req, res) => {
-  const userId = req.query.userId; // 요청된 userId
+app.get('/mainpage/:userId', async (req, res) => {
+  const userId = req.params.userId; // 요청된 userId
 
   const sql = `SELECT artists.photo, artists.artistId, artists.groupName
               FROM Favorites
