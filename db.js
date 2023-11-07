@@ -259,7 +259,7 @@ Favorite.init(
     // },
     favoriteQuant: {
       type: DataTypes.INTEGER,
-      // autoIncrement: true,
+      //autoIncrement: true,
     }
   }
   ,
