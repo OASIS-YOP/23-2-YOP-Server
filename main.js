@@ -149,11 +149,37 @@ app.get('/artistpage', async (req, res) => {
             ORDER BY enterComp DESC;`;
   con.query(sql, (err, result, fields)=>{
     if(err) throw err;
-    res.status(200).send(result);
+    const r = {
+      allArtistList: result
+    };
+    res.status(200).send(r);
     console.log("아티스트페이지", result);
   })
 });
 
+//community page
+app.get('/community/:userId/:artistId', async (req, res) => {
+  const userId = req.params.userId;
+  const artistId = req.params.artistId; 
+  const sql = `SELECT 
+  artists.groupName,
+  artists.photo,
+  artists.collectionQuant,
+  f.favoriteQuant,
+  uc.collectionQuant
+FROM artists
+INNER JOIN Favorites f ON artists.artistId = f.artistId
+INNER JOIN UserCollections uc ON artists.artistId = uc.artistId
+WHERE artists.artistId = ? AND uc.userId = ?;`;
+  con.query(sql,[userId, artistId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      allArtistList: result
+    };
+    res.status(200).send(r);
+    //console.log("아티스트페이지", result);
+  })
+});
 
 app.listen(port, ()=>{
   console.log(`Example app listening on ${port}`);
