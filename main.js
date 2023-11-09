@@ -5,14 +5,6 @@ import { swaggerUi, specs } from './modules/swagger.js'
 import mysql from 'mysql';
 import { config } from 'dotenv';
 config();
-import { Artist, 
-  Favorite, 
-  Collection, 
-  Like,
-  PhotoCard,
-  Polaroid,
-  Post,
-  User } from './db.js';
 
 const app = express();
 const port = 3000;
