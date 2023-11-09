@@ -52,7 +52,7 @@ app.get('/', async(req, res)=>{
 
 //mainpage
 //즐겨찾는 아티스트
-app.get('/mainpage/:userId', async (req, res) => {
+app.get('/mainpage/:userId/favArtist', async (req, res) => {
   const userId = req.params.userId; // 요청된 userId
 
   const sql = `SELECT artists.photo, artists.artistId, artists.groupName
@@ -62,7 +62,7 @@ app.get('/mainpage/:userId', async (req, res) => {
   con.query(sql, [userId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
-      favAritst: result // 여기에서 result는 변수명입니다. 원하는 결과 데이터로 대체되어야 합니다.
+      favArtist: result // 여기에서 result는 변수명입니다. 원하는 결과 데이터로 대체되어야 합니다.
     };
     res.status(200).send(r);
   })
@@ -144,7 +144,7 @@ app.get('/mainpage/:userId/artist', async (req, res) => {
 
 
 //artistpage
-app.get('/artistpage', async (req, res) => {
+app.get('/artistpage/allArtist', async (req, res) => {
   const sql1 = `SELECT enterComp FROM artists ORDER BY enterComp DESC`;
   con.query(sql1, (err, result1) => {
     if (err) throw err;
@@ -185,7 +185,7 @@ app.get('/artistpage', async (req, res) => {
 
 //community page
 //아티스트 프로필 조회
-app.get('/community/:artistId', async (req, res) => {
+app.get('/community/:artistId/artistProfile', async (req, res) => {
   const artistId = req.params.artistId; 
   const sql = `SELECT 
                 artists.groupName,
@@ -242,7 +242,7 @@ app.get('/community/:artistId/favoriteQuant', async (req, res) => {
 //app.delete
 
 //아티스트 내가 가진 컬렉션 조회
-app.get('/community/:artistId/collectionQuant', async (req, res) => {
+app.get('/community/:userId/collectionQuant', async (req, res) => {
   const userId = req.params.artistId; 
   const sql = `SELECT COUNT(*)
                 FROM UserCollections
