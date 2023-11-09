@@ -42,7 +42,9 @@ con.query('SELECT * from users', (error, results, fields)=> {
 });
 
 //connection.end();
-
+const getRandomInt = (max) => {
+  return Math.floor(Math.random() * max);
+}
 
 app.get('/', async(req, res)=>{
   res.send('Hello World!');
@@ -116,26 +118,30 @@ app.get('/mainpage/:userId/now5', async (req, res) => {
 
 //랜덤 아티스트
 app.get('/mainpage/:userId/artist', async (req, res) => {
-  function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
-  }
-  const randomInt = getRandomInt(4)+1 //
-  const sql = `SELECT 
-              enterComp,
-              groupName,
-              photo
-            FROM artists
-            WHERE artistId=?;`;
-  con.query(sql,[randomInt], (err, result, fields)=>{
-    if(err) throw err;
-    //res.status(200).send(`randomArtistList: ${result}`);
-    const r = {
-      randomArtistList: result // 여기에서 result는 변수명입니다. 원하는 결과 데이터로 대체되어야 합니다.
-    };
-    res.status(200).send(r);
-    console.log("랜덤아티스트", result);
-  })
+  const sql = `SELECT DISTINCT enterComp FROM artists;`;
+  
+  con.query(sql, (err, results, fields) => {
+    if (err) throw err;
+    
+    const randomEnterComp = results[getRandomInt(results.length)].enterComp;
+    
+    const sql3 = `SELECT artistId, groupName, photo
+                  FROM artists
+                  WHERE enterComp = ?`;
+    
+    con.query(sql3, [randomEnterComp], (err, result, fields) => {
+      if (err) throw err;
+      
+      const r = {
+        randomArtistList: result
+      };
+      
+      res.status(200).send(r);
+      console.log("랜덤아티스트", result);
+    });
+  });
 });
+
 
 //artistpage
 app.get('/artistpage', async (req, res) => {
@@ -252,7 +258,61 @@ app.get('/community/:artistId/collectionQuant', async (req, res) => {
 });
 
 //아티스트 멤버별 이름 및 사진 조회
+// app.get('/community/:artistId/members', async (req, res) => {
+//   const artistId = req.params.artistId; 
+//   const sql = `SELECT 
+//                 memberNum,
+//                 memberPhoto
+//               FROM artists
+//               WHERE artistId = ?; `;
+//   con.query(sql,1, (err, result, fields)=>{
+//     if(err) throw err;
+//     for(let i=0; i<memberNum; i++){
+//       const namdAndPhoto = {
+//         name: memberPhoto[i].name,
+//         memPhoto: memberPhoto[i].memPhoto
+//       }
+//     }
+//     const r = nameAndPhoto;
+//     res.status(200).send(r);
+//     console.log("멤버별 이름과 사진", result);
+//   })
+// });
 app.get('/community/:artistId/members', async (req, res) => {
+  const artistId = req.params.artistId;
+  //const artistId = 1;
+  const sql = `SELECT 
+                memberNum,
+                memberPhoto
+              FROM artists
+              WHERE artistId = ?; `;
+  con.query(sql, [artistId], (err, result, fields) => {
+    if(err) throw err;
+
+    if (result.length > 0) {
+      const memberNum = result[0].memberNum;
+      const memberPhoto = JSON.parse(result[0].memberPhoto); // memberPhoto는 배열이 아니라 ''문자열!!
+      console.log('result',result);
+      const members = [];
+      for (let i = 0; i < memberNum; i++) {
+        const nameAndPhoto = {
+          name: memberPhoto[i].name, 
+          memPhoto: memberPhoto[i].memPhoto 
+        };
+        members.push(nameAndPhoto);
+      }
+      
+      const r = { members }; // Wrap the members array in an object
+      res.status(200).send(r);
+      console.log("멤버별 이름과 사진", members);
+    } else {
+      res.status(404).send("No members found for the given artist ID.");
+    }
+  });
+});
+
+//아티스트 멤버별 도안 조회
+app.get('/community/:artistId/membersPost', async (req, res) => {
   const artistId = req.params.artistId; 
   const sql = `SELECT 
                 memberNum,
@@ -269,6 +329,59 @@ app.get('/community/:artistId/members', async (req, res) => {
   })
 });
 
+//아티스트 전체 도안 조회
+app.get('/community/:artistId/allPost', async (req, res) => {
+  const artistId = req.params.artistId; 
+  const sql = `SELECT 
+                memberNum,
+                memberPhoto
+              FROM artists
+              WHERE artistId = ?; `;
+  con.query(sql,[artistId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      memberNumandPhoto: result
+    };
+    res.status(200).send(r);
+    //console.log("아티스트페이지", result);
+  })
+});
+
+//도안 게시 - 컬렉션 선택
+app.get('/community/:userId/uploadPost/collection', async (req, res) => {
+  const artistId = req.params.artistId; 
+  const sql = `SELECT 
+                memberNum,
+                memberPhoto
+              FROM artists
+              WHERE artistId = ?; `;
+  con.query(sql,[artistId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      memberNumandPhoto: result
+    };
+    res.status(200).send(r);
+    //console.log("아티스트페이지", result);
+  })
+});
+
+//도안 게시 - 도안 선택
+app.get('/community/:artistId/uploadPost/post', async (req, res) => {
+  const artistId = req.params.artistId; 
+  const sql = `SELECT 
+                memberNum,
+                memberPhoto
+              FROM artists
+              WHERE artistId = ?; `;
+  con.query(sql,[artistId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      memberNumandPhoto: result
+    };
+    res.status(200).send(r);
+    //console.log("아티스트페이지", result);
+  })
+});
 
 app.listen(port, ()=>{
   console.log(`Example app listening on ${port}`);
