@@ -60,7 +60,7 @@ app.get('/mainpage/:userId', async (req, res) => {
   con.query(sql, [userId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
-      favAritst: result // 여기에서 result는 변수명입니다. 원하는 결과 데이터로 대체되어야 합니다.
+      favArtist: result // 여기에서 result는 변수명입니다. 원하는 결과 데이터로 대체되어야 합니다.
     };
     res.status(200).send(r);
   })
