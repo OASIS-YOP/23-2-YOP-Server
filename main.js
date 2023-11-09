@@ -312,20 +312,28 @@ app.get('/community/:artistId/members', async (req, res) => {
 });
 
 //아티스트 멤버별 도안 조회
-app.get('/community/:artistId/membersPost', async (req, res) => {
-  const artistId = req.params.artistId; 
+app.get('/community/:memberName/membersPost', async (req, res) => { 
+  const memberName = req.params.memberName;
   const sql = `SELECT 
-                memberNum,
-                memberPhoto
-              FROM artists
-              WHERE artistId = ?; `;
-  con.query(sql,[artistId], (err, result, fields)=>{
+                p.postId,
+                p.post,
+                p.userId,
+                pc.enterComp,
+                pc.groupName,
+                pc.memberName,
+                pc.albumName,
+                u.nickname
+              FROM Posts p
+              INNER JOIN users u ON p.userId = u.userId
+              INNER JOIN Polaroids pl ON p.PolaroidPolaroidId = pl.polaroidId
+              INNER JOIN photoCards pc ON pc.memberName = pl.photoCardMemberName
+              WHERE  pc.memberName = ?; `;
+  con.query(sql,[memberName], (err, result, fields)=>{
     if(err) throw err;
     const r = {
-      memberNumandPhoto: result
+      memberPostList: result
     };
     res.status(200).send(r);
-    //console.log("아티스트페이지", result);
   })
 });
 
@@ -333,17 +341,28 @@ app.get('/community/:artistId/membersPost', async (req, res) => {
 app.get('/community/:artistId/allPost', async (req, res) => {
   const artistId = req.params.artistId; 
   const sql = `SELECT 
-                memberNum,
-                memberPhoto
-              FROM artists
-              WHERE artistId = ?; `;
+                a.artistId,
+                p.postId,
+                p.post,
+                p.userId,
+                pc.enterComp,
+                pc.groupName,
+                pc.memberName,
+                pc.albumName,
+                u.nickname
+              FROM artists a
+              INNER JOIN photoCards pc ON pc.enterComp = a.enterComp
+              INNER JOIN Polaroids pl ON pc.memberName = pl.photoCardMemberName
+              INNER JOIN Posts p ON p.PolaroidPolaroidId = pl.polaroidId
+              INNER JOIN users u ON p.userId = u.userId
+              WHERE artistId = 1; `
   con.query(sql,[artistId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
-      memberNumandPhoto: result
+      allPostList: result
     };
     res.status(200).send(r);
-    //console.log("아티스트페이지", result);
+    console.log("아티스트 전체 도안", result);
   })
 });
 
