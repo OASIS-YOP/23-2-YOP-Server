@@ -228,7 +228,7 @@ app.get('/community/:artistId/favoriteQuant', async (req, res) => {
 //app.delete
 
 //아티스트 내가 가진 컬렉션 조회
-app.get('/community/:artistId/collectionQuant', async (req, res) => {
+app.get('/community/:userId/collectionQuant', async (req, res) => {
   const userId = req.params.artistId; 
   const sql = `SELECT COUNT(*)
                 FROM UserCollections
@@ -261,7 +261,7 @@ app.get('/community/:artistId/members', async (req, res) => {
   })
 });
 
-//아티스트 전체 도안 조회
+//아티스트 멤버별 도안 조회
 app.get('/community/:artistId/membersPost', async (req, res) => {
   const artistId = req.params.artistId; 
   const sql = `SELECT 
@@ -279,7 +279,7 @@ app.get('/community/:artistId/membersPost', async (req, res) => {
   })
 });
 
-//아티스트 멤버별 도안 조회
+//아티스트 전체 도안 조회
 app.get('/community/:artistId/allPost', async (req, res) => {
   const artistId = req.params.artistId; 
   const sql = `SELECT 
@@ -297,8 +297,8 @@ app.get('/community/:artistId/allPost', async (req, res) => {
   })
 });
 
-//아티스트 멤버별 도안 조회
-app.get('/community/:artistId/uploadPost', async (req, res) => {
+//도안 게시 - 컬렉션 선택
+app.get('/community/:userId/uploadPost/collection', async (req, res) => {
   const artistId = req.params.artistId; 
   const sql = `SELECT 
                 memberNum,
@@ -315,7 +315,8 @@ app.get('/community/:artistId/uploadPost', async (req, res) => {
   })
 });
 
-app.get('/community/:artistId/deletePost', async (req, res) => {
+//도안 게시 - 도안 선택
+app.get('/community/:artistId/uploadPost/post', async (req, res) => {
   const artistId = req.params.artistId; 
   const sql = `SELECT 
                 memberNum,
