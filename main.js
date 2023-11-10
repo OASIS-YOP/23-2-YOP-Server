@@ -117,14 +117,14 @@ app.get('/mainpage/:userId/now5', async (req, res) => {
 });
 
 //랜덤 아티스트
-app.get('/mainpage/:userId/artist', async (req, res) => {
+app.get('/mainpage/:userId/randomArtist', async (req, res) => {
   const sql = `SELECT DISTINCT enterComp FROM artists;`;
   
   con.query(sql, (err, results, fields) => {
     if (err) throw err;
     
     const randomEnterComp = results[getRandomInt(results.length)].enterComp;
-    
+    //console.log("소속사",randomEnterComp);
     const sql3 = `SELECT artistId, groupName, photo
                   FROM artists
                   WHERE enterComp = ?`;
