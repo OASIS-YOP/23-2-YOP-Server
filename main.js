@@ -402,6 +402,24 @@ app.get('/community/:artistId/uploadPost/post', async (req, res) => {
   })
 });
 
+
+//mypage
+//프로필 정보 조회
+app.get('/mypage/:userId/myProfile', async(req, res)=>{
+  const userId = req.params.userId;
+  const sql = `SELECT userId, avatar, nickname, biography
+              FROM users
+              WHERE userId = ?;`;
+  con.query(sql, [userId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      userProfileInfo : result
+    };
+    res.status(200).send(r);
+  })
+
+});
+
 app.listen(port, ()=>{
   console.log(`Example app listening on ${port}`);
 })
