@@ -420,6 +420,24 @@ app.get('/mypage/:userId/myProfile', async(req, res)=>{
 
 });
 
+//아티스트 탭 조회(즐겨찾기 기준)
+app.get('/mypage/:userId/myPost/artistTab', async(req, res)=>{
+  const userId = req.params.userId;
+  const sql = `SELECT f.artistId, a.groupName
+              FROM Favorites f
+              INNER JOIN artists a ON f.artistId = a.artistId
+              WHERE userId = 1;
+              `
+  con.query(sql, [userId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      artistTabInfo: result 
+    }
+    res.status(200).send(r);
+  })
+});
+
+
 app.listen(port, ()=>{
   console.log(`Example app listening on ${port}`);
 })
