@@ -437,6 +437,28 @@ app.get('/mypage/:userId/myPost/artistTab', async(req, res)=>{
   })
 });
 
+//아티스트 별 포스트(게시 도안) 모아보기
+app.get('/mypage/:userId/myPost/:artistId/post', async (req, res)=>{
+  const userId = req.params.userId;
+  const artistId = req.params.artistId;
+  const sql = `SELECT p.postId, p.post, p.postDateTime,
+                      pc.memberName, pc.albumName, pc.enterComp, pc.groupName,
+                      u.userId, u.nickname 
+              FROM Posts p
+              INNER JOIN Polaroids pl ON p.PolaroidPolaroidId = pl.polaroidId
+              INNER JOIN photoCards pc ON pl.photoCardMemberName = pc.memberName
+              INNER JOIN users u ON u.userId = p.userId
+              INNER JOIN artists a ON pc.groupName = a.groupName
+              WHERE p.userId = ? AND a.artistId = ?;`;
+  con.query(sql, [userId, artistId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      postOfArtistList: result
+    }
+    res.status(200).send(r);
+    console.log(r);
+  });
+});
 
 app.listen(port, ()=>{
   console.log(`Example app listening on ${port}`);
