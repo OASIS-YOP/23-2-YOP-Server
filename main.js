@@ -443,12 +443,14 @@ app.get('/mypage/:userId/myPost/:artistId/post', async (req, res)=>{
   const artistId = req.params.artistId;
   const sql = `SELECT p.postId, p.post, p.postDateTime,
                       pc.memberName, pc.albumName, pc.enterComp, pc.groupName,
-                      u.userId, u.nickname 
+                      u.userId, u.nickname,
+                      l.likeQuant
               FROM Posts p
               INNER JOIN Polaroids pl ON p.PolaroidPolaroidId = pl.polaroidId
               INNER JOIN photoCards pc ON pl.photoCardMemberName = pc.memberName
               INNER JOIN users u ON u.userId = p.userId
               INNER JOIN artists a ON pc.groupName = a.groupName
+              INNER JOIN Likes l ON p.postId = l.postId
               WHERE p.userId = ? AND a.artistId = ?;`;
   con.query(sql, [userId, artistId], (err, result, fields)=>{
     if(err) throw err;
@@ -459,6 +461,8 @@ app.get('/mypage/:userId/myPost/:artistId/post', async (req, res)=>{
     console.log(r);
   });
 });
+
+//
 
 app.listen(port, ()=>{
   console.log(`Example app listening on ${port}`);
