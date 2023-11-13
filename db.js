@@ -347,7 +347,7 @@ User.belongsToMany(Collection, {
   })
 Collection.belongsToMany(User, {
   through: 'UserCollection',
-  foreignKey: 'collectionId',
+  foreignKey: 'albumName',
   })
 
 // 회원: 포토카드 = 다대다
