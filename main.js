@@ -423,10 +423,6 @@ app.get('/mypage/:userId/myProfile', async(req, res)=>{
 //아티스트 탭 조회(포스트 유무 기준)
 app.get('/mypage/:userId/myPost/artistTab', async(req, res)=>{
   const userId = req.params.userId;
-  // const sql = `SELECT f.artistId, a.groupName
-  //             FROM Favorites f
-  //             INNER JOIN artists a ON f.artistId = a.artistId
-  //             WHERE userId = 1;
   const sql =  `SELECT pc.groupName
                 FROM Posts p
                 INNER JOIN Polaroids pl ON p.PolaroidPolaroidId = pl.polaroidId
@@ -438,7 +434,7 @@ app.get('/mypage/:userId/myPost/artistTab', async(req, res)=>{
   con.query(sql, [userId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
-      artistTabInfo: result 
+      postArtistList: result 
     }
     res.status(200).send(r);
   })
@@ -483,8 +479,36 @@ app.delete('/mypage/:userId/myPost/delete/:postId', async (req, res)=>{
   })
 });
 
+//아티스트 탭 정보 조회(즐겨찾기 기준)
+app.get('/mypage/:userId/myCollection/artistTab', async (req, res)=>{
+  const userId = req.params.userId;
+  const sql = `SELECT f.artistId, a.groupName
+              FROM Favorites f
+              INNER JOIN artists a ON f.artistId = a.artistId
+              WHERE userId = 1;`;
+  con.query(sql, [userId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      collectionArtistList: result
+    }
+    console.log(r);
+    res.status(200).send(r);
+  })
+});
 
-
+//활성화한 컬렉션 정보 조회
+app.get('/mypage/:userId/myCollection/:artistId/active', async (req, res)=>{
+  const userId = req.params.userId;
+  const artistId = req.params.artistId;
+  const sql = `;`;
+  con.query(sql, [userId, artistId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      activeCollectionList: result
+    }
+    res.status(200).send(r);
+  })
+});
 
 
 app.listen(port, ()=>{
