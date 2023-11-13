@@ -100,8 +100,9 @@ app.get('/mainpage/:userId/hot10', async (req, res) => {
 app.get('/mainpage/:userId/now5', async (req, res) => {
   
   const sql = `
-              SELECT postId, post
-              FROM Posts
+              SELECT p.postId, pl.polaroid
+              FROM Posts p
+              INNER JOIN Polaroids pl ON p.PolaroidPolaroidId = pl.polaroidId
               ORDER BY postId DESC
               LIMIT 5;
             `
