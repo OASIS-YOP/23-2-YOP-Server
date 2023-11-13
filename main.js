@@ -462,7 +462,19 @@ app.get('/mypage/:userId/myPost/:artistId/post', async (req, res)=>{
   });
 });
 
-//
+//포스트 삭제하기
+app.delete('/mypage/:userId/myPost/delete/:postId', async (req, res)=>{
+  const postId = req.params.postId;
+  const sql =  `DELETE FROM Posts WHERE postId = ?`
+  con.query(sql, [postId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      postDeleted: result
+    }
+    res.status(200).send(r);
+    console.log(r);
+  })
+});
 
 app.listen(port, ()=>{
   console.log(`Example app listening on ${port}`);
