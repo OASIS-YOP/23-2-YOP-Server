@@ -184,31 +184,19 @@ Post.init(
 User.hasMany(Polaroid, {
   foreignKey: 'userId'
 })
+Polaroid.belongsTo(User);
 
 // 회원: 포스트 = 일대다
 User.hasMany(Post, {
   foreignKey: 'userId'
 })
+Post.belongsTo(User);
 
 // 좋아요 ( 회원: 포스트 = 다대다)
 class Like extends Model {
 }
 Like.init(
   {
-    // userId: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: User, 
-    //     key: 'userId'
-    //   }
-    // },
-    // postId: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: Post,
-    //     key: 'postId'
-    //   }
-    // },
     likeQuant: {
       type: DataTypes.INTEGER,
       //autoIncrement: true,
@@ -238,20 +226,6 @@ class Favorite extends Model {
 }
 Favorite.init(
   {
-    // userId: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: User, 
-    //     key: 'userId'
-    //   }
-    // },
-    // artistId: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: Artist,
-    //     key: 'artistId'
-    //   }
-    // },
     favoriteQuant: {
       type: DataTypes.INTEGER,
       //autoIncrement: true,
@@ -294,20 +268,14 @@ Polaroid.belongsTo(PhotoCard,
 Post.belongsTo(Polaroid);
 
 // 아티스트:컬렉션 = 일대일
-Collection.belongsTo(Artist, 
-//   {
-//   foreignKey: 'artistId'
-// }
+Collection.belongsTo(Artist
 );
-
-Polaroid.sync();
-Post.sync();
-Collection.sync();
 
 // 컬렉션: 포토카드 = 일대다
 Collection.hasMany(PhotoCard, {
   foreignKey: 'collectionId'
 })
+PhotoCard.belongsTo(Collection);
 
 // 회원: 컬렉션 = 다대다
 
@@ -315,20 +283,6 @@ class UserCollection extends Model {
 }
 UserCollection.init(
   {
-    // userId: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: User, 
-    //     key: 'userId'
-    //   }
-    // },
-    // artistId: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: Artist,
-    //     key: 'artistId'
-    //   }
-    // },
     collectionQuant: {
       type: DataTypes.INTEGER,
       // autoIncrement: true,
@@ -350,26 +304,20 @@ Collection.belongsToMany(User, {
   foreignKey: 'albumName',
   })
 
+// 아티스트: 컬렉션 = 일대다
+Artist.hasMany(Collection, {
+  foreignKey: 'artistId'
+});
+Collection.belongsTo(Artist);
+
+await sequelize.sync();
+
 // 회원: 포토카드 = 다대다
 
 class UserPhotoCard extends Model {
 }
 UserPhotoCard.init(
   {
-    // userId: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: User, 
-    //     key: 'userId'
-    //   }
-    // },
-    // artistId: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: Artist,
-    //     key: 'artistId'
-    //   }
-    // },
     collectionQuant: {
       type: DataTypes.INTEGER,
       // autoIncrement: true,
@@ -391,18 +339,26 @@ PhotoCard.belongsToMany(User, {
   foreignKey: 'photoCardId',
   })
 
+  //----일대일----
+  Polaroid.sync();
+  Post.sync();
+  Collection.sync();
+  User.sync();
+  PhotoCard.sync();
+  Artist.sync();
+
 //await sequelize.sync({alter:true});
 await sequelize.sync();
 
 //------------------EXPORT---------------------
-export { Artist, 
-  Collection, 
-  Favorite, 
-  Like, 
-  PhotoCard, 
-  Polaroid, 
-  Post, 
-  User}
+// export { Artist, 
+//   Collection, 
+//   Favorite, 
+//   Like, 
+//   PhotoCard, 
+//   Polaroid, 
+//   Post, 
+//   User}
 
 
 
@@ -579,8 +535,10 @@ const fav1 = Favorite.build(
 
 // await fav1.save();
 
+//---------------------drop------------------------------------
 // await sequelize.drop();
 // console.log('All tables dropped!');
+
 // await Collection.truncate();
 // await Artist.truncate();
 
