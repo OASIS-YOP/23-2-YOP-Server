@@ -85,8 +85,8 @@ app.get('/mainpage/:userId/hot10', async (req, res) => {
               LIMIT 10
             ) l
             INNER JOIN Posts p ON l.postId = p.postId
-            INNER JOIN Polaroids pr ON p.PolaroidPolaroidId = pr.PhotoCardMemberName
-            INNER JOIN photoCards pc ON pr.photoCardMemberName = pc.memberName;`;
+            INNER JOIN Polaroids pl ON p.polaroidId = pl.PhotoCardMemberName
+            INNER JOIN photoCards pc ON pl.photoCardMemberName = pc.memberName;`;
   con.query(sql, (err, result, fields)=>{
     if(err) throw err;
     const r = {
