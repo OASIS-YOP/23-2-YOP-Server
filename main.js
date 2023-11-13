@@ -5,14 +5,14 @@ import { swaggerUi, specs } from './modules/swagger.js'
 import mysql from 'mysql';
 import { config } from 'dotenv';
 config();
-import { Artist, 
-  Favorite, 
-  Collection, 
-  Like,
-  PhotoCard,
-  Polaroid,
-  Post,
-  User } from './db.js';
+// import { Artist, 
+//   Favorite, 
+//   Collection, 
+//   Like,
+//   PhotoCard,
+//   Polaroid,
+//   Post,
+//   User } from './db.js';
 
 const app = express();
 const port = 8080;
@@ -316,7 +316,7 @@ app.get('/community/:memberName/membersPost', async (req, res) => {
   const memberName = req.params.memberName;
   const sql = `SELECT 
                 p.postId,
-                p.post,
+                pl.polaroid,
                 p.userId,
                 pc.enterComp,
                 pc.groupName,
@@ -343,7 +343,7 @@ app.get('/community/:artistId/allPost', async (req, res) => {
   const sql = `SELECT 
                 a.artistId,
                 p.postId,
-                p.post,
+                pl.polaroid
                 p.userId,
                 pc.enterComp,
                 pc.groupName,
@@ -444,7 +444,7 @@ app.get('/mypage/:userId/myPost/artistTab', async(req, res)=>{
 app.get('/mypage/:userId/myPost/:artistId/post', async (req, res)=>{
   const userId = req.params.userId;
   const artistId = req.params.artistId;
-  const sql = `SELECT p.postId, p.post, p.postDateTime,
+  const sql = `SELECT p.postId, pl.polaroid, p.postDateTime,
                       pc.memberName, pc.albumName, pc.enterComp, pc.groupName,
                       u.userId, u.nickname,
                       l.likeQuant
@@ -500,7 +500,11 @@ app.get('/mypage/:userId/myCollection/artistTab', async (req, res)=>{
 app.get('/mypage/:userId/myCollection/:artistId/active', async (req, res)=>{
   const userId = req.params.userId;
   const artistId = req.params.artistId;
-  const sql = `;`;
+  const sql = `SELECT albumJacket, albumName, activeDateTime, photoCardQuant
+              FROM collections c
+              INNER JOIN UserCollections uc ON uc.albumName = c.albumName 
+              INNER JOIN users a ON u.userId = uc.userId
+              WHERE userId = ? AND artistId = ?;`;
   con.query(sql, [userId, artistId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
