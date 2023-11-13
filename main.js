@@ -15,7 +15,7 @@ config();
 //   User } from './db.js';
 
 const app = express();
-const port = 8080;
+const port = 3000;
 app.use(bodyParser.json());
 const corsOptions = {
   origin: "http://localhost:3000",
