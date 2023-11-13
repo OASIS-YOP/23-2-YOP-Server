@@ -15,7 +15,7 @@ import { Artist,
   User } from './db.js';
 
 const app = express();
-const port = 3000;
+const port = 8080;
 app.use(bodyParser.json());
 const corsOptions = {
   origin: "http://localhost:3000",
@@ -465,7 +465,7 @@ app.get('/mypage/:userId/myPost/:artistId/post', async (req, res)=>{
 //포스트 삭제하기
 app.delete('/mypage/:userId/myPost/delete/:postId', async (req, res)=>{
   const postId = req.params.postId;
-  const sql =  `DELETE FROM Posts WHERE postId = ?`
+  const sql =  `DELETE FROM Posts WHERE postId = ?;`;
   con.query(sql, [postId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
@@ -475,6 +475,10 @@ app.delete('/mypage/:userId/myPost/delete/:postId', async (req, res)=>{
     console.log(r);
   })
 });
+
+
+
+
 
 app.listen(port, ()=>{
   console.log(`Example app listening on ${port}`);
