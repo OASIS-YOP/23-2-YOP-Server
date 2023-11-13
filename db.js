@@ -102,7 +102,7 @@ PhotoCard.init(
 await sequelize.sync();
 
 //컬렉션
-//enterComp, groupName, memberName, albumName, version
+//enterComp, groupName, memberName, albumName
 class Collection extends Model {
 }
 Collection.init(
@@ -114,13 +114,7 @@ Collection.init(
       albumJacket: DataTypes.STRING,
       photoCardQuant: DataTypes.INTEGER,
       activeDateTime: DataTypes.DATE,
-      // artistId: {
-      //   type: DataTypes.INTEGER,
-      //   references: {
-      //     model: Artist,  // Polaroid 모델을 참조
-      //     key: 'artistId' // Polaroid 모델의 기본 키를 참조
-      //   }
-      // }
+      activationCode: DataTypes.STRING
     }
     ,
     {
@@ -130,6 +124,7 @@ Collection.init(
     }
 );
 
+await sequelize.sync();
 //도안
 class Polaroid extends Model {
 }

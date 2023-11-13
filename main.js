@@ -420,14 +420,21 @@ app.get('/mypage/:userId/myProfile', async(req, res)=>{
 
 });
 
-//아티스트 탭 조회(즐겨찾기 기준)
+//아티스트 탭 조회(포스트 유무 기준)
 app.get('/mypage/:userId/myPost/artistTab', async(req, res)=>{
   const userId = req.params.userId;
-  const sql = `SELECT f.artistId, a.groupName
-              FROM Favorites f
-              INNER JOIN artists a ON f.artistId = a.artistId
-              WHERE userId = 1;
-              `
+  // const sql = `SELECT f.artistId, a.groupName
+  //             FROM Favorites f
+  //             INNER JOIN artists a ON f.artistId = a.artistId
+  //             WHERE userId = 1;
+  const sql =  `SELECT pc.groupName
+                FROM Posts p
+                INNER JOIN Polaroids pl ON p.PolaroidPolaroidId = pl.polaroidId
+                INNER JOIN photoCards pc ON pl.photoCardMemberName = pc.memberName
+                WHERE p.userId = ?
+                
+                HAVING COUNT(*) > 0;
+              `;
   con.query(sql, [userId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
