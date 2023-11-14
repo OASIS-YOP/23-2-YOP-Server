@@ -516,40 +516,41 @@ const pc1 = PhotoCard.build({
   photocard: 'fff',
   albumName: 'GET UP(The 2nd EP)',
   enterComp: '어도어 엔터테인먼트(ADOR Entertainment)',
-  groupName: '뉴진스(New Jeans)'
+  groupName: '뉴진스(New Jeans)',
+  userId:1
 })
-const pc2 = PhotoCard.build({
-  memberName: '하니',
-  version: 'A',
-  photocard: 'ff',
-  albumName: 'GET UP(The 2nd EP)',
-  enterComp: '어도어 엔터테인먼트(ADOR Entertainment)',
-  groupName: '뉴진스(New Jeans)'
-})
-const pc3 = PhotoCard.build({
-  memberName: '지민',
-  version: 'A',
-  photocard: 'f',
-  albumName: '[싱글] <Butter>',
-  enterComp: '빅히트 엔터테인먼트(Big Hit Entertainment)',
-  groupName: '방탄소년단(BTS)'
-})
+// const pc2 = PhotoCard.build({
+//   memberName: '하니',
+//   version: 'A',
+//   photocard: 'ff',
+//   albumName: 'GET UP(The 2nd EP)',
+//   enterComp: '어도어 엔터테인먼트(ADOR Entertainment)',
+//   groupName: '뉴진스(New Jeans)'
+// })
+// const pc3 = PhotoCard.build({
+//   memberName: '지민',
+//   version: 'A',
+//   photocard: 'f',
+//   albumName: '[싱글] <Butter>',
+//   enterComp: '빅히트 엔터테인먼트(Big Hit Entertainment)',
+//   groupName: '방탄소년단(BTS)'
+// })
 // ------Polaroid-----------
 const pol1 = Polaroid.build({
   polaroidId:1,
   polaroid:'https://ohnpol.s3.ap-northeast-2.amazonaws.com/polaroid/YOP_1.png',
   saveDateTime: '2023-11-12 00:00:01'
 })
-const pol2 = Polaroid.build({
-  polaroidId:2,
-  polaroid:'https://ohnpol.s3.ap-northeast-2.amazonaws.com/polaroid/YOP_2.png',
-  saveDateTime: '2023-11-12 00:00:22'
-})
-const pol3 = Polaroid.build({
-  polaroidId:3,
-  polaroid:'https://ohnpol.s3.ap-northeast-2.amazonaws.com/polaroid/YOPdd.png',
-  saveDateTime: '2023-11-12 00:00:33'
-})
+// const pol2 = Polaroid.build({
+//   polaroidId:2,
+//   polaroid:'https://ohnpol.s3.ap-northeast-2.amazonaws.com/polaroid/YOP_2.png',
+//   saveDateTime: '2023-11-12 00:00:22'
+// })
+// const pol3 = Polaroid.build({
+//   polaroidId:3,
+//   polaroid:'https://ohnpol.s3.ap-northeast-2.amazonaws.com/polaroid/YOPdd.png',
+//   saveDateTime: '2023-11-12 00:00:33'
+// })
 // ------Post-----------
 const post1 = Post.build({
   postId:1,
@@ -557,26 +558,26 @@ const post1 = Post.build({
   postDateTime: '2023-11-23 00:00:01' ,
   userId: 1,
   
-  PolaroidPolaroidId: 1
+  polaroidId: 1
 })
 
-const post2 = Post.build({
-  postId:2,
-  post:'',
-  postDateTime: '2023-11-23 00:00:22' ,
-  userId: 1,
+// const post2 = Post.build({
+//   postId:2,
+//   post:'',
+//   postDateTime: '2023-11-23 00:00:22' ,
+//   userId: 1,
   
-  PolaroidPolaroidId: 2
-})
+//   PolaroidPolaroidId: 2
+// })
 
-const post3 = Post.build({
-  postId:3,
-  post:'',
-  postDateTime: '2023-11-23 00:00:33' ,
-  userId: 1,
+// const post3 = Post.build({
+//   postId:3,
+//   post:'',
+//   postDateTime: '2023-11-23 00:00:33' ,
+//   userId: 1,
   
-  PolaroidPolaroidId: 3
-})
+//   PolaroidPolaroidId: 3
+// })
 
 //-------user----------
 const userTemp = User.build(
@@ -598,27 +599,35 @@ const fav1 = Favorite.build(
     artistId: 1
   }
 )
-
+//------like---------------
+const like1 = Like.build({
+  likeQuant: 1,
+  userId:1,
+  postId:1
+})
 
 //----------------------saved---------------------------------
-await BTS.save();
-await aespa.save();
-await IU.save();
-await newJeans.save();
+// await BTS.save();
+// await aespa.save();
+// await IU.save();
+// await newJeans.save();
 
-await userTemp.save();
+// await userTemp.save();
 
-await fav1.save();
+// await fav1.save();
+
 
 // await pc1.save();
-// await pc2.save();
-// await pc3.save();
+// // await pc2.save();
+// // await pc3.save();
 // await pol1.save();
-// await pol2.save();
-// await pol3.save();
+// // await pol2.save();
+// // await pol3.save();
 // await post1.save();
 // await post2.save();
 // await post3.save();
+
+// // await like1.save();
 
 //---------------------drop------------------------------------
 // await sequelize.drop();

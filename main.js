@@ -67,42 +67,72 @@ app.get('/mainpage/:userId/favArtist', async (req, res) => {
     res.status(200).send(r);
   })
 });
+
 //hot10
 app.get('/mainpage/:userId/hot10', async (req, res) => {
-  
-  const sql = `SELECT 
-              pc.photocard,
-              pc.enterComp,
-              pc.groupName,
-              pc.memberName,
-              pc.albumName,
-              l.userId,
-              l.postId
-            FROM (
-              SELECT postId, userId
-              FROM Likes
-              ORDER BY likeQuant DESC
-              LIMIT 10
-            ) l
-            INNER JOIN Posts p ON l.postId = p.postId
-            INNER JOIN Polaroids pl ON p.polaroidId = pl.PhotoCardMemberName
-            INNER JOIN photoCards pc ON pl.photoCardMemberName = pc.memberName;`;
-  con.query(sql, (err, result, fields)=>{
-    if(err) throw err;
-    const r = {
-      hot10List: result // 여기에서 result는 변수명입니다. 원하는 결과 데이터로 대체되어야 합니다.
+  const hotPostsQuery = `SELECT postId, COUNT(likeQuant) AS likeCount
+                          FROM Likes
+                          GROUP BY postId
+                          ORDER BY likeCount DESC
+                          LIMIT 10;`;
+
+  try {
+    const hotPosts = await new Promise((resolve, reject) => {
+      con.query(hotPostsQuery, (err, result, fields) => {
+        if (err) reject(err);
+        resolve(result);
+        console.log('1: ', result);
+      });
+    });
+
+    const getPostDetails = async (postId) => {
+      const postDetailsQuery = `SELECT 
+                                  pc.photocard,
+                                  pc.enterComp,
+                                  pc.groupName,
+                                  pc.memberName,
+                                  pc.albumName,
+                                  l.userId,
+                                  l.postId
+                                FROM Likes l
+                                INNER JOIN Posts p ON l.postId = p.postId
+                                INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
+                                INNER JOIN photoCards pc ON pl.photocardMemberName = pc.memberName
+                                WHERE l.postId = ?;`;
+
+      return new Promise((resolve, reject) => {
+        con.query(postDetailsQuery, [postId], (err, result, fields) => {
+          if (err) reject(err);
+          resolve(result);
+          console.log('2: ', result);
+        });
+      });
     };
-    res.status(200).send(r);
-    console.log("hot10", result);
-  })
+
+    const finalResult = [];
+
+    for (let i = 0; i < hotPosts.length; i++) {
+      const postDetails = await getPostDetails(hotPosts[i].postId);
+      finalResult.push(postDetails);
+    }
+
+    console.log(finalResult);
+    res.status(200).send(finalResult);
+    console.log('3: ', finalResult);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
 });
+
+
 //실시간도안
 app.get('/mainpage/:userId/now5', async (req, res) => {
   
   const sql = `
               SELECT p.postId, pl.polaroid
               FROM Posts p
-              INNER JOIN Polaroids pl ON p.PolaroidPolaroidId = pl.polaroidId
+              INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
               ORDER BY postId DESC
               LIMIT 5;
             `
@@ -126,11 +156,11 @@ app.get('/mainpage/:userId/randomArtist', async (req, res) => {
     
     const randomEnterComp = results[getRandomInt(results.length)].enterComp;
     //console.log("소속사",randomEnterComp);
-    const sql3 = `SELECT artistId, groupName, photo
+    const sql2 = `SELECT artistId, groupName, photo
                   FROM artists
                   WHERE enterComp = ?`;
     
-    con.query(sql3, [randomEnterComp], (err, result, fields) => {
+    con.query(sql2, [randomEnterComp], (err, result, fields) => {
       if (err) throw err;
       
       const r = {
@@ -200,23 +230,6 @@ app.get('/community/:artistId/artistProfile', async (req, res) => {
     if(err) throw err;
     const r = {
       ArtistProfile: result
-    };
-    res.status(200).send(r);
-    //console.log("아티스트페이지", result);
-  })
-});
-
-//아티스트 즐겨찾기 수 조회
-app.get('/community/:artistId/favoriteQuant', async (req, res) => {
-  const artistId = req.params.artistId; 
-  const sql = `SELECT 
-                favoriteQuant
-              FROM Favorites
-              WHERE artistId = ? ;`;
-  con.query(sql,[artistId], (err, result, fields)=>{
-    if(err) throw err;
-    const r = {
-      ArtistFavoriteQuant: result
     };
     res.status(200).send(r);
     //console.log("아티스트페이지", result);
@@ -326,8 +339,8 @@ app.get('/community/:memberName/membersPost', async (req, res) => {
                 u.nickname
               FROM Posts p
               INNER JOIN users u ON p.userId = u.userId
-              INNER JOIN Polaroids pl ON p.PolaroidPolaroidId = pl.polaroidId
-              INNER JOIN photoCards pc ON pc.memberName = pl.photoCardMemberName
+              INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
+              INNER JOIN photoCards pc ON pc.memberName = pl.photocardMemberName
               WHERE  pc.memberName = ?; `;
   con.query(sql,[memberName], (err, result, fields)=>{
     if(err) throw err;
@@ -350,13 +363,13 @@ app.get('/community/:artistId/allPost', async (req, res) => {
                 pc.groupName,
                 pc.memberName,
                 pc.albumName,
-                u.nickname
+                u.nickname,
               FROM artists a
               INNER JOIN photoCards pc ON pc.enterComp = a.enterComp
-              INNER JOIN Polaroids pl ON pc.memberName = pl.photoCardMemberName
-              INNER JOIN Posts p ON p.PolaroidPolaroidId = pl.polaroidId
+              INNER JOIN Polaroids pl ON pc.memberName = pl.photocardMemberName
+              INNER JOIN Posts p ON p.polaroidId = pl.polaroidId
               INNER JOIN users u ON p.userId = u.userId
-              WHERE artistId = 1; `
+              WHERE artistId = ?; `
   con.query(sql,[artistId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
@@ -426,8 +439,8 @@ app.get('/mypage/:userId/myPost/artistTab', async(req, res)=>{
   const userId = req.params.userId;
   const sql =  `SELECT pc.groupName
                 FROM Posts p
-                INNER JOIN Polaroids pl ON p.PolaroidPolaroidId = pl.polaroidId
-                INNER JOIN photoCards pc ON pl.photoCardMemberName = pc.memberName
+                INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
+                INNER JOIN photoCards pc ON pl.photocardMemberName = pc.memberName
                 WHERE p.userId = ?
                 
                 HAVING COUNT(*) > 0;
@@ -450,8 +463,8 @@ app.get('/mypage/:userId/myPost/:artistId/post', async (req, res)=>{
                       u.userId, u.nickname,
                       l.likeQuant
               FROM Posts p
-              INNER JOIN Polaroids pl ON p.PolaroidPolaroidId = pl.polaroidId
-              INNER JOIN photoCards pc ON pl.photoCardMemberName = pc.memberName
+              INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
+              INNER JOIN photoCards pc ON pl.photocardMemberName = pc.memberName
               INNER JOIN users u ON u.userId = p.userId
               INNER JOIN artists a ON pc.groupName = a.groupName
               INNER JOIN Likes l ON p.postId = l.postId
@@ -486,7 +499,7 @@ app.get('/mypage/:userId/myCollection/artistTab', async (req, res)=>{
   const sql = `SELECT f.artistId, a.groupName
               FROM Favorites f
               INNER JOIN artists a ON f.artistId = a.artistId
-              WHERE userId = 1;`;
+              WHERE userId = ?;`;
   con.query(sql, [userId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
