@@ -287,10 +287,10 @@ Collection.belongsTo(Artist,{
 
 // 컬렉션: 포토카드 = 일대다
 Collection.hasMany(PhotoCard,{
-  foreignKey: 'collectionId'
+  foreignKey: 'albumName'
 });
 PhotoCard.belongsTo(Collection,{
-  foreignKey: 'collectionId'
+  foreignKey: 'albumName'
 });
 
 await sequelize.sync();
@@ -514,7 +514,7 @@ const pc1 = PhotoCard.build({
   memberName: '민지',
   version: 'A',
   photocard: 'fff',
-  albumName: 'GET UP(The 2nd EP)',
+  albumName: "<NewJeans 2nd EP 'GET UP'>",
   enterComp: '어도어 엔터테인먼트(ADOR Entertainment)',
   groupName: '뉴진스(New Jeans)',
   userId:1
