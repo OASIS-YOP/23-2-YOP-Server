@@ -586,7 +586,7 @@ const userTemp = User.build(
     email: 'ohnpol1004@naver.com',
     nickname: 'ohnpol1004',
     password: '1111',
-    avatar: '',
+    avatar: 'https://ohnpol.s3.ap-northeast-2.amazonaws.com/users/avatar.png',
     biography: '자기소개'
 })
 
@@ -612,7 +612,7 @@ const like1 = Like.build({
 // await IU.save();
 // await newJeans.save();
 
-// await userTemp.save();
+//await userTemp.save();
 
 // await fav1.save();
 

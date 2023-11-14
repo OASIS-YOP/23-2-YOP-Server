@@ -427,7 +427,7 @@ app.get('/mypage/:userId/myProfile', async(req, res)=>{
   con.query(sql, [userId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
-      userProfileInfo : result
+      userProfileInfo : result[0]
     };
     res.status(200).send(r);
   })
