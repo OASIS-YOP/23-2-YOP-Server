@@ -423,13 +423,16 @@ app.get('/mypage/:userId/myProfile', async(req, res)=>{
   const userId = req.params.userId;
   const sql = `SELECT userId, avatar, nickname, biography
               FROM users
-              WHERE userId = ?;`;
+              WHERE userId = ?
+              
+              ;`;
   con.query(sql, [userId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
       userProfileInfo : result[0]
     };
     res.status(200).send(r);
+    console.log(result[0]);
   })
 
 });
