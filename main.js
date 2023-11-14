@@ -253,8 +253,19 @@ app.get('/community/:artistId/favoriteQuant', async (req, res) => {
 });
 
 //아티스트 즐겨찾기 해제
-//app.delete
-
+app.delete('/community/:artistId/notFavorite/:userId', async(req,res)=>{
+  const artistId = req.params.artistId;
+  const userId = req.params.userId;
+  const sql = `DELETE 
+              FROM Likes
+              WHERE (artistId=? AND userID=?);
+  `
+  con.query(sql, [artistId, userId], (err, result, fields)=>{
+    if(err) throw err;
+    res.status(200).send(result);
+    console.log(result);
+  })
+});
 //아티스트 내가 가진 컬렉션 조회
 app.get('/community/:userId/collectionQuant', async (req, res) => {
   const userId = req.params.artistId; 
