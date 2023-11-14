@@ -93,7 +93,7 @@ app.get('/mainpage/:userId/hot10', async (req, res) => {
                                   pc.memberName,
                                   pc.albumName,
                                   l.userId,
-                                  l.postId
+                                  l.postId, / 좋아요 개수
                                 FROM Likes l
                                 INNER JOIN Posts p ON l.postId = p.postId
                                 INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
@@ -440,13 +440,12 @@ app.get('/mypage/:userId/myProfile', async(req, res)=>{
 //아티스트 탭 조회(포스트 유무 기준)
 app.get('/mypage/:userId/myPost/artistTab', async(req, res)=>{
   const userId = req.params.userId;
-  const sql =  `SELECT pc.groupName
+  const sql =  `SELECT pc.groupName, a.artistId
                 FROM Posts p
                 INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
                 INNER JOIN photoCards pc ON pl.photocardMemberName = pc.memberName
+                INNER JOIN artists a ON a.groupName = pc.groupName
                 WHERE p.userId = ?
-                
-                HAVING COUNT(*) > 0;
               `;
   con.query(sql, [userId], (err, result, fields)=>{
     if(err) throw err;
@@ -461,17 +460,33 @@ app.get('/mypage/:userId/myPost/artistTab', async(req, res)=>{
 app.get('/mypage/:userId/myPost/:artistId/post', async (req, res)=>{
   const userId = req.params.userId;
   const artistId = req.params.artistId;
-  const sql = `SELECT p.postId, pl.polaroid, p.postDateTime,
-                      pc.memberName, pc.albumName, pc.enterComp, pc.groupName,
-                      u.userId, u.nickname,
-                      l.likeQuant
-              FROM Posts p
-              INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
-              INNER JOIN photoCards pc ON pl.photocardMemberName = pc.memberName
-              INNER JOIN users u ON u.userId = p.userId
-              INNER JOIN artists a ON pc.groupName = a.groupName
-              INNER JOIN Likes l ON p.postId = l.postId
-              WHERE p.userId = ? AND a.artistId = ?;`;
+  const sql = `SELECT p.postId, pl.polaroid, u.userId, u.nickname,
+  pc.enterComp, pc.groupName, pc.memberName, pc.albumName,
+  COUNT(l.likeQuant) AS likeCount
+FROM Posts p
+INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
+INNER JOIN photoCards pc ON pl.photocardMemberName = pc.memberName
+INNER JOIN users u ON u.userId = p.userId
+INNER JOIN artists a ON pc.groupName = a.groupName
+LEFT JOIN Likes l ON p.postId = l.postId
+WHERE p.userId = ? AND a.artistId = ?
+GROUP BY p.postId, pl.polaroid, u.userId, u.nickname,
+    pc.enterComp, pc.groupName, pc.memberName, pc.albumName
+
+UNION
+
+SELECT p.postId, pl.polaroid, u.userId, u.nickname,
+  pc.enterComp, pc.groupName, pc.memberName, pc.albumName,
+  COUNT(l.likeQuant) AS likeCount
+FROM Posts p
+INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
+INNER JOIN photoCards pc ON pl.photocardMemberName = pc.memberName
+INNER JOIN users u ON u.userId = p.userId
+INNER JOIN artists a ON pc.groupName = a.groupName
+RIGHT JOIN Likes l ON p.postId = l.postId
+WHERE p.userId = ? AND a.artistId = ?
+GROUP BY p.postId, pl.polaroid, u.userId, u.nickname,
+    pc.enterComp, pc.groupName, pc.memberName, pc.albumName;`;
   con.query(sql, [userId, artistId], (err, result, fields)=>{
     if(err) throw err;
     const r = {

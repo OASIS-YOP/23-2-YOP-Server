@@ -612,7 +612,7 @@ const like1 = Like.build({
 // await IU.save();
 // await newJeans.save();
 
-await userTemp.save();
+// await userTemp.save();
 
 // await fav1.save();
 
