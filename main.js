@@ -362,6 +362,22 @@ app.get('/community/:memberName/membersPost', async (req, res) => {
   })
 });
 
+// 아티스트 멤버 별 도안 좋아요 수 조회
+app.get('/community/:memberName/memberPost/:postId/like', async(req, res)=>{
+  const memberName = req.params.memberName;
+  const postId = req.params.postId;
+  const sql = `SELECT postId, COUNT(postId)
+              FROM Likes
+              WHERE postId = ?`;
+  con.query( sql, [postId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      postLikeQuantList: result
+    }
+    res.status(200).send(r);
+  })
+});
+
 //아티스트 전체 도안 조회
 app.get('/community/:artistId/allPost', async (req, res) => {
   const artistId = req.params.artistId; 
@@ -390,6 +406,23 @@ app.get('/community/:artistId/allPost', async (req, res) => {
     console.log("아티스트 전체 도안", result);
   })
 });
+
+// 아티스트 전체 도안 좋아요 수 조회
+app.get('/community/:artistId/allPost/:postId/like', async(req, res)=>{
+  const artistId = req.params.artistId;
+  const postId = req.params.postId;
+  const sql = `SELECT postId, COUNT(postId)
+              FROM Likes
+              WHERE postId =?`;
+  con.query( sql, [postId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      allPostLikeQuantList: result
+    }
+    res.status(200).send(r);
+  })
+});
+
 
 //도안 게시 - 컬렉션 선택
 app.get('/community/:userId/uploadPost/collection', async (req, res) => {
