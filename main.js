@@ -229,7 +229,7 @@ app.get('/community/:artistId/artistProfile', async (req, res) => {
   con.query(sql,[artistId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
-      ArtistProfile: result
+      ArtistProfile: result[0]
     };
     res.status(200).send(r);
     //console.log("아티스트페이지", result);
@@ -245,7 +245,7 @@ app.get('/community/:artistId/favoriteQuant', async (req, res) => {
   con.query(sql,[artistId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
-      ArtistFavoriteQuant: result
+      ArtistFavoriteQuant: result[0]
     };
     res.status(200).send(r);
     //console.log("아티스트페이지", result);
@@ -275,7 +275,7 @@ app.get('/community/:userId/collectionQuant', async (req, res) => {
   con.query(sql,[userId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
-      collectionQuantThatIHave: result
+      collectionQuantThatIHave: result[0]
     };
     res.status(200).send(r);
     //console.log("아티스트페이지", result);
@@ -366,9 +366,9 @@ app.get('/community/:memberName/membersPost', async (req, res) => {
 app.get('/community/:memberName/memberPost/:postId/like', async(req, res)=>{
   const memberName = req.params.memberName;
   const postId = req.params.postId;
-  const sql = `SELECT postId, COUNT(postId)
+  const sql = `SELECT postId, COUNT(*) AS likeQuant
               FROM Likes
-              WHERE postId = ?`;
+              WHERE postId = ?;`;
   con.query( sql, [postId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
@@ -384,13 +384,13 @@ app.get('/community/:artistId/allPost', async (req, res) => {
   const sql = `SELECT 
                 a.artistId,
                 p.postId,
-                pl.polaroid
+                pl.polaroid,
                 p.userId,
                 pc.enterComp,
                 pc.groupName,
                 pc.memberName,
                 pc.albumName,
-                u.nickname,
+                u.nickname
               FROM artists a
               INNER JOIN photoCards pc ON pc.enterComp = a.enterComp
               INNER JOIN Polaroids pl ON pc.memberName = pl.photocardMemberName
@@ -411,9 +411,9 @@ app.get('/community/:artistId/allPost', async (req, res) => {
 app.get('/community/:artistId/allPost/:postId/like', async(req, res)=>{
   const artistId = req.params.artistId;
   const postId = req.params.postId;
-  const sql = `SELECT postId, COUNT(postId)
+  const sql = `SELECT postId, COUNT(*) AS likeQuant
               FROM Likes
-              WHERE postId =?`;
+              WHERE postId =?;`;
   con.query( sql, [postId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
