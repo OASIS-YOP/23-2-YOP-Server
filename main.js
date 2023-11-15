@@ -1,10 +1,8 @@
 import bodyParser from 'body-parser';
 import express from 'express';
 import cors from 'cors';
-import { swaggerUi, specs } from './modules/swagger.js'
-import mysql from 'mysql';
-import { config } from 'dotenv';
-config();
+import { swaggerUi, specs } from './modules/swagger.js';
+import con from './mysql.js';
 // import { Artist, 
 //   Favorite, 
 //   Collection, 
@@ -24,24 +22,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 
-const con = mysql.createConnection({
-  host     : process.env.DB_HOST,
-  user     : process.env.DB_USER,
-  password : process.env.DB_PASSWORD,
-  database : process.env.DB_DATABASE
-});
 
-con.connect();
-
-con.query('SELECT * from users', (error, results, fields)=> {
-  if (error){
-    console.log(error);
-  };
-  console.log(results);
-  //console.log(process.env.DB_HOST);
-});
-
-//connection.end();
 const getRandomInt = (max) => {
   return Math.floor(Math.random() * max);
 }
@@ -224,7 +205,6 @@ app.get('/community/:artistId/artistProfile', async (req, res) => {
                 artists.enterComp,
                 artists.collectionQuant
               FROM artists
-              INNER JOIN Favorites f ON artists.artistId = f.artistId
               WHERE artists.artistId = ? `;
   con.query(sql,[artistId], (err, result, fields)=>{
     if(err) throw err;
