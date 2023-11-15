@@ -252,6 +252,7 @@ app.get('/community/:artistId/favoriteQuant', async (req, res) => {
   })
 });
 
+
 //아티스트 즐겨찾기 해제
 app.delete('/community/:artistId/notFavorite/:userId', async(req,res)=>{
   const artistId = req.params.artistId;
@@ -317,17 +318,16 @@ app.get('/community/:artistId/members', async (req, res) => {
     if (result.length > 0) {
       const memberNum = result[0].memberNum;
       const memberPhoto = JSON.parse(result[0].memberPhoto); // memberPhoto는 배열이 아니라 ''문자열!!
-      console.log('result',result);
-      const members = [];
-      for (let i = 0; i < memberNum; i++) {
-        const nameAndPhoto = {
-          name: memberPhoto[i].name, 
-          memPhoto: memberPhoto[i].memPhoto 
-        };
-        members.push(nameAndPhoto);
-      }
-      
-      const r = { members }; // Wrap the members array in an object
+      console.log('memphoto',memberPhoto);
+      // const members = [];
+      // for (let i = 0; i < memberNum; i++) {
+      //   const nameAndPhoto = {
+      //     name: memberPhoto[i].name, 
+      //     memPhoto: memberPhoto[i].memPhoto 
+      //   };
+      //   members.push(nameAndPhoto);
+      // }
+      const r = { memberPhoto }; // Wrap the members array in an object
       res.status(200).send(r);
       console.log("멤버별 이름과 사진", members);
     } else {
