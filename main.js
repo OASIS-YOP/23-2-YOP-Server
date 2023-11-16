@@ -195,63 +195,63 @@ app.get('/artistpage/allArtist', async (req, res) => {
 
 
 // 아티스트 프로필 조회
-const artistProfile = (artistId) => {
-  return new Promise((resolve, reject) => {
-    con.query(
-      `SELECT 
-        artists.groupName,
-        artists.photo,
-        artists.enterComp,
-        artists.collectionQuant
-      FROM artists
-      WHERE artists.artistId = ?
-      ;`, [artistId], (err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result[0]);
-        }
-      }
-    );
-  });
-};
+// const artistProfile = (artistId) => {
+//   return new Promise((resolve, reject) => {
+//     con.query(
+//       `SELECT 
+//         artists.groupName,
+//         artists.photo,
+//         artists.enterComp,
+//         artists.collectionQuant
+//       FROM artists
+//       WHERE artists.artistId = ?
+//       ;`, [artistId], (err, result) => {
+//         if (err) {
+//           reject(err);
+//         } else {
+//           resolve(result[0]);
+//         }
+//       }
+//     );
+//   });
+// };
 
-// 아티스트 즐겨찾기 수 조회
-const artistFavoriteQuant = (artistId) => {
-  return new Promise((resolve, reject) => {
-    con.query(
-      `SELECT COUNT(*) AS favoriteQuant
-      FROM Favorites
-      WHERE artistId = ?; `, [artistId], (err, result) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(result[0]);
-        }
-      }
-    );
-  });
-};
+// // 아티스트 즐겨찾기 수 조회
+// const artistFavoriteQuant = (artistId) => {
+//   return new Promise((resolve, reject) => {
+//     con.query(
+//       `SELECT COUNT(*) AS favoriteQuant
+//       FROM Favorites
+//       WHERE artistId = ?; `, [artistId], (err, result) => {
+//         if (err) {
+//           reject(err);
+//         } else {
+//           resolve(result[0]);
+//         }
+//       }
+//     );
+//   });
+// };
 
-app.get('/community/:artistId/artistProfile', async (req, res) => {
-  const artistId = req.params.artistId;
+// app.get('/community/:artistId/artistProfile', async (req, res) => {
+//   const artistId = req.params.artistId;
 
-  try {
-    const profile = await artistProfile(artistId);
-    const favoriteQuant = await artistFavoriteQuant(artistId);
-    const result = {...profile, ...favoriteQuant};
+//   try {
+//     const profile = await artistProfile(artistId);
+//     const favoriteQuant = await artistFavoriteQuant(artistId);
+//     const result = {...profile, ...favoriteQuant};
 
-    const r = {
-      artistProfile: result
-    };
+//     const r = {
+//       artistProfile: result
+//     };
 
-    res.status(200).send(r);
-    console.log('r', r);
-  } catch (error) {
-    console.error('에러:', error);
-    res.status(500).send('내부 서버 오류');
-  }
-});
+//     res.status(200).send(r);
+//     console.log('r', r);
+//   } catch (error) {
+//     console.error('에러:', error);
+//     res.status(500).send('내부 서버 오류');
+//   }
+// });
 
 // //아티스트 즐겨찾기 수 조회
 // app.get('/community/:artistId/favoriteQuant', async (req, res) => {
@@ -548,7 +548,6 @@ app.get('/mypage/:userId/myPost/:artistId/:postId/like', async(req, res)=>{
   const artistId = req.params.artistId;
   const postId = req.params.postId;
   const sql = `SELECT COUNT(*) AS LikeQuant
-                
                 FROM Likes
                 WHERE postId = ?;`;
   con.query(sql, [postId], (err, result, fields)=>{
@@ -608,6 +607,22 @@ app.get('/mypage/:userId/myCollection/:artistId/active', async (req, res)=>{
     res.status(200).send(r);
   })
 });
+
+//비활성화 컬렉션 정보 조회
+app.get('/mypage/:userId/myCollection/:artistId/notActive', async(req, res)=>{
+  const userId = req.params.userId;
+  const artistId = req.params.artistId;
+});
+
+//선택한 컬렉션 정보 조회
+app.get('/mypage/:userId/myCollection/:artistId/:collectionId', async (req, res)=>{
+  const userId = req.params.userId;
+  const artistId = req.params.artistId;
+  const collectionId = req.params.collectionId;
+  const sql = `SELECT ;`;
+
+});
+
 
 
 app.listen(port, ()=>{
