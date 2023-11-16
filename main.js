@@ -73,8 +73,7 @@ app.get('/mainpage/:userId/hot10', async (req, res) => {
                                   pc.groupName,
                                   pc.memberName,
                                   pc.albumName,
-                                  l.userId,
-                                  l.postId, / 좋아요 개수
+                                  l.postId,
                                 FROM Likes l
                                 INNER JOIN Posts p ON l.postId = p.postId
                                 INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
@@ -195,42 +194,80 @@ app.get('/artistpage/allArtist', async (req, res) => {
 
 
 
-//community page
-//아티스트 프로필 조회
+// 아티스트 프로필 조회
+const artistProfile = (artistId) => {
+  return new Promise((resolve, reject) => {
+    con.query(
+      `SELECT 
+        artists.groupName,
+        artists.photo,
+        artists.enterComp,
+        artists.collectionQuant
+      FROM artists
+      WHERE artists.artistId = ?
+      ;`, [artistId], (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result[0]);
+        }
+      }
+    );
+  });
+};
+
+// 아티스트 즐겨찾기 수 조회
+const artistFavoriteQuant = (artistId) => {
+  return new Promise((resolve, reject) => {
+    con.query(
+      `SELECT COUNT(*) AS favoriteQuant
+      FROM Favorites
+      WHERE artistId = ?; `, [artistId], (err, result) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(result[0]);
+        }
+      }
+    );
+  });
+};
+
 app.get('/community/:artistId/artistProfile', async (req, res) => {
-  const artistId = req.params.artistId; 
-  const sql = `SELECT 
-                artists.groupName,
-                artists.photo,
-                artists.enterComp,
-                artists.collectionQuant
-              FROM artists
-              WHERE artists.artistId = ? `;
-  con.query(sql,[artistId], (err, result, fields)=>{
-    if(err) throw err;
+  const artistId = req.params.artistId;
+
+  try {
+    const profile = await artistProfile(artistId);
+    const favoriteQuant = await artistFavoriteQuant(artistId);
+    const result = {...profile, ...favoriteQuant};
+
     const r = {
-      ArtistProfile: result[0]
+      artistProfile: result
     };
+
     res.status(200).send(r);
-    //console.log("아티스트페이지", result);
-  })
+    console.log('r', r);
+  } catch (error) {
+    console.error('에러:', error);
+    res.status(500).send('내부 서버 오류');
+  }
 });
 
-//아티스트 즐겨찾기 수 조회
-app.get('/community/:artistId/favoriteQuant', async (req, res) => {
-  const artistId = req.params.artistId; 
-  const sql = `SELECT COUNT(*)
-                FROM Favorites
-              WHERE artistId = ?; `;
-  con.query(sql,[artistId], (err, result, fields)=>{
-    if(err) throw err;
-    const r = {
-      ArtistFavoriteQuant: result[0]
-    };
-    res.status(200).send(r);
-    //console.log("아티스트페이지", result);
-  })
-});
+// //아티스트 즐겨찾기 수 조회
+// app.get('/community/:artistId/favoriteQuant', async (req, res) => {
+//   const artistId = req.params.artistId; 
+//   const sql = `SELECT COUNT(*) AS favoriteQuant
+//                 FROM Favorites
+//               WHERE artistId = ?; `;
+//   con.query(sql,[artistId], (err, result, fields)=>{
+//     if(err) throw err;
+//     const r = {
+//       ArtistFavoriteQuant: result[0]
+//     };
+//     res.status(200).send(r);
+//     //console.log("아티스트페이지", result);
+//   })
+// });
 
 
 //아티스트 즐겨찾기 해제
@@ -247,6 +284,7 @@ app.delete('/community/:artistId/notFavorite/:userId', async(req,res)=>{
     console.log(result);
   })
 });
+
 //아티스트 내가 가진 컬렉션 조회
 app.get('/community/:userId/collectionQuant', async (req, res) => {
   const userId = req.params.artistId; 
