@@ -20,6 +20,7 @@ const corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
+app.use(express.json());
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 
 
@@ -391,7 +392,7 @@ app.get('/community/:artistId/members', async (req, res) => {
 app.get('/community/:memberName/membersPost', async (req, res) => { 
   const memberName = req.params.memberName;
   const sql = `SELECT 
-                p.postId,
+  DISTINCT p.postId,
                 pl.polaroid,
                 p.userId,
                 pc.enterComp,
@@ -432,7 +433,7 @@ app.get('/community/:memberName/memberPost/:postId/like', async(req, res)=>{
 //아티스트 전체 도안 조회
 app.get('/community/:artistId/allPost', async (req, res) => {
   const artistId = req.params.artistId; 
-  const sql = `SELECT 
+  const sql = `SELECT DISTINCT
                 a.artistId,
                 p.postId,
                 pl.polaroid,
@@ -656,8 +657,33 @@ app.get('/mypage/:userId/myCollection/:artistId/:collectionId', async (req, res)
 });
 
 // 포스트 좋아요 누르기
-app.get('/post/:userId/:postId/updateLike', async(req, res)=>{
+app.post('/post/:userId/:postId/updateLike', async(req, res)=>{
+  try {
+    const userId = req.params.userId;
+    const postId = req.params.postId;
 
+    // Use prepared statement to prevent SQL injection
+    const sql = 'INSERT INTO Likes (likeQuant, userId, postId) VALUES (1, ?, ?)';
+    con.query(sql, [userId, postId], (err, result, fields) => {
+      if (err) {
+        // Handle SQL error
+        console.error('SQL error:', err);
+        res.status(500).send('Internal Server Error');
+        return;
+      }
+
+      // Send a meaningful response to the client
+      res.status(201).send({
+        success: true,
+        message: 'Like added successfully',
+        data: result,
+      });
+    });
+  } catch (error) {
+    // Handle other errors
+    console.error('Error:', error);
+    res.status(500).send('Internal Server Error');
+  }
 });
 
 app.listen(port, ()=>{
