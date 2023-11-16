@@ -503,12 +503,12 @@ app.get('/mypage/:userId/myProfile', async(req, res)=>{
 //아티스트 탭 조회(포스트 유무 기준)
 app.get('/mypage/:userId/myPost/artistTab', async(req, res)=>{
   const userId = req.params.userId;
-  const sql =  `SELECT pc.groupName, a.artistId
+  const sql =  `SELECT DISTINCT pc.groupName, a.artistId
                 FROM Posts p
                 INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
                 INNER JOIN photoCards pc ON pl.photocardMemberName = pc.memberName
                 INNER JOIN artists a ON a.groupName = pc.groupName
-                WHERE p.userId = ?
+                WHERE p.userId = ?;
               `;
   con.query(sql, [userId], (err, result, fields)=>{
     if(err) throw err;
