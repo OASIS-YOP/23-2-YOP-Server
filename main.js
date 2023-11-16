@@ -268,7 +268,40 @@ app.get('/artistpage/allArtist', async (req, res) => {
 //     //console.log("아티스트페이지", result);
 //   })
 // });
+app.get('/community/:artistId/artistProfile', async (req, res) => {
+  const artistId = req.params.artistId; 
+  const sql = `SELECT 
+                artists.groupName,
+                artists.photo,
+                artists.enterComp,
+                artists.collectionQuant
+              FROM artists
+              WHERE artists.artistId = ? `;
+  con.query(sql,[artistId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      ArtistProfile: result[0]
+    };
+    res.status(200).send(r);
+    //console.log("아티스트페이지", result);
+  })
+});
 
+//아티스트 즐겨찾기 수 조회
+app.get('/community/:artistId/favoriteQuant', async (req, res) => {
+  const artistId = req.params.artistId; 
+  const sql = `SELECT COUNT(*)
+                FROM Favorites
+              WHERE artistId = ?; `;
+  con.query(sql,[artistId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      ArtistFavoriteQuant: result[0]
+    };
+
+    res.status(200).send(r);
+  });
+});
 
 //아티스트 즐겨찾기 해제
 app.delete('/community/:artistId/notFavorite/:userId', async(req,res)=>{
