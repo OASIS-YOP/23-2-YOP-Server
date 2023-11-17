@@ -345,7 +345,11 @@ User.belongsToMany(PhotoCard, {
 });
 PhotoCard.belongsToMany(User, {
   through: 'UserPhotoCard',
-  foreignKey: 'photoCardId',
+  foreignKey: 'memberName',
+});
+PhotoCard.belongsToMany(User, {
+  through: 'UserPhotoCard',
+  foreignKey: 'photocard',
 });
 await sequelize.sync();
 

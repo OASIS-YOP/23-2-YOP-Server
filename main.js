@@ -52,60 +52,39 @@ app.get('/mainpage/:userId/favArtist', async (req, res) => {
 
 //hot10
 app.get('/mainpage/:userId/hot10', async (req, res) => {
-  const hotPostsQuery = `SELECT postId, COUNT(likeQuant) AS likeCount
+  const sql = `SELECT postId, COUNT(likeQuant) AS likeCount
                           FROM Likes
                           GROUP BY postId
                           ORDER BY likeCount DESC
                           LIMIT 10;`;
-
-  try {
-    const hotPosts = await new Promise((resolve, reject) => {
-      con.query(hotPostsQuery, (err, result, fields) => {
-        if (err) reject(err);
-        resolve(result);
-        console.log('1: ', result);
-      });
-    });
-
-    const getPostDetails = async (postId) => {
-      const postDetailsQuery = `SELECT 
-                                  pc.photocard,
-                                  pc.enterComp,
-                                  pc.groupName,
-                                  pc.memberName,
-                                  pc.albumName,
-                                  l.postId,
-                                FROM Likes l
-                                INNER JOIN Posts p ON l.postId = p.postId
-                                INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
-                                INNER JOIN photoCards pc ON pl.photocardMemberName = pc.memberName
-                                WHERE l.postId = ?;`;
-
-      return new Promise((resolve, reject) => {
-        con.query(postDetailsQuery, [postId], (err, result, fields) => {
-          if (err) reject(err);
-          resolve(result);
-          console.log('2: ', result);
-        });
-      });
-    };
-
-    const finalResult = [];
-
-    for (let i = 0; i < hotPosts.length; i++) {
-      const postDetails = await getPostDetails(hotPosts[i].postId);
-      finalResult.push(postDetails);
+  con.query(sql, (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      hot10List: result
     }
-
-    console.log(finalResult);
-    res.status(200).send(finalResult);
-    console.log('3: ', finalResult);
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal Server Error");
-  }
+    res.status(200).send(r);
+  }) 
 });
 
+app.get('/mainpage/:userId/hot10/:postId/like', async(req, res)=>{
+  const postId = req.params.postId;
+  const sql = `SELECT DISTINCT l.postId, l.likeQuant, pl.polaroid, 
+                pc.enterComp, pc.groupName, pc.memberName, pc.albumName,
+                p.userId, u.nickname
+                FROM Likes l
+                INNER JOIN Posts p ON l.postId = p.postId
+                INNER JOIN Polaroids pl ON pl.polaroidId = p.polaroidId
+                INNER JOIN photoCards pc ON pl.photocardMemberName = pc.memberName
+                INNER JOIN users u ON u.userId = p.userId
+                WHERE l.postId = ?;`;
+  con.query(sql, [postId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      hot10LikeList : result
+    }
+    res.status(200).send(r);
+  })
+})
 
 //실시간도안
 app.get('/mainpage/:userId/now5', async (req, res) => {
@@ -412,6 +391,7 @@ app.get('/community/:memberName/membersPost', async (req, res) => {
     };
     res.status(200).send(r);
   })
+  console.log(req.params);
 });
 
 // 아티스트 멤버 별 도안 좋아요 수 조회
@@ -627,11 +607,11 @@ app.get('/mypage/:userId/myCollection/artistTab', async (req, res)=>{
 app.get('/mypage/:userId/myCollection/:artistId/active', async (req, res)=>{
   const userId = req.params.userId;
   const artistId = req.params.artistId;
-  const sql = `SELECT albumJacket, albumName, activeDateTime, photoCardQuant
+  const sql = `SELECT c.albumJacket, c.albumName, c.activeDateTime, c.photoCardQuant
               FROM collections c
               INNER JOIN UserCollections uc ON uc.albumName = c.albumName 
-              INNER JOIN users a ON u.userId = uc.userId
-              WHERE userId = ? AND artistId = ?;`;
+              INNER JOIN users u ON u.userId = uc.userId
+              WHERE uc.userId = ? AND c.artistId = ?;`;
   con.query(sql, [userId, artistId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
@@ -641,10 +621,20 @@ app.get('/mypage/:userId/myCollection/:artistId/active', async (req, res)=>{
   })
 });
 
-//비활성화 컬렉션 정보 조회
-app.get('/mypage/:userId/myCollection/:artistId/notActive', async(req, res)=>{
-  const userId = req.params.userId;
+//전체 컬렉션 정보 조회
+app.get('/mypage/:userId/myCollection/:artistId/allCollection', async(req, res)=>{
+  //const userId = req.params.userId;
   const artistId = req.params.artistId;
+  const sql = `SELECT DISTINCT c.albumJacket, c.albumName
+              FROM collections c
+              WHERE c.artistId = ?;`;
+  con.query(sql, [artistId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      activeCollectionList: result
+    }
+    res.status(200).send(r);
+  })
 });
 
 //선택한 컬렉션 정보 조회
