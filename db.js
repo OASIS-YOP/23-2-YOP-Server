@@ -327,7 +327,7 @@ class UserPhotoCard extends Model {
 }
 UserPhotoCard.init(
   {
-    collectionQuant: {
+    photocardQuant: {
       type: DataTypes.INTEGER,
       // autoIncrement: true,
     }
