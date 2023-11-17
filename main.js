@@ -631,19 +631,49 @@ app.get('/mypage/:userId/myCollection/:artistId/allCollection', async(req, res)=
   con.query(sql, [artistId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
-      activeCollectionList: result
+      allCollectionList: result
     }
     res.status(200).send(r);
   })
 });
 
-//선택한 컬렉션 정보 조회
-app.get('/mypage/:userId/myCollection/:artistId/:collectionId', async (req, res)=>{
+//선택한 컬렉션 전체 포토카드 정보 조회
+app.get('/mypage/:userId/myCollection/:artistId/:collectionId/allPhotocard', async (req, res)=>{
   const userId = req.params.userId;
-  const artistId = req.params.artistId;
-  const collectionId = req.params.collectionId;
-  const sql = `SELECT ;`;
+  //const artistId = req.params.artistId;
+  const albumName = req.params.albumName;
+  const sql = `SELECT pc.photocard, pc.version, pc.memberName, upc.photocardQuant
+              FROM UserCollections uc
+              INNER JOIN collections c ON uc.albumName = c.albumName
+              INNER JOIN photoCards pc ON pc.albumName = uc.albumName
+              INNER JOIN UserPhotoCards upc ON uc.userId = upc.userId
+              WHERE uc.userId =?  AND uc.albumName=?;`;
+    con.query(sql, [userId, albumName], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      collectionPhotocardList: result
+    }
+    res.status(200).send(r);
+  })
 
+});
+
+//선택한 컬렉션 활성화된 포토카드 정보 조회
+app.get('/mypage/:userId/myCollection/:artistId/:collectionId/activePhotocard', async (req, res)=>{
+  const userId = req.params.userId;
+  //const artistId = req.params.artistId;
+  //const albumName = req.params.albumName;
+  const sql = `SELECT upc.photocard, pc.version, pc.memberName
+              FROM UserPhotoCards upc
+              INNER JOIN photoCards pc ON pc.photocard = upc.photocard
+              WHERE upc.userId =?;`;
+    con.query(sql, [userId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = {
+      ActivePhotocardList: result
+    }
+    res.status(200).send(r);
+  })
 });
 
 // 포스트 좋아요 누르기
