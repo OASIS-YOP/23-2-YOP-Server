@@ -21,6 +21,7 @@ const util = {
 
 export const uploadImage = async (req, res) => {
   console.log(req.file);
+  console.log('s3 이미지 경로 :', req.file.location);
   const image = req.file.location;
   if (image === undefined) {
     return res.status(400).send(util.fail(400, "이미지가 존재하지 않습니다."));
