@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import { swaggerUi, specs } from './modules/swagger.js';
 import con from './mysql.js';
+import upload from './modules/multer.js'
 // import { Artist, 
 //   Favorite, 
 //   Collection, 
@@ -44,7 +45,7 @@ app.get('/mainpage/:userId/favArtist', async (req, res) => {
   con.query(sql, [userId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
-      favArtist: result // 여기에서 result는 변수명입니다. 원하는 결과 데이터로 대체되어야 합니다.
+      favArtistList: result // 여기에서 result는 변수명입니다. 원하는 결과 데이터로 대체되어야 합니다.
     };
     res.status(200).send(r);
   })
@@ -705,6 +706,14 @@ app.post('/post/:userId/:postId/updateLike', async(req, res)=>{
     res.status(500).send('Internal Server Error');
   }
 });
+
+//polaroid 저장
+// app.post('/edit/save/:userId/:polaroidId', uploadImage, async(req, res)=>{
+//   res.status(200).send({
+//     message: "OK",
+//     fileInfo: req.file
+//   })
+// });
 
 app.listen(port, ()=>{
   console.log(`Example app listening on ${port}`);

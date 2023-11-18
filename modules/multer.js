@@ -1,8 +1,6 @@
 import multer from 'multer';
 import multerS3 from 'multer-s3'
 import aws from 'aws-sdk';
-import pkg from 'multer';
-const { upload:multerUpload } = 'multer';
 import { config } from "dotenv";
 config();
 
@@ -19,11 +17,10 @@ let upload = multer({
     contentType: multerS3.AUTO_CONTENT_TYPE,
     acl: 'public_read',
     key: (req, file, cb) =>{
-      cb(null, `${Date.now()}_${file.originalname}`);
+      cb(null, `polaroid/polaroid_${Date.now()}_${file.originalname}`);
     },
   }),
 });
 
-//upload = multerUpload(upload);
 
-export { upload };
+export default upload;
