@@ -130,6 +130,7 @@ Polaroid.init(
       polaroidId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement:true
       },
       polaroid: DataTypes.STRING,
       saveDateTime: DataTypes.DATE,
@@ -268,7 +269,7 @@ Collection.hasMany(User,{
 // 포토카드: 도안 = 일대일
 Polaroid.belongsTo(PhotoCard, 
   {
-  foreignKey: 'photocardMemberName' 
+  foreignKey: 'photocard' 
 }
 );
 // 도안:포스트 = 일대일

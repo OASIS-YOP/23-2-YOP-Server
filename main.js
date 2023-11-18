@@ -1,9 +1,29 @@
 import bodyParser from 'body-parser';
 import express from 'express';
 import cors from 'cors';
-import { swaggerUi, specs } from './modules/swagger.js';
+//import { swaggerUi, specs } from './modules/swagger.js';
 import con from './mysql.js';
-import upload from './modules/multer.js'
+import multer from 'multer';
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import crypto from 'crypto';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const randomImgName = (bytes=32)=> crypto.randomBytes(bytes).toString('hex');
+
+const bucketName = process.env.BUCKET_NAME;
+const region = process.env.S3_REGION;
+const accessKey = process.env.S3_KEYID;
+const secretAccessKey = process.env.S3_PRIVATEKEY;
+
+const s3 = new S3Client({
+  credentials:{
+    accessKeyId: accessKey,
+    secretAccessKey: secretAccessKey
+  },
+  region: region
+});
+
 // import { Artist, 
 //   Favorite, 
 //   Collection, 
@@ -15,6 +35,12 @@ import upload from './modules/multer.js'
 
 const app = express();
 const port = 3000;
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage});
+
+
+
 app.use(bodyParser.json());
 const corsOptions = {
   origin: "http://localhost:3000",
@@ -22,7 +48,7 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
+//app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 
 
 const getRandomInt = (max) => {
@@ -708,12 +734,35 @@ app.post('/post/:userId/:postId/updateLike', async(req, res)=>{
 });
 
 //polaroid 저장
-// app.post('/edit/save/:userId/:polaroidId', uploadImage, async(req, res)=>{
-//   res.status(200).send({
-//     message: "OK",
-//     fileInfo: req.file
-//   })
-// });
+app.post('/edit/save/:userId/:photocard', upload.single('image'), async(req, res)=>{
+  console.log("req.body", req.body);
+  console.log("req.file", req.file);
+
+  //req.file.buffer
+
+  const imgName = randomImgName();
+  const params = {
+    Bucket: bucketName,
+    Key: imgName,
+    Body: req.file.buffer,
+    ACL: 'public-read',
+    ContentType: req.file.mimetype
+  }
+
+  const command = new PutObjectCommand(params);
+  await s3.send(command);
+
+  const userId = req.params.userId;
+  const photocard = req.params.photocard.slice(8,);
+  const sql = `INSERT into Polaroids 
+              VALUE (${imgName}, ${now()},  ?, ?) `
+  con.query(sql, [userId, photocard], (err, result, fields)=>{
+    if(err) throw err;
+    res.status(201).send(result);
+  })
+  
+});
+
 
 app.listen(port, ()=>{
   console.log(`Example app listening on ${port}`);
