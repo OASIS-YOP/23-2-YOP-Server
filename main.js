@@ -16,6 +16,10 @@ const region = process.env.S3_REGION;
 const accessKey = process.env.S3_KEYID;
 const secretAccessKey = process.env.S3_PRIVATEKEY;
 
+console.log('Region:', region);
+console.log('Access Key:', accessKey);
+console.log('Secret Access Key:', secretAccessKey);
+
 const s3 = new S3Client({
   credentials:{
     accessKeyId: accessKey,
@@ -733,8 +737,39 @@ app.post('/post/:userId/:postId/updateLike', async(req, res)=>{
   }
 });
 
+//아티스트 즐겨찾기 누르기
+app.post('/community/:artistId/updateFavorite/:userId', async(req, res)=>{
+  try {
+    const userId = req.params.userId;
+    const artistId = req.params.artistId;
+
+    // Use prepared statement to prevent SQL injection
+    const sql = 'INSERT INTO Favorites (favoriteQuant, userId, artistId) VALUES (1, ?, ?)';
+    con.query(sql, [userId, artistId], (err, result, fields) => {
+      if (err) {
+        // Handle SQL error
+        console.error('SQL error:', err);
+        res.status(500).send('Internal Server Error');
+        return;
+      }
+
+      // Send a meaningful response to the client
+      res.status(201).send({
+        success: true,
+        message: 'Favorite added successfully',
+        data: result,
+      });
+    });
+  } catch (error) {
+    // Handle other errors
+    console.error('Error:', error);
+    res.status(500).send('Internal Server Error');
+  }
+})
+
+
 //polaroid 저장
-app.post('/edit/save/:userId/:photocard', upload.single('image'), async(req, res)=>{
+app.post('/edit/save/:userId/:photocardId', upload.single('image'), async(req, res)=>{
   console.log("req.body", req.body);
   console.log("req.file", req.file);
 
@@ -743,22 +778,44 @@ app.post('/edit/save/:userId/:photocard', upload.single('image'), async(req, res
   const imgName = randomImgName();
   const params = {
     Bucket: bucketName,
-    Key: imgName,
+    Key: `polaroid/${imgName}`,
     Body: req.file.buffer,
     ACL: 'public-read',
     ContentType: req.file.mimetype
+
   }
 
   const command = new PutObjectCommand(params);
   await s3.send(command);
+  console.log(command);
 
+  //const userId = req.params.userId;
+  //const photocard = req.params.photocard.slice(8,);
+  let today = new Date();   
+
+  let year = today.getFullYear(); // 년도
+  let month = today.getMonth() + 1;  // 월
+  let date = today.getDate();  // 날짜
+
+  let nowdate = `${year}-${month}-${date}`;
+
+  let hours = today.getHours(); // 시
+  let minutes = today.getMinutes();  // 분
+  let seconds = today.getSeconds();  // 초
+
+  let time = `${hours}:${minutes}:${seconds}`;
+  let dateTime = `${nowdate} ${time}`;
+  console.log(dateTime);
+
+  const image = `https://${process.env.BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/polaroid/${imgName}`;
   const userId = req.params.userId;
-  const photocard = req.params.photocard.slice(8,);
-  const sql = `INSERT into Polaroids 
-              VALUE (${imgName}, ${now()},  ?, ?) `
-  con.query(sql, [userId, photocard], (err, result, fields)=>{
+  const photocardId = req.params.photocardId;
+  const sql = `INSERT into Polaroids( polaroid, saveDateTime, userUserId, photocardId)
+              VALUES ( ?, ?, ?, ?) `
+  con.query(sql, [image, dateTime, userId, photocardId ], (err, result, fields)=>{
     if(err) throw err;
     res.status(201).send(result);
+    console.log(result);
   })
   
 });

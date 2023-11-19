@@ -74,18 +74,14 @@ class PhotoCard extends Model {
 }
 PhotoCard.init(
     {
-      memberName: {
-        type: DataTypes.STRING,
+      photocardId:{
+        type:DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true
       },
-      version: {
-        type: DataTypes.STRING,
-      },
-      photocard: 
-        {
-          type: DataTypes.STRING,
-          primaryKey: true,
-        },
+      memberName: DataTypes.STRING,
+      version: DataTypes.STRING,
+      photocard: DataTypes.STRING,
       albumName: DataTypes.STRING,
       enterComp: DataTypes.STRING,
       groupName: DataTypes.STRING
@@ -130,17 +126,11 @@ Polaroid.init(
       polaroidId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
-        autoIncrement:true
+        autoIncrement:true,
+        allowNull: true
       },
       polaroid: DataTypes.STRING,
       saveDateTime: DataTypes.DATE,
-      // photocardId: {
-      //   type: DataTypes.INTEGER,
-      //   references: {
-      //     model: PhotoCard,  // Polaroid 모델을 참조
-      //     key: 'photocardId' // Polaroid 모델의 기본 키를 참조
-      //   }
-      // }
     }
     ,
     {
@@ -269,7 +259,7 @@ Collection.hasMany(User,{
 // 포토카드: 도안 = 일대일
 Polaroid.belongsTo(PhotoCard, 
   {
-  foreignKey: 'photocard' 
+  foreignKey: 'photocardId' 
 }
 );
 // 도안:포스트 = 일대일
@@ -346,11 +336,11 @@ User.belongsToMany(PhotoCard, {
 });
 PhotoCard.belongsToMany(User, {
   through: 'UserPhotoCard',
-  foreignKey: 'memberName',
+  foreignKey: 'photocardId',
 });
 PhotoCard.belongsToMany(User, {
   through: 'UserPhotoCard',
-  foreignKey: 'photocard',
+  foreignKey: 'photocardId',
 });
 await sequelize.sync();
 
@@ -515,23 +505,23 @@ const newJeans = Artist.build(
 
 // ------collection-------
 // ------Photocard-----------
-const pc1 = PhotoCard.build({
-  memberName: '민지',
-  version: 'A',
-  photocard: 'fff',
-  albumName: "<NewJeans 2nd EP 'GET UP'>",
-  enterComp: '어도어 엔터테인먼트(ADOR Entertainment)',
-  groupName: '뉴진스(New Jeans)',
-  userId:1
-})
-const pc2 = PhotoCard.build({
-  memberName: '민지',
-  version: 'A',
-  photocard: 'ff',
-  albumName: '<NewJeans 2nd EP \'GET UP\'>',
-  enterComp: '어도어 엔터테인먼트(ADOR Entertainment)',
-  groupName: '뉴진스(New Jeans)'
-})
+// const pc1 = PhotoCard.build({
+//   memberName: '민지',
+//   version: 'A',
+//   photocard: 'fff',
+//   albumName: "<NewJeans 2nd EP 'GET UP'>",
+//   enterComp: '어도어 엔터테인먼트(ADOR Entertainment)',
+//   groupName: '뉴진스(New Jeans)',
+//   userId:1
+// })
+// const pc2 = PhotoCard.build({
+//   memberName: '민지',
+//   version: 'A',
+//   photocard: 'ff',
+//   albumName: '<NewJeans 2nd EP \'GET UP\'>',
+//   enterComp: '어도어 엔터테인먼트(ADOR Entertainment)',
+//   groupName: '뉴진스(New Jeans)'
+// })
 // const pc3 = PhotoCard.build({
 //   memberName: '지민',
 //   version: 'A',
@@ -541,39 +531,39 @@ const pc2 = PhotoCard.build({
 //   groupName: '방탄소년단(BTS)'
 // })
 // ------Polaroid-----------
-const pol1 = Polaroid.build({
-  polaroidId:1,
-  polaroid:'https://ohnpol.s3.ap-northeast-2.amazonaws.com/polaroid/YOP_1.png',
-  saveDateTime: '2023-11-12 00:00:01'
-})
-const pol2 = Polaroid.build({
-  polaroidId:2,
-  polaroid:'https://ohnpol.s3.ap-northeast-2.amazonaws.com/polaroid/YOP_2.png',
-  saveDateTime: '2023-11-12 00:00:22'
-})
+// const pol1 = Polaroid.build({
+//   polaroidId:1,
+//   polaroid:'https://ohnpol.s3.ap-northeast-2.amazonaws.com/polaroid/YOP_1.png',
+//   saveDateTime: '2023-11-12 00:00:01'
+// })
+// const pol2 = Polaroid.build({
+//   polaroidId:2,
+//   polaroid:'https://ohnpol.s3.ap-northeast-2.amazonaws.com/polaroid/YOP_2.png',
+//   saveDateTime: '2023-11-12 00:00:22'
+// })
 // const pol3 = Polaroid.build({
 //   polaroidId:3,
 //   polaroid:'https://ohnpol.s3.ap-northeast-2.amazonaws.com/polaroid/YOPdd.png',
 //   saveDateTime: '2023-11-12 00:00:33'
 // })
 // ------Post-----------
-const post1 = Post.build({
-  postId:1,
-  post:'',
-  postDateTime: '2023-11-23 00:00:01' ,
-  userId: 1,
+// const post1 = Post.build({
+//   postId:1,
+//   post:'',
+//   postDateTime: '2023-11-23 00:00:01' ,
+//   userId: 1,
   
-  polaroidId: 1
-})
+//   polaroidId: 1
+// })
 
-const post2 = Post.build({
-  postId:2,
-  post:'',
-  postDateTime: '2023-11-23 00:00:22' ,
-  userId: 2,
+// const post2 = Post.build({
+//   postId:2,
+//   post:'',
+//   postDateTime: '2023-11-23 00:00:22' ,
+//   userId: 2,
   
-  PolaroidPolaroidId: 2
-})
+//   PolaroidPolaroidId: 2
+// })
 
 // const post3 = Post.build({
 //   postId:3,
