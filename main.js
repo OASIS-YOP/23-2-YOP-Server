@@ -84,11 +84,18 @@ app.get('/mainpage/:userId/favArtist', async (req, res) => {
 
 //hot10
 app.get('/mainpage/:userId/hot10', async (req, res) => {
-  const sql = `SELECT postId, COUNT(likeQuant) AS likeCount
-                          FROM Likes
-                          GROUP BY postId
-                          ORDER BY likeCount DESC
-                          LIMIT 10;`;
+  const sql = `SELECT l.postId, COUNT(*) AS thisisnothing,
+                pl.polaroid, 
+                pc.enterComp, pc.groupName, pc.memberName, pc.albumName,
+                p.userId, u.nickname
+              FROM Likes l
+              INNER JOIN Posts p ON p.postId = l.postId
+              INNER JOIN Polaroids pl ON pl.polaroidId = p.polaroidId
+              INNER JOIN photoCards pc ON pl.photocardId = pc.photocardId
+              INNER JOIN users u ON l.userId = u.userId
+              GROUP BY l.postId
+              ORDER BY thisisnothing DESC
+              LIMIT 10;`;
   con.query(sql, (err, result, fields)=>{
     if(err) throw err;
     const r = {
@@ -101,15 +108,10 @@ app.get('/mainpage/:userId/hot10', async (req, res) => {
 //hot10 좋아요
 app.get('/mainpage/:userId/hot10/:postId/like', async(req, res)=>{
   const postId = req.params.postId;
-  const sql = `SELECT DISTINCT l.postId, l.likeQuant, pl.polaroid, 
-                pc.enterComp, pc.groupName, pc.memberName, pc.albumName,
-                p.userId, u.nickname
-                FROM Likes l
-                INNER JOIN Posts p ON l.postId = p.postId
-                INNER JOIN Polaroids pl ON pl.polaroidId = p.polaroidId
-                INNER JOIN photoCards pc ON pl.photocardMemberName = pc.memberName
-                INNER JOIN users u ON u.userId = p.userId
-                WHERE l.postId = ?;`;
+  const sql = `SELECT postId, COUNT(*) AS likeQuant
+              FROM Likes
+              WHERE postId = ?
+              GROUP BY postId;`;
   con.query(sql, [postId], (err, result, fields)=>{
     if(err) throw err;
     const r = {
@@ -928,26 +930,23 @@ app.post('/edit/save/:userId/:photocardId', upload.single('image'), async(req, r
     Body: req.file.buffer,
     ACL: 'public-read',
     ContentType: req.file.mimetype
-
   }
 
   const command = new PutObjectCommand(params);
   await s3.send(command);
   console.log(command);
 
-  //const userId = req.params.userId;
-  //const photocard = req.params.photocard.slice(8,);
   let today = new Date();   
 
-  let year = today.getFullYear(); // 년도
-  let month = today.getMonth() + 1;  // 월
-  let date = today.getDate();  // 날짜
+  let year = today.getFullYear();
+  let month = today.getMonth() + 1; 
+  let date = today.getDate(); 
 
   let nowdate = `${year}-${month}-${date}`;
 
-  let hours = today.getHours(); // 시
-  let minutes = today.getMinutes();  // 분
-  let seconds = today.getSeconds();  // 초
+  let hours = today.getHours(); 
+  let minutes = today.getMinutes();  
+  let seconds = today.getSeconds();  
 
   let time = `${hours}:${minutes}:${seconds}`;
   let dateTime = `${nowdate} ${time}`;
