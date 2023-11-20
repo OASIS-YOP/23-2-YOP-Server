@@ -959,6 +959,8 @@ app.post('/edit/save/:userId/:photocardId', upload.single('image'), async(req, r
               VALUES ( NULL, ?, ?, ?, ?) `
   con.query(sql, [image, dateTime, userId, photocardId ], (err, result, fields)=>{
     if(err) throw err;
+    const msg = "도안 저장 완료"
+    result.message = msg;
     res.status(201).send(result);
     console.log(result);
   })
