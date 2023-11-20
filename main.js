@@ -97,6 +97,7 @@ app.get('/mainpage/:userId/hot10', async (req, res) => {
   }) 
 });
 
+//hot10 좋아요
 app.get('/mainpage/:userId/hot10/:postId/like', async(req, res)=>{
   const postId = req.params.postId;
   const sql = `SELECT DISTINCT l.postId, l.likeQuant, pl.polaroid, 
@@ -319,7 +320,7 @@ app.delete('/community/:artistId/notFavorite/:userId', async(req,res)=>{
   const userId = req.params.userId;
   const sql = `DELETE 
               FROM Likes
-              WHERE (artistId=? AND userID=?);
+              WHERE (artistId=? AND userId=?);
   `
   con.query(sql, [artistId, userId], (err, result, fields)=>{
     if(err) throw err;
@@ -345,27 +346,7 @@ app.get('/community/:artistId/:userId/collectionQuant', async (req, res) => {
   })
 });
 
-//아티스트 멤버별 이름 및 사진 조회
-// app.get('/community/:artistId/members', async (req, res) => {
-//   const artistId = req.params.artistId; 
-//   const sql = `SELECT 
-//                 memberNum,
-//                 memberPhoto
-//               FROM artists
-//               WHERE artistId = ?; `;
-//   con.query(sql,1, (err, result, fields)=>{
-//     if(err) throw err;
-//     for(let i=0; i<memberNum; i++){
-//       const namdAndPhoto = {
-//         name: memberPhoto[i].name,
-//         memPhoto: memberPhoto[i].memPhoto
-//       }
-//     }
-//     const r = nameAndPhoto;
-//     res.status(200).send(r);
-//     console.log("멤버별 이름과 사진", result);
-//   })
-// });
+//멤버별 이름 및 사진 조회
 app.get('/community/:artistId/members', async (req, res) => {
   const artistId = req.params.artistId;
   //const artistId = 1;
@@ -737,6 +718,23 @@ app.post('/post/:userId/:postId/updateLike', async(req, res)=>{
   }
 });
 
+//포스트 좋아요 클릭 해제하기
+app.delete('/post/notLike/:userId/:postId', async(req, res)=>{
+  const postId = req.params.artistId;
+  const userId = req.params.userId;
+  const sql = `DELETE 
+              FROM Likes
+              WHERE (postId=? AND userId=?);
+  `
+  con.query(sql, [postId, userId], (err, result, fields)=>{
+    if(err) throw err;
+    const msg = "삭제 완료"
+    result.message = msg
+    res.status(200).send(result);
+    console.log(result);
+  })
+});
+
 //아티스트 즐겨찾기 누르기
 app.post('/community/:artistId/updateFavorite/:userId', async(req, res)=>{
   try {
@@ -767,8 +765,8 @@ app.post('/community/:artistId/updateFavorite/:userId', async(req, res)=>{
   }
 })
 
-
-//polaroid 저장
+//edit
+//polaroid 도안 저장
 app.post('/edit/save/:userId/:photocardId', upload.single('image'), async(req, res)=>{
   console.log("req.body", req.body);
   console.log("req.file", req.file);
