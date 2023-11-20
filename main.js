@@ -924,7 +924,8 @@ app.post('/edit/save/:userId/:photocardId', upload.single('image'), async(req, r
   const params = {
     Bucket: bucketName,
     Key: `polaroid/${imgName}`,
-    Body: req.file.buffer,
+    //Body: req.file.buffer,
+    Body: req.file,
     ACL: 'public-read',
     ContentType: req.file.mimetype
 
