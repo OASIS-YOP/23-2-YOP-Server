@@ -967,10 +967,51 @@ app.post('/edit/save/:userId/:photocardId', upload.single('image'), async(req, r
   
 });
 
+//컬렉션 활성화
+app.post('/mypage/:userId/myCollection/:albumName/collectionActivation', async(req, res)=>{
+  const userId = req.params.userId;
+  const albumName = req.params.albumName;
+  const code = req.body.code;
+
+  const sql = `INSERT INTO UserCollections
+              VALUES (1, ?, ?)`;
+  con.query( sql, [userId, albumName], (err, result, fields)=>{
+    if(err) throw err;
+    const msg = "컬렉션 활성화됨"
+    result.message  = msg;
+    res.status(201).send(result);
+    console.log(result);
+  })
+});
+
+//포토카드 랜덤 부여(활성화 임시 버전)
+app.post('/mypage/:userId/myCollection/:albumName/cardActivationRandomly', async(req, res)=>{
+  const userId = req.params.userId;
+  const albumName = req.params.albumName;
+  const sql = `SELECT photocardId
+              FROM photoCards
+              WHERE albumName = ?`
+  con.query(sql, [albumName], (err, result, fields)=>{
+    if(err) throw err;
+    console.log(result);
+    const randomIndex = getRandomInt(result.length);
+    const randomCard = parseInt(result[randomIndex-1].photocardId);
+    const sql2 = `INSERT UserPhotoCards
+                  VALUES (1, ?, ?)`;
+    con.query(sql2, [userId, randomCard], (err, result, fields)=>{
+      if(err) throw err;
+      
+      const msg = "랜덤 포토카드 부여"
+      result.message = msg;
+      res.status(201).send(result);
+      console.log(result);
+    })
+  })
+});
 
 app.listen(port, ()=>{
   console.log(`Example app listening on ${port}`);
-})
+});
 
 // 데이터베이스 연결 종료
 // 이는 종료가 필요한 경우에 사용되어야 합니다.
