@@ -149,6 +149,8 @@ Post.init(
       postId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
+        allowNull: true
       },
       
       postDateTime: DataTypes.DATE,
@@ -639,7 +641,10 @@ const like1 = Like.build({
 // await sequelize.drop();
 // console.log('All tables dropped!');
 
-// await Collection.truncate();
+// await 
+// await Like.truncate();
+// await Post.truncate();
+// await Polaroid.truncate();
 // await Artist.truncate();
 
 

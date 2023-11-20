@@ -7,6 +7,7 @@ import multer from 'multer';
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import crypto from 'crypto';
 import dotenv from 'dotenv';
+import { join } from 'path';
 dotenv.config();
 
 const randomImgName = (bytes=32)=> crypto.randomBytes(bytes).toString('hex');
@@ -468,42 +469,73 @@ app.get('/community/:artistId/allPost/:postId/like', async(req, res)=>{
 });
 
 
-//도안 게시 - 컬렉션 선택
-app.get('/community/:userId/uploadPost/collection', async (req, res) => {
-  const artistId = req.params.artistId; 
-  const sql = `SELECT 
-                memberNum,
-                memberPhoto
-              FROM artists
-              WHERE artistId = ?; `;
-  con.query(sql,[artistId], (err, result, fields)=>{
+// //도안 게시 - 컬렉션 선택
+// app.get('/community/:userId/uploadPost/collection', async (req, res) => {
+//   const artistId = req.params.artistId; 
+//   const sql = `SELECT 
+//                 memberNum,
+//                 memberPhoto
+//               FROM artists
+//               WHERE artistId = ?; `;
+//   con.query(sql,[artistId], (err, result, fields)=>{
+//     if(err) throw err;
+//     const r = {
+//       memberNumandPhoto: result
+//     };
+//     res.status(200).send(r);
+//     //console.log("아티스트페이지", result);
+//   })
+// });
+
+// //도안 게시 - 도안 선택
+// app.get('/community/:artistId/uploadPost/post', async (req, res) => {
+//   const artistId = req.params.artistId; 
+//   const sql = `SELECT 
+//                 memberNum,
+//                 memberPhoto
+//               FROM artists
+//               WHERE artistId = ?; `;
+//   con.query(sql,[artistId], (err, result, fields)=>{
+//     if(err) throw err;
+//     const r = {
+//       memberNumandPhoto: result
+//     };
+//     res.status(200).send(r);
+//     //console.log("아티스트페이지", result);
+//   })
+// });
+
+// 도안 게시(포스팅)
+app.post('/community/:userId/uploadPost/:polaroidId/upload', async(req, res)=>{
+  
+  let today = new Date();   
+
+  let year = today.getFullYear(); // 년도
+  let month = today.getMonth() + 1;  // 월
+  let date = today.getDate();  // 날짜
+
+  let nowdate = `${year}-${month}-${date}`;
+
+  let hours = today.getHours(); // 시
+  let minutes = today.getMinutes();  // 분
+  let seconds = today.getSeconds();  // 초
+
+  let time = `${hours}:${minutes}:${seconds}`;
+  let dateTime = `${nowdate} ${time}`;
+
+  //const image = `https://${process.env.BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/polaroid/${imgName}`;
+  const userId = req.params.userId;
+  const polaroidId = req.params.polaroidId;
+  const sql = `INSERT into Posts( postId, postDateTime, userId, polaroidId)
+              VALUES ( NULL, ?, ?, ?) `
+  con.query(sql, [ dateTime, userId, polaroidId ], (err, result, fields)=>{
     if(err) throw err;
-    const r = {
-      memberNumandPhoto: result
-    };
-    res.status(200).send(r);
-    //console.log("아티스트페이지", result);
+    const msg = "포스팅 완료"
+    result.message = msg;
+    res.status(201).send(result);
+    console.log(result);
   })
 });
-
-//도안 게시 - 도안 선택
-app.get('/community/:artistId/uploadPost/post', async (req, res) => {
-  const artistId = req.params.artistId; 
-  const sql = `SELECT 
-                memberNum,
-                memberPhoto
-              FROM artists
-              WHERE artistId = ?; `;
-  con.query(sql,[artistId], (err, result, fields)=>{
-    if(err) throw err;
-    const r = {
-      memberNumandPhoto: result
-    };
-    res.status(200).send(r);
-    //console.log("아티스트페이지", result);
-  })
-});
-
 
 //mypage
 //프로필 정보 조회
@@ -754,11 +786,18 @@ app.get('/mypage/:userId/myPolaroid/:albumName/polaroids', async(req, res)=>{
 });
 
 //내 도안 삭제하기
-app.delete('/mypage/:userId/myPolaroid/:albumName/delete/:polaroidId', async(req, res)=>{
+app.delete('/mypage/:userId/myPolaroid/delete/:polaroidId', async(req, res)=>{
   const userId = req.params.userId;
-  const albumName = req.params.albumName;
+  //const albumName = req.params.albumName;
   const polaroidId = req.params.polaroidId;
-  const sql = ``;
+  const sql = `DELETE FROM Polaroids WHERE polaroidId = ?;`;
+  con.query(sql, [polaroidId],(err, result, fields)=>{
+    if(err) throw err;
+    const msg = "삭제 완료"
+    result.message = msg;
+    res.status(200).send(result);
+    console.log(result);
+  } )
 })
 
 // 좋아요한 포스트 모아보기
@@ -916,8 +955,8 @@ app.post('/edit/save/:userId/:photocardId', upload.single('image'), async(req, r
   const image = `https://${process.env.BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/polaroid/${imgName}`;
   const userId = req.params.userId;
   const photocardId = req.params.photocardId;
-  const sql = `INSERT into Polaroids( polaroid, saveDateTime, userUserId, photocardId)
-              VALUES ( ?, ?, ?, ?) `
+  const sql = `INSERT into Polaroids( polaroidId, polaroid, saveDateTime, userUserId, photocardId)
+              VALUES ( NULL, ?, ?, ?, ?) `
   con.query(sql, [image, dateTime, userId, photocardId ], (err, result, fields)=>{
     if(err) throw err;
     res.status(201).send(result);
