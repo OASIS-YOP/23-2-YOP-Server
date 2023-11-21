@@ -130,12 +130,37 @@ Polaroid.init(
         allowNull: true
       },
       polaroid: DataTypes.STRING,
-      saveDateTime: DataTypes.DATE,
+      saveDateTime: DataTypes.DATE
     }
     ,
     {
         sequelize,
         modelName: "Polaroid", 
+        timestamps: false
+    }
+);
+await sequelize.sync();
+
+// 도안백업
+class PolaroidBackup extends Model {
+}
+PolaroidBackup.init(
+    {
+      polaroidId: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement:true,
+        allowNull: true
+      },
+      polaroid: DataTypes.STRING,
+      saveDateTime: DataTypes.DATE,
+      userId: DataTypes.INTEGER,
+      photocardId: DataTypes.INTEGER
+    }
+    ,
+    {
+        sequelize,
+        modelName: "polaroidBackup", 
         timestamps: false
     }
 );

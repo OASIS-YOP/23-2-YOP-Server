@@ -964,6 +964,15 @@ app.post('/edit/save/:userId/:photocardId', upload.single('image'), async(req, r
     res.status(201).send(result);
     console.log(result);
   })
+  const sql2 = `INSERT into PolaroidBackups ( polaroidId, polaroid, saveDateTime, userUserId, photocardId)
+                VALUES ( NULL, ?, ?, ?, ?) `
+  con.query(sql2, [image, dateTime, userId, photocardId ], (err, result, fields)=>{
+    if(err) throw err;
+    const msg = "백업 도안 저장 완료"
+    result.message = msg;
+    res.status(201).send(result);
+    console.log(result);
+  })
   
 });
 
