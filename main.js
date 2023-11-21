@@ -1,13 +1,11 @@
 import bodyParser from 'body-parser';
 import express from 'express';
 import cors from 'cors';
-//import { swaggerUi, specs } from './modules/swagger.js';
 import con from './mysql.js';
 import multer from 'multer';
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import crypto from 'crypto';
 import dotenv from 'dotenv';
-import { join } from 'path';
 dotenv.config();
 
 const randomImgName = (bytes=32)=> crypto.randomBytes(bytes).toString('hex');
@@ -281,6 +279,7 @@ app.get('/artistpage/allArtist', async (req, res) => {
 //     //console.log("아티스트페이지", result);
 //   })
 // });
+
 // 아티스트 프로필 조회
 app.get('/community/:artistId/artistProfile', async (req, res) => {
   const artistId = req.params.artistId; 
@@ -397,7 +396,7 @@ app.get('/community/:memberName/membersPost', async (req, res) => {
               FROM Posts p
               INNER JOIN users u ON p.userId = u.userId
               INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
-              INNER JOIN photoCards pc ON pc.memberName = pl.photocardMemberName
+              INNER JOIN photoCards pc ON pc.photocardId = pl.photocardId
               WHERE  pc.memberName = ?; `;
   con.query(sql,[memberName], (err, result, fields)=>{
     if(err) throw err;
@@ -440,7 +439,7 @@ app.get('/community/:artistId/allPost', async (req, res) => {
                 u.nickname
               FROM artists a
               INNER JOIN photoCards pc ON pc.enterComp = a.enterComp
-              INNER JOIN Polaroids pl ON pc.memberName = pl.photocardMemberName
+              INNER JOIN Polaroids pl ON pc.photocardId = pl.photocardId
               INNER JOIN Posts p ON p.polaroidId = pl.polaroidId
               INNER JOIN users u ON p.userId = u.userId
               WHERE artistId = ?; `
@@ -469,7 +468,6 @@ app.get('/community/:artistId/allPost/:postId/like', async(req, res)=>{
     res.status(200).send(r);
   })
 });
-
 
 // //도안 게시 - 컬렉션 선택
 // app.get('/community/:userId/uploadPost/collection', async (req, res) => {
@@ -565,7 +563,7 @@ app.get('/mypage/:userId/myPost/artistTab', async(req, res)=>{
   const sql =  `SELECT DISTINCT pc.groupName, a.artistId
                 FROM Posts p
                 INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
-                INNER JOIN photoCards pc ON pl.photocardMemberName = pc.memberName
+                INNER JOIN photoCards pc ON pl.photocardId = pc.photocardId
                 INNER JOIN artists a ON a.groupName = pc.groupName
                 WHERE p.userId = ?;
               `;
@@ -995,7 +993,6 @@ app.post('/edit/save/:userId/:photocardId', upload.single('image'), async(req, r
     });
   });
 });
-
 
 //컬렉션 활성화
 app.post('/mypage/:userId/myCollection/:albumName/collectionActivation', async(req, res)=>{
