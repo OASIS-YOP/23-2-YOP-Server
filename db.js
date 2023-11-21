@@ -243,13 +243,7 @@ Artist.belongsToMany(User, {
 });
 await sequelize.sync();
 
-// 포토카드
-User.hasMany(PhotoCard, {
-  foreignKey: 'userId'
-});
-PhotoCard.belongsTo(User,{
-  foreignKey:'userId'
-})
+
 // 컬렉션
 User.hasMany(Collection, {
   foreignKey: 'userId'
