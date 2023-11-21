@@ -760,10 +760,10 @@ app.get('/mypage/:userId/myPolaroid/:artistId/collection', async(req, res)=>{
 app.get('/mypage/:userId/myPolaroid/:albumName/polaroidQuant', async(req, res)=>{
   const userId = req.params.userId;
   const albumName = req.params.albumName;
-  const sql =  `SELECT COUNT(*) AS polaroidQuant
-                FROM Polaroids pl
-                INNER JOIN photoCards pc ON pc.photocardId = pl.photocardId
-                WHERE pl.userUserId = ? AND pc.albumName = ?`;
+  const sql =  `SELECT COUNT(*) AS polaroidBackupQuant
+                FROM polaroidBackups plb
+                INNER JOIN photoCards pc ON pc.photocardId = plb.photocardId
+                WHERE plb.userId = ? AND pc.albumName = ?`;
   con.query(sql, [userId, albumName], (err, result, fields)=>{
     if(err) throw err;
     res.status(200).send(result[0]);
@@ -775,13 +775,13 @@ app.get('/mypage/:userId/myPolaroid/:albumName/polaroids', async(req, res)=>{
   const userId = req.params.userId;
   const albumName = req.params.albumName;
   const sql = `SELECT polaroidId, polaroid, saveDateTime
-              FROM Polaroids pl
-              INNER JOIN photoCards pc ON pc.photocardId = pl.photocardId
-              WHERE pl.userUserId = ? AND pc.albumName = ?`;
+              FROM polaroidBackups plb
+              INNER JOIN photoCards pc ON pc.photocardId = plb.photocardId
+              WHERE plb.userId = ? AND pc.albumName = ?`;
   con.query(sql, [userId, albumName], (err, result, fields)=>{
     if(err) throw err;
     const r = {
-      myPolariodList: result
+      myPolariodBackupList: result
     }
     res.status(200).send(r);
   })
@@ -792,10 +792,10 @@ app.delete('/mypage/:userId/myPolaroid/delete/:polaroidId', async(req, res)=>{
   const userId = req.params.userId;
   //const albumName = req.params.albumName;
   const polaroidId = req.params.polaroidId;
-  const sql = `DELETE FROM Polaroids WHERE polaroidId = ?;`;
+  const sql = `DELETE FROM polaroidBackups WHERE polaroidId = ?;`;
   con.query(sql, [polaroidId],(err, result, fields)=>{
     if(err) throw err;
-    const msg = "삭제 완료"
+    const msg = "백업 도안 삭제 완료"
     result.message = msg;
     res.status(200).send(result);
     console.log(result);
@@ -956,25 +956,46 @@ app.post('/edit/save/:userId/:photocardId', upload.single('image'), async(req, r
   const userId = req.params.userId;
   const photocardId = req.params.photocardId;
   const sql = `INSERT into Polaroids( polaroidId, polaroid, saveDateTime, userUserId, photocardId)
-              VALUES ( NULL, ?, ?, ?, ?) `
-  con.query(sql, [image, dateTime, userId, photocardId ], (err, result, fields)=>{
-    if(err) throw err;
-    const msg = "도안 저장 완료"
-    result.message = msg;
-    res.status(201).send(result);
-    console.log(result);
-  })
-  const sql2 = `INSERT into PolaroidBackups ( polaroidId, polaroid, saveDateTime, userUserId, photocardId)
-                VALUES ( NULL, ?, ?, ?, ?) `
-  con.query(sql2, [image, dateTime, userId, photocardId ], (err, result, fields)=>{
-    if(err) throw err;
-    const msg = "백업 도안 저장 완료"
-    result.message = msg;
-    res.status(201).send(result);
-    console.log(result);
-  })
-  
+              VALUES ( NULL, ?, ?, ?, ?)`;
+
+  const sql2 = `INSERT into polaroidBackups ( polaroidId, polaroid, saveDateTime, userId, photocardId)
+                  VALUES ( NULL, ?, ?, ?, ?)`;
+
+  con.query(sql, [image, dateTime, userId, photocardId], (err, result1, fields) => {
+    if (err) {
+      throw err;
+    }
+
+    const msg = "도안 저장 완료";
+
+    // 첫 번째 쿼리 결과를 처리하거나 필요에 따라 조정
+
+    console.log(result1);
+
+    con.query(sql2, [image, dateTime, userId, photocardId], (err, result2, fields) => {
+      if (err) {
+        throw err;
+      }
+
+      const backupMsg = "백업 도안 저장 완료";
+
+      // 두 번째 쿼리 결과를 처리하거나 필요에 따라 조정
+
+      console.log(result2);
+
+      // 결합된 응답을 보냄
+      const response = {
+        originalResult: result1,
+        backupResult: result2,
+        message: `${msg} / ${backupMsg}`,
+      };
+
+      res.status(201).send(response);
+      console.log(response);
+    });
+  });
 });
+
 
 //컬렉션 활성화
 app.post('/mypage/:userId/myCollection/:albumName/collectionActivation', async(req, res)=>{
