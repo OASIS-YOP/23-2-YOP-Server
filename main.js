@@ -81,43 +81,67 @@ app.get('/mainpage/:userId/favArtist', async (req, res) => {
 });
 
 //hot10
-app.get('/mainpage/:userId/hot10', async (req, res) => {
-  const sql = `SELECT l.postId, COUNT(*) AS thisisnothing,
-                pl.polaroid, 
-                pc.enterComp, pc.groupName, pc.memberName, pc.albumName,
-                p.userId, u.nickname
-              FROM Likes l
-              INNER JOIN Posts p ON p.postId = l.postId
-              INNER JOIN Polaroids pl ON pl.polaroidId = p.polaroidId
-              INNER JOIN photoCards pc ON pl.photocardId = pc.photocardId
-              INNER JOIN users u ON l.userId = u.userId
-              GROUP BY l.postId
-              ORDER BY thisisnothing DESC
-              LIMIT 10;`;
+// app.get('/mainpage/:userId/hot10', async (req, res) => {
+//   const sql = `SELECT l.postId, COUNT(*) AS thisisnothing,
+//                 pl.polaroid, 
+//                 pc.enterComp, pc.groupName, pc.memberName, pc.albumName,
+//                 p.userId, u.nickname
+//               FROM Likes l
+//               INNER JOIN Posts p ON p.postId = l.postId
+//               INNER JOIN Polaroids pl ON pl.polaroidId = p.polaroidId
+//               INNER JOIN photoCards pc ON pl.photocardId = pc.photocardId
+//               INNER JOIN users u ON l.userId = u.userId
+//               GROUP BY l.postId
+//               ORDER BY thisisnothing DESC
+//               LIMIT 10;`;
+//   con.query(sql, (err, result, fields)=>{
+//     if(err) throw err;
+//     const r = {
+//       hot10List: result
+//     }
+//     res.status(200).send(r);
+//   }) 
+// });
+
+// //hot10 좋아요
+// app.get('/mainpage/:userId/hot10/:postId/like', async(req, res)=>{
+//   const postId = req.params.postId;
+//   const sql = `SELECT postId, COUNT(*) AS likeQuant
+//               FROM Likes
+//               WHERE postId = ?
+//               GROUP BY postId;`;
+//   con.query(sql, [postId], (err, result, fields)=>{
+//     if(err) throw err;
+//     const r = {
+//       hot10LikeList : result
+//     }
+//     res.status(200).send(r);
+//   })
+// })
+
+//좋아요 합친 버전
+app.get('/mainpage/:userId/hot10', async(req, res)=>{
+  const sql = `SELECT l.postId, COUNT(*) AS likeQuant,
+                      pl.polaroid, 
+                      pc.enterComp, pc.groupName, pc.memberName, pc.albumName,
+                      p.userId, u.nickname
+                    FROM Likes l
+                    INNER JOIN Posts p ON p.postId = l.postId
+                    INNER JOIN Polaroids pl ON pl.polaroidId = p.polaroidId
+                    INNER JOIN photoCards pc ON pl.photocardId = pc.photocardId
+                    INNER JOIN users u ON p.userId = u.userId
+                    GROUP BY l.postId
+                    ORDER BY likeQuant DESC
+                    LIMIT 10;`;
   con.query(sql, (err, result, fields)=>{
     if(err) throw err;
-    const r = {
-      hot10List: result
-    }
-    res.status(200).send(r);
-  }) 
-});
-
-//hot10 좋아요
-app.get('/mainpage/:userId/hot10/:postId/like', async(req, res)=>{
-  const postId = req.params.postId;
-  const sql = `SELECT postId, COUNT(*) AS likeQuant
-              FROM Likes
-              WHERE postId = ?
-              GROUP BY postId;`;
-  con.query(sql, [postId], (err, result, fields)=>{
-    if(err) throw err;
-    const r = {
-      hot10LikeList : result
+    const r={
+      hot10List:result
     }
     res.status(200).send(r);
   })
 })
+
 
 //실시간도안
 app.get('/mainpage/:userId/now5', async (req, res) => {
