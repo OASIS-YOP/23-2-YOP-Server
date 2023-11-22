@@ -119,7 +119,7 @@ app.get('/mainpage/:userId/favArtist', async (req, res) => {
 //   })
 // })
 
-//좋아요 합친 버전
+//hot 10 좋아요 합친 버전
 app.get('/mainpage/:userId/hot10', async(req, res)=>{
   const sql = `SELECT l.postId, COUNT(*) AS likeQuant,
                       pl.polaroid, 
@@ -678,17 +678,48 @@ app.get('/mypage/:userId/myPost/:artistId/post', async (req, res)=>{
               INNER JOIN photoCards pc ON pl.photocardId = pc.photocardId
               INNER JOIN artists a ON a.groupName = pc.groupName
               INNER JOIN users u ON p.userId = u.userId
-              WHERE p.userId = ? AND a.artistId=?;`;
-  con.query(sql, [userId, artistId], (err, result, fields)=>{
-    if(err) throw err;
-    const r = {
-      postOfArtistList: result
+              WHERE p.userId = ? AND a.artistId=?
+              ORDER BY p.postId DESC;`;
+  con.query(sql, [userId, artistId], async (err, result, fields) => {
+    if (err) throw err;
+    
+    const finalResult = [];
+
+    for (let i = 0; i < result.length; i++) {
+      const postId = result[i].postId;
+
+      const sql2 = `SELECT l.postId, COUNT(*) AS likeQuant
+                    FROM Likes l
+                    WHERE l.postId = ?
+                    GROUP BY l.postId;`;
+      
+      const likeQuantResult = await new Promise((resolve, reject) => {
+        con.query(sql2, [postId], (err, result, fields) => {
+          if (err) reject(err);
+          resolve(result.length > 0 ? result[0].likeQuant : 0);
+          // if (result.length > 0) {
+          //   resolve(result[0].likeQuant);
+          // } else {
+          //   resolve(0);
+          // }
+          //만약 결과가 있고, likeQuant 속성이 있다면 해당 값을 사용하고, 그렇지 않으면 기본값으로 0을 사용한다
+        });
+      });
+
+      const r = {
+          ...result[i],
+          likeQuant: likeQuantResult
+      };
+
+      finalResult.push(r);
     }
+    const r = {
+      myPostList:finalResult
+    }
+    
     res.status(200).send(r);
-    console.log(r);
   });
 });
-
 //아티스트 별 게시 도안 좋아요 개수
 app.get('/mypage/:userId/myPost/:artistId/:postId/like', async(req, res)=>{
   const userId = req.params.userId;
