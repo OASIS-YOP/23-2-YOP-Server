@@ -406,75 +406,141 @@ app.get('/community/:artistId/members', async (req, res) => {
 });
 
 //아티스트 멤버별 도안 조회
-app.get('/community/:memberName/membersPost', async (req, res) => { 
+app.get('/community/:memberName/memberPost', async (req, res) => { 
   const memberName = req.params.memberName;
   const sql = `SELECT 
-  DISTINCT p.postId,
+                p.postId,
                 pl.polaroid,
-                p.userId,
                 pc.enterComp,
                 pc.groupName,
                 pc.memberName,
                 pc.albumName,
+                p.userId,
                 u.nickname
               FROM Posts p
               INNER JOIN users u ON p.userId = u.userId
               INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
               INNER JOIN photoCards pc ON pc.photocardId = pl.photocardId
-              WHERE  pc.memberName = ?; `;
-  con.query(sql,[memberName], (err, result, fields)=>{
-    if(err) throw err;
+              WHERE  pc.memberName = ?
+              ORDER BY p.postId DESC
+              ; `;
+  con.query(sql, [memberName], async (err, result, fields) => {
+    if (err) throw err;
+    
+    const finalResult = [];
+
+    for (let i = 0; i < result.length; i++) {
+      const postId = result[i].postId;
+
+      const sql2 = `SELECT l.postId, COUNT(*) AS likeQuant
+                    FROM Likes l
+                    WHERE l.postId = ?
+                    GROUP BY l.postId
+                    ORDER BY l.postId DESC`;
+      
+      const likeQuantResult = await new Promise((resolve, reject) => {
+        con.query(sql2, [postId], (err, result, fields) => {
+          if (err) reject(err);
+          resolve(result.length > 0 ? result[0].likeQuant : 0);
+          // if (result.length > 0) {
+          //   resolve(result[0].likeQuant);
+          // } else {
+          //   resolve(0);
+          // }
+          //만약 결과가 있고, likeQuant 속성이 있다면 해당 값을 사용하고, 그렇지 않으면 기본값으로 0을 사용한다
+        });
+      });
+
+      const r = {
+          ...result[i],
+          likeQuant: likeQuantResult
+      };
+
+      finalResult.push(r);
+    }
     const r = {
-      memberPostList: result
-    };
+      memberPostList:finalResult
+    }
+    
     res.status(200).send(r);
-  })
-  console.log(req.params);
+  });
 });
 
-// 아티스트 멤버 별 도안 좋아요 수 조회
-app.get('/community/:memberName/memberPost/:postId/like', async(req, res)=>{
-  const memberName = req.params.memberName;
-  const postId = req.params.postId;
-  const sql = `SELECT postId, COUNT(*) AS likeQuant
-              FROM Likes
-              WHERE postId = ?;`;
-  con.query( sql, [postId], (err, result, fields)=>{
-    if(err) throw err;
-    const r = {
-      postLikeQuantList: result
-    }
-    res.status(200).send(r);
-  })
-});
+// // 아티스트 멤버 별 도안 좋아요 수 조회
+// app.get('/community/:memberName/memberPost/:postId/like', async(req, res)=>{
+//   const memberName = req.params.memberName;
+//   const postId = req.params.postId;
+//   const sql = `SELECT postId, COUNT(*) AS likeQuant
+//               FROM Likes
+//               WHERE postId = ?;`;
+//   con.query( sql, [postId], (err, result, fields)=>{
+//     if(err) throw err;
+//     const r = {
+//       postLikeQuantList: result
+//     }
+//     res.status(200).send(r);
+//   })
+// });
 
 //아티스트 전체 도안 조회
 app.get('/community/:artistId/allPost', async (req, res) => {
   const artistId = req.params.artistId; 
-  const sql = `SELECT DISTINCT
-                a.artistId,
+  const sql = `SELECT
                 p.postId,
                 pl.polaroid,
-                p.userId,
                 pc.enterComp,
                 pc.groupName,
                 pc.memberName,
                 pc.albumName,
+                p.userId,
                 u.nickname
-              FROM artists a
-              INNER JOIN photoCards pc ON pc.enterComp = a.enterComp
-              INNER JOIN Polaroids pl ON pc.photocardId = pl.photocardId
-              INNER JOIN Posts p ON p.polaroidId = pl.polaroidId
+              FROM Posts p
               INNER JOIN users u ON p.userId = u.userId
-              WHERE artistId = ?; `
-  con.query(sql,[artistId], (err, result, fields)=>{
-    if(err) throw err;
+              INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
+              INNER JOIN photoCards pc ON pc.photocardId = pl.photocardId
+              INNER JOIN artists a ON pc.enterComp = a.enterComp
+              WHERE a.artistId = ?
+              ORDER BY p.postId DESC; `
+  con.query(sql, [artistId], async (err, result, fields) => {
+    if (err) throw err;
+    
+    const finalResult = [];
+
+    for (let i = 0; i < result.length; i++) {
+      const postId = result[i].postId;
+
+      const sql2 = `SELECT l.postId, COUNT(*) AS likeQuant
+                    FROM Likes l
+                    WHERE l.postId = ?
+                    GROUP BY l.postId
+                    ORDER BY l.postId DESC`;
+      
+      const likeQuantResult = await new Promise((resolve, reject) => {
+        con.query(sql2, [postId], (err, result, fields) => {
+          if (err) reject(err);
+          resolve(result.length > 0 ? result[0].likeQuant : 0);
+          // if (result.length > 0) {
+          //   resolve(result[0].likeQuant);
+          // } else {
+          //   resolve(0);
+          // }
+          //만약 결과가 있고, likeQuant 속성이 있다면 해당 값을 사용하고, 그렇지 않으면 기본값으로 0을 사용한다
+        });
+      });
+
+      const r = {
+          ...result[i],
+          likeQuant: likeQuantResult
+      };
+
+      finalResult.push(r);
+    }
     const r = {
-      allPostList: result
-    };
+      allPostList:finalResult
+    }
+    
     res.status(200).send(r);
-    console.log("아티스트 전체 도안", result);
-  })
+  });
 });
 
 // 아티스트 전체 도안 좋아요 수 조회
@@ -836,28 +902,62 @@ app.get('/mypage/:userId/myLike', async(req, res)=>{
               INNER JOIN artists a ON a.groupName = pc.groupName
               INNER JOIN users u ON p.userId = u.userId
               INNER JOIN Likes l ON p.postId = l.postId
-              WHERE l.userId = ?;`;
-  con.query(sql, [userId], (err, result, fields)=>{
-    if(err) throw err;
-    const r = {
-      likedPostList: result
-    }
-    res.status(200).send(r);
-  })
-})
+              WHERE l.userId = ?
+              ORDER BY l.likeId DESC;`;
+  con.query(sql, [userId], async (err, result, fields) => {
+    if (err) throw err;
+    
+    const finalResult = [];
 
-// 좋아요한 포스트 좋아요 개수 조회
-app.get('/mypage/:userId/:postId/likeQuant', async(req, res)=>{
-  //const userId = req.params.userId;
-  const postId = req.params.postId;
-  const sql = `SELECT COUNT(*) AS postLikeQuant
-              FROM Likes
-              WHERE postId = ?`;
-  con.query(sql, [postId], (err, result, fields)=>{
-    if(err) throw err;
-    res.status(200).send(result[0]);
-  })
-})
+    for (let i = 0; i < result.length; i++) {
+      const postId = result[i].postId;
+
+      const sql2 = `SELECT l.postId, COUNT(*) AS likeQuant
+                    FROM Likes l
+                    WHERE l.postId = ?
+                    GROUP BY l.postId
+                    `;
+      
+      const likeQuantResult = await new Promise((resolve, reject) => {
+        con.query(sql2, [postId], (err, result, fields) => {
+          if (err) reject(err);
+          resolve(result.length > 0 ? result[0].likeQuant : 0);
+          // if (result.length > 0) {
+          //   resolve(result[0].likeQuant);
+          // } else {
+          //   resolve(0);
+          // }
+          //만약 결과가 있고, likeQuant 속성이 있다면 해당 값을 사용하고, 그렇지 않으면 기본값으로 0을 사용한다
+        });
+      });
+
+      const r = {
+          ...result[i],
+          likeQuant: likeQuantResult
+      };
+
+      finalResult.push(r);
+    }
+    const r = {
+      myLikeList:finalResult
+    }
+    
+    res.status(200).send(r);
+  });
+});
+
+// // 좋아요한 포스트 좋아요 개수 조회
+// app.get('/mypage/:userId/:postId/likeQuant', async(req, res)=>{
+//   //const userId = req.params.userId;
+//   const postId = req.params.postId;
+//   const sql = `SELECT COUNT(*) AS postLikeQuant
+//               FROM Likes
+//               WHERE postId = ?`;
+//   con.query(sql, [postId], (err, result, fields)=>{
+//     if(err) throw err;
+//     res.status(200).send(result[0]);
+//   })
+// })
 
 // 포스트 좋아요 누르기
 app.post('/post/:userId/:postId/updateLike', async(req, res)=>{
@@ -866,7 +966,7 @@ app.post('/post/:userId/:postId/updateLike', async(req, res)=>{
     const postId = req.params.postId;
 
     // Use prepared statement to prevent SQL injection
-    const sql = 'INSERT INTO Likes (likeQuant, userId, postId) VALUES (1, ?, ?)';
+    const sql = 'INSERT INTO Likes (userId, postId) VALUES ( ?, ?)';
     con.query(sql, [userId, postId], (err, result, fields) => {
       if (err) {
         // Handle SQL error
@@ -913,7 +1013,7 @@ app.post('/community/:artistId/updateFavorite/:userId', async(req, res)=>{
     const artistId = req.params.artistId;
 
     // Use prepared statement to prevent SQL injection
-    const sql = 'INSERT INTO Favorites (favoriteQuant, userId, artistId) VALUES (1, ?, ?)';
+    const sql = 'INSERT INTO Favorites (userId, artistId) VALUES (?, ?)';
     con.query(sql, [userId, artistId], (err, result, fields) => {
       if (err) {
         // Handle SQL error

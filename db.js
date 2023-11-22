@@ -215,9 +215,10 @@ class Like extends Model {
 }
 Like.init(
   {
-    likeQuant: {
+    likeId: {
       type: DataTypes.INTEGER,
-      //autoIncrement: true,
+      autoIncrement: true,
+      primaryKey: true,
     }
   }
   ,
@@ -227,7 +228,7 @@ Like.init(
       timestamps: false
   }
 );
-
+await sequelize.sync();
 User.belongsToMany(Post, {
   through: 'Like',
   foreignKey: 'userId',
@@ -244,9 +245,10 @@ class Favorite extends Model {
 }
 Favorite.init(
   {
-    favoriteQuant: {
+    favoriteId: {
       type: DataTypes.INTEGER,
-      //autoIncrement: true,
+      autoIncrement: true,
+      primaryKey: true,
     }
   }
   ,
