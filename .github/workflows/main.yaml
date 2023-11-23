@@ -1,0 +1,15 @@
+name: "온폴 CI/CD 실습"
+
+on:
+  push:
+      branches:
+        - feat/api
+      tags:
+        - release.*
+
+jobs:
+  Job1:
+    runs-on: ubuntu-latest
+    steps:
+      -run: echo "내용...${{ github.repository }}"
+      -uses: actions/setup-node@v4

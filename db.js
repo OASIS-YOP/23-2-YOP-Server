@@ -20,7 +20,6 @@ sequelize.authenticate().then(() => {
 });
 
 //회원
-//userId, email, nickname, password, avatar, biography
 class User extends Model {}
 User.init(
     {
@@ -29,6 +28,7 @@ User.init(
         primaryKey: true,
         autoIncrement: true,
       },
+        id: DataTypes.STRING,
         email: DataTypes.STRING,
         nickname: DataTypes.STRING,
         password: DataTypes.STRING,
@@ -42,10 +42,9 @@ User.init(
         timestamps: false
     }
 );
-
+await sequelize.sync();
 
 //아티스트
-//artistId, enterComp, groupName, memberName, collectionQuant
 class Artist extends Model {}
 Artist.init(
     {
@@ -69,28 +68,24 @@ Artist.init(
         timestamps: false
     }
 );
-
-
+await sequelize.sync();
 
 //포토카드
-//enterComp, groupName, memberName, albumName, version
 class PhotoCard extends Model {
 }
 PhotoCard.init(
     {
-      memberName: {
-        type: DataTypes.STRING,
+      photocardId:{
+        type:DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true
       },
-      version: {
-        type: DataTypes.STRING,
-        primaryKey: true,
-      },
+      memberName: DataTypes.STRING,
+      version: DataTypes.STRING,
       photocard: DataTypes.STRING,
       albumName: DataTypes.STRING,
       enterComp: DataTypes.STRING,
-      groupName: DataTypes.STRING,
-      activeDateTime: DataTypes.DATE
+      groupName: DataTypes.STRING
     }
     ,
     {
@@ -102,7 +97,6 @@ PhotoCard.init(
 await sequelize.sync();
 
 //컬렉션
-//enterComp, groupName, memberName, albumName, version
 class Collection extends Model {
 }
 Collection.init(
@@ -114,13 +108,7 @@ Collection.init(
       albumJacket: DataTypes.STRING,
       photoCardQuant: DataTypes.INTEGER,
       activeDateTime: DataTypes.DATE,
-      // artistId: {
-      //   type: DataTypes.INTEGER,
-      //   references: {
-      //     model: Artist,  // Polaroid 모델을 참조
-      //     key: 'artistId' // Polaroid 모델의 기본 키를 참조
-      //   }
-      // }
+      activationCode: DataTypes.STRING
     }
     ,
     {
@@ -129,6 +117,7 @@ Collection.init(
         timestamps: false
     }
 );
+await sequelize.sync();
 
 //도안
 class Polaroid extends Model {
@@ -138,16 +127,11 @@ Polaroid.init(
       polaroidId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement:true,
+        allowNull: true
       },
       polaroid: DataTypes.STRING,
-      saveDateTime: DataTypes.DATE,
-      // photocardId: {
-      //   type: DataTypes.INTEGER,
-      //   references: {
-      //     model: PhotoCard,  // Polaroid 모델을 참조
-      //     key: 'photocardId' // Polaroid 모델의 기본 키를 참조
-      //   }
-      // }
+      saveDateTime: DataTypes.DATE
     }
     ,
     {
@@ -156,6 +140,32 @@ Polaroid.init(
         timestamps: false
     }
 );
+await sequelize.sync();
+
+// 도안백업
+class PolaroidBackup extends Model {
+}
+PolaroidBackup.init(
+    {
+      polaroidId: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement:true,
+        allowNull: true
+      },
+      polaroid: DataTypes.STRING,
+      saveDateTime: DataTypes.DATE,
+      userId: DataTypes.INTEGER,
+      photocardId: DataTypes.INTEGER
+    }
+    ,
+    {
+        sequelize,
+        modelName: "polaroidBackup", 
+        timestamps: false
+    }
+);
+await sequelize.sync();
 
 //포스트
 class Post extends Model {
@@ -165,8 +175,10 @@ Post.init(
       postId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
+        autoIncrement: true,
+        allowNull: true
       },
-      post: DataTypes.STRING,
+      
       postDateTime: DataTypes.DATE,
       // polaroidId: {
       //   type: DataTypes.INTEGER,
@@ -183,40 +195,31 @@ Post.init(
         timestamps: false
     }
 );
+await sequelize.sync();
 
 // 릴레이션
 // 회원 : 도안 = 일대다
-User.hasMany(Polaroid, {
-  foreignKey: 'userId'
-})
+User.hasMany(Polaroid);
+Polaroid.belongsTo(User);
 
 // 회원: 포스트 = 일대다
 User.hasMany(Post, {
   foreignKey: 'userId'
 })
+Post.belongsTo(User,{
+  foreignKey: 'userId'
+});
+await sequelize.sync();
 
 // 좋아요 ( 회원: 포스트 = 다대다)
 class Like extends Model {
 }
 Like.init(
   {
-    // userId: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: User, 
-    //     key: 'userId'
-    //   }
-    // },
-    // postId: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: Post,
-    //     key: 'postId'
-    //   }
-    // },
-    likeQuant: {
+    likeId: {
       type: DataTypes.INTEGER,
-      //autoIncrement: true,
+      autoIncrement: true,
+      primaryKey: true,
     }
   }
   ,
@@ -226,40 +229,27 @@ Like.init(
       timestamps: false
   }
 );
-
+await sequelize.sync();
 User.belongsToMany(Post, {
   through: 'Like',
   foreignKey: 'userId',
-  })
+});
+
 Post.belongsToMany(User, {
   through: 'Like',
   foreignKey: 'postId',
-  })
-
-
+});
+await sequelize.sync();
 
 // 즐겨찾기 (회원: 아티스트 = 다대다)
 class Favorite extends Model {
 }
 Favorite.init(
   {
-    // userId: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: User, 
-    //     key: 'userId'
-    //   }
-    // },
-    // artistId: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: Artist,
-    //     key: 'artistId'
-    //   }
-    // },
-    favoriteQuant: {
+    favoriteId: {
       type: DataTypes.INTEGER,
-      //autoIncrement: true,
+      autoIncrement: true,
+      primaryKey: true,
     }
   }
   ,
@@ -273,67 +263,58 @@ Favorite.init(
 User.belongsToMany(Artist, {
   through: 'Favorite',
   foreignKey: 'userId',
-  })
+});
+
 Artist.belongsToMany(User, {
   through: 'Favorite',
   foreignKey: 'artistId',
-  })
+});
+await sequelize.sync();
 
 
-// 포토카드
-User.hasMany(PhotoCard, {
-  foreignKey: 'userId'
-})
 // 컬렉션
 User.hasMany(Collection, {
   foreignKey: 'userId'
-})
+});
+Collection.hasMany(User,{
+  foreignKey: 'userId'
+});
 
 // 포토카드: 도안 = 일대일
 Polaroid.belongsTo(PhotoCard, 
-//   {
-//   foreignKey: 'photocardId' 
-// }
+  {
+  foreignKey: 'photocardId' 
+}
 );
 // 도안:포스트 = 일대일
-Post.belongsTo(Polaroid);
+Post.belongsTo(Polaroid,
+  {
+    foreignKey: 'polaroidId' 
+});
 
-// 아티스트:컬렉션 = 일대일
-Collection.belongsTo(Artist, 
-//   {
-//   foreignKey: 'artistId'
-// }
-);
-
-Polaroid.sync();
-Post.sync();
-Collection.sync();
+// 아티스트: 컬렉션 = 일대다
+Artist.hasMany(Collection,{
+  foreignKey: 'artistId'
+});
+Collection.belongsTo(Artist,{
+  foreignKey: 'artistId'
+});
 
 // 컬렉션: 포토카드 = 일대다
-Collection.hasMany(PhotoCard, {
-  foreignKey: 'collectionId'
-})
+Collection.hasMany(PhotoCard,{
+  foreignKey: 'albumName'
+});
+PhotoCard.belongsTo(Collection,{
+  foreignKey: 'albumName'
+});
+
+await sequelize.sync();
 
 // 회원: 컬렉션 = 다대다
-
 class UserCollection extends Model {
 }
 UserCollection.init(
   {
-    // userId: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: User, 
-    //     key: 'userId'
-    //   }
-    // },
-    // artistId: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: Artist,
-    //     key: 'artistId'
-    //   }
-    // },
     collectionQuant: {
       type: DataTypes.INTEGER,
       // autoIncrement: true,
@@ -349,33 +330,19 @@ UserCollection.init(
 User.belongsToMany(Collection, {
   through: 'UserCollection',
   foreignKey: 'userId',
-  })
+});
 Collection.belongsToMany(User, {
   through: 'UserCollection',
-  foreignKey: 'collectionId',
-  })
+  foreignKey: 'albumName',
+});
+await sequelize.sync();
 
 // 회원: 포토카드 = 다대다
-
 class UserPhotoCard extends Model {
 }
 UserPhotoCard.init(
   {
-    // userId: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: User, 
-    //     key: 'userId'
-    //   }
-    // },
-    // artistId: {
-    //   type: DataTypes.INTEGER,
-    //   references: {
-    //     model: Artist,
-    //     key: 'artistId'
-    //   }
-    // },
-    collectionQuant: {
+    photocardQuant: {
       type: DataTypes.INTEGER,
       // autoIncrement: true,
     }
@@ -390,16 +357,26 @@ UserPhotoCard.init(
 User.belongsToMany(PhotoCard, {
   through: 'UserPhotoCard',
   foreignKey: 'userId',
-  })
+});
 PhotoCard.belongsToMany(User, {
   through: 'UserPhotoCard',
-  foreignKey: 'photoCardId',
-  })
-
-//await sequelize.sync({alter:true});
+  foreignKey: 'photocardId',
+});
+PhotoCard.belongsToMany(User, {
+  through: 'UserPhotoCard',
+  foreignKey: 'photocardId',
+});
 await sequelize.sync();
 
-//------------------EXPORT---------------------
+// //----일대일----
+// Polaroid.sync();
+// Post.sync();
+// Collection.sync();
+// User.sync();
+// PhotoCard.sync();
+// Artist.sync();
+
+// //------------------EXPORT---------------------
 export { Artist, 
   Collection, 
   Favorite, 
@@ -413,15 +390,15 @@ export { Artist,
 
 
 
-//-------------------DATA-----------------------
-// const jane = User.build({ firstName: "Jane", lastName: "Doe" });
+// //-------------------DATA-----------------------
+// // const jane = User.build({ firstName: "Jane", lastName: "Doe" });
 
-// // "jane" has not been saved to the database yet!
-// // You can change any of its properties here, and call `save()` later to persist them all at once.
+// // // "jane" has not been saved to the database yet!
+// // // You can change any of its properties here, and call `save()` later to persist them all at once.
 
-// await jane.save();
+// // await jane.save();
 
-// // "jane" is now saved to the database!
+// // // "jane" is now saved to the database!
 
 // ------artist-------
 const BTS = Artist.build(
@@ -551,6 +528,75 @@ const newJeans = Artist.build(
 
 
 // ------collection-------
+// ------Photocard-----------
+// const pc1 = PhotoCard.build({
+//   memberName: '민지',
+//   version: 'A',
+//   photocard: 'fff',
+//   albumName: "<NewJeans 2nd EP 'GET UP'>",
+//   enterComp: '어도어 엔터테인먼트(ADOR Entertainment)',
+//   groupName: '뉴진스(New Jeans)',
+//   userId:1
+// })
+// const pc2 = PhotoCard.build({
+//   memberName: '민지',
+//   version: 'A',
+//   photocard: 'ff',
+//   albumName: '<NewJeans 2nd EP \'GET UP\'>',
+//   enterComp: '어도어 엔터테인먼트(ADOR Entertainment)',
+//   groupName: '뉴진스(New Jeans)'
+// })
+// const pc3 = PhotoCard.build({
+//   memberName: '지민',
+//   version: 'A',
+//   photocard: 'f',
+//   albumName: '[싱글] <Butter>',
+//   enterComp: '빅히트 엔터테인먼트(Big Hit Entertainment)',
+//   groupName: '방탄소년단(BTS)'
+// })
+// ------Polaroid-----------
+// const pol1 = Polaroid.build({
+//   polaroidId:1,
+//   polaroid:'https://ohnpol.s3.ap-northeast-2.amazonaws.com/polaroid/YOP_1.png',
+//   saveDateTime: '2023-11-12 00:00:01'
+// })
+// const pol2 = Polaroid.build({
+//   polaroidId:2,
+//   polaroid:'https://ohnpol.s3.ap-northeast-2.amazonaws.com/polaroid/YOP_2.png',
+//   saveDateTime: '2023-11-12 00:00:22'
+// })
+// const pol3 = Polaroid.build({
+//   polaroidId:3,
+//   polaroid:'https://ohnpol.s3.ap-northeast-2.amazonaws.com/polaroid/YOPdd.png',
+//   saveDateTime: '2023-11-12 00:00:33'
+// })
+// ------Post-----------
+// const post1 = Post.build({
+//   postId:1,
+//   post:'',
+//   postDateTime: '2023-11-23 00:00:01' ,
+//   userId: 1,
+  
+//   polaroidId: 1
+// })
+
+// const post2 = Post.build({
+//   postId:2,
+//   post:'',
+//   postDateTime: '2023-11-23 00:00:22' ,
+//   userId: 2,
+  
+//   PolaroidPolaroidId: 2
+// })
+
+// const post3 = Post.build({
+//   postId:3,
+//   post:'',
+//   postDateTime: '2023-11-23 00:00:33' ,
+//   userId: 1,
+  
+//   PolaroidPolaroidId: 3
+// })
 
 //-------user----------
 const userTemp = User.build(
@@ -559,8 +605,18 @@ const userTemp = User.build(
     email: 'ohnpol1004@naver.com',
     nickname: 'ohnpol1004',
     password: '1111',
-    avatar: '',
+    avatar: 'https://ohnpol.s3.ap-northeast-2.amazonaws.com/users/avatar.png',
     biography: '자기소개'
+})
+
+const userTemp2 = User.build(
+  {
+    // userId: 1,
+    email: 'user2@naver.com',
+    nickname: 'user2',
+    password: '2222',
+    avatar: 'https://ohnpol.s3.ap-northeast-2.amazonaws.com/users/avatar.png',
+    biography: 'user2입니다'
 })
 
 //-------favorite----------
@@ -572,7 +628,12 @@ const fav1 = Favorite.build(
     artistId: 1
   }
 )
-
+//------like---------------
+const like1 = Like.build({
+  likeQuant: 1,
+  userId:1,
+  postId:1
+})
 
 //----------------------saved---------------------------------
 // await BTS.save();
@@ -581,12 +642,31 @@ const fav1 = Favorite.build(
 // await newJeans.save();
 
 // await userTemp.save();
+//await userTemp2.save();
 
 // await fav1.save();
 
+
+// await pc1.save();
+//await pc2.save();
+// // await pc3.save();
+// await pol1.save();
+// await pol2.save();
+// // await pol3.save();
+// await post1.save();
+// await post2.save();
+// await post3.save();
+
+// // await like1.save();
+
+//---------------------drop------------------------------------
 // await sequelize.drop();
 // console.log('All tables dropped!');
-// await Collection.truncate();
+
+// await 
+// await Like.truncate();
+// await Post.truncate();
+// await Polaroid.truncate();
 // await Artist.truncate();
 
 
