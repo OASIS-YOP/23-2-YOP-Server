@@ -7,9 +7,9 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
-import { Strategy as JwtStrategy } from 'passport-jwt';
-import { ExtractJwt as ExtracJwt } from 'passport-jwt';
-import { DataTypes, Model, Sequelize } from 'sequelize';
+// import { Strategy as JwtStrategy } from 'passport-jwt';
+// import { ExtractJwt as ExtracJwt } from 'passport-jwt';
+// import { DataTypes, Model, Sequelize } from 'sequelize';
 // import { Artist, 
 //   Favorite, 
 //   Collection, 
@@ -74,7 +74,6 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 app.use(express.json());
-//app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 
 const getRandomInt = (max) => {
   return Math.floor(Math.random() * max);
