@@ -7,10 +7,9 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
-// import { Strategy as JwtStrategy } from 'passport-jwt';
-// import { ExtractJwt as ExtracJwt } from 'passport-jwt';
-// //import { User } from 'db.js';
-// import { DataTypes, Model, Sequelize } from 'sequelize';
+import { Strategy as JwtStrategy } from 'passport-jwt';
+import { ExtractJwt as ExtracJwt } from 'passport-jwt';
+import { DataTypes, Model, Sequelize } from 'sequelize';
 // import { Artist, 
 //   Favorite, 
 //   Collection, 
@@ -888,7 +887,7 @@ app.get('/mypage/:userId/myCollection/:albumName/activePhotocard', async (req, r
 //아티스트 탭 정보 조회(도안이 하나라도 있는 경우)
 app.get('/mypage/:userId/myPolaroid/artistTab', async(req, res)=>{
   const userId = req.params.userId;
-  const sql =  `SELECT a.artistId, a.groupName FROM artists a
+  const sql =  `SELECT DISTINCT a.artistId, a.groupName FROM artists a
                 INNER JOIN photoCards pc ON pc.enterComp = a.enterComp
                 INNER JOIN Polaroids pl ON pl.photocardId = pc.photocardId
                 WHERE pl.userUserId = ?`;
@@ -898,7 +897,7 @@ app.get('/mypage/:userId/myPolaroid/artistTab', async(req, res)=>{
       item.groupName = item.groupName.replace(/\([^)]*\)/, '').trim();
     });
     const r = {
-      postArtistTabList: result
+      polaroidArtistTabList: result
     }
     res.status(200).send(r);
   })
