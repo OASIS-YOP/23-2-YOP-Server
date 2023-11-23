@@ -4,7 +4,7 @@ on:
   push:
       branches:
         - feat/api
-      tag:
+      tags:
         - release.*
 
 jobs:
@@ -12,3 +12,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       -run: echo "내용...${{ github.repository }}"
+      -uses: actions/setup-node@v4
