@@ -11,5 +11,12 @@ jobs:
   Job1:
     runs-on: ubuntu-latest
     steps:
-      -run: echo "내용...${{ github.repository }}"
-      -uses: actions/setup-node@v4
+      - run: echo "내용...${{ github.repository }}"
+      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
+        - with:
+          node-version: 18
+      - name: "NPM 설치"
+        run: npm install
+      - name: "NPM 실행"
+        run: node main.js
