@@ -7,6 +7,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
+
 // import { Strategy as JwtStrategy } from 'passport-jwt';
 // import { ExtractJwt as ExtracJwt } from 'passport-jwt';
 // import { DataTypes, Model, Sequelize } from 'sequelize';
