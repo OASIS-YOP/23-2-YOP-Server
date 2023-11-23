@@ -7,6 +7,18 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
+import { Strategy as JwtStrategy } from 'passport-jwt';
+import { ExtractJwt as ExtracJwt } from 'passport-jwt';
+//import { User } from 'db.js';
+import { DataTypes, Model, Sequelize } from 'sequelize';
+// import { Artist, 
+//   Favorite, 
+//   Collection, 
+//   Like,
+//   PhotoCard,
+//   Polaroid,
+//   Post,
+//   User } from './db.js';
 
 const randomImgName = (bytes=32)=> crypto.randomBytes(bytes).toString('hex');
 
@@ -27,22 +39,34 @@ const s3 = new S3Client({
   region: region
 });
 
-// import { Artist, 
-//   Favorite, 
-//   Collection, 
-//   Like,
-//   PhotoCard,
-//   Polaroid,
-//   Post,
-//   User } from './db.js';
-
 const app = express();
 const port = 3000;
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage});
 
+//로그인 관련
+const options = {
+  jwtFromRequest: ExtracJwt.fromAuthHeaderAsBearerToken(),
+  secretOrkey: 'secret',
+  algorithms: ['RS256']
+}
 
+// const strategy = new JwtStrategy(options, (payload, done)=>{
+//   User.findOne({where: {id: payload.sub}})
+//   .then((user)=>{
+//     if(user){
+//       return done(null, user);
+//     }else{
+//       return done(null, false);
+//     }
+//   })
+//   .catch(err => done(err, null));
+// });
+
+// module.exports = (passport)=>{
+//   passport.use(strategy);
+// }
 
 app.use(bodyParser.json());
 const corsOptions = {
@@ -53,7 +77,6 @@ app.use(cors(corsOptions));
 app.use(express.json());
 //app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs))
 
-
 const getRandomInt = (max) => {
   return Math.floor(Math.random() * max);
 }
@@ -61,6 +84,20 @@ const getRandomInt = (max) => {
 app.get('/', async(req, res)=>{
   res.send('Hello World!');
 })
+
+//회원
+app.get('/protected', async(req, res, next)=>{
+
+});
+
+app.post('/login', async(req, res, next)=>{
+
+});
+
+app.post('/register', async(req, res, next)=>{
+
+});
+
 
 //mainpage
 //즐겨찾는 아티스트
@@ -657,8 +694,12 @@ app.get('/mypage/:userId/myPost/artistTab', async(req, res)=>{
                 INNER JOIN artists a ON a.groupName = pc.groupName
                 WHERE p.userId = ?;
               `;
+  
   con.query(sql, [userId], (err, result, fields)=>{
     if(err) throw err;
+    result.forEach(item => {
+      item.groupName = item.groupName.replace(/\([^)]*\)/, '').trim();
+    });
     const r = {
       postArtistList: result 
     }
@@ -760,6 +801,9 @@ app.get('/mypage/:userId/myCollection/artistTab', async (req, res)=>{
               WHERE userId = ?;`;
   con.query(sql, [userId], (err, result, fields)=>{
     if(err) throw err;
+    result.forEach(item => {
+      item.groupName = item.groupName.replace(/\([^)]*\)/, '').trim();
+    });
     const r = {
       collectionArtistList: result
     }
@@ -850,6 +894,9 @@ app.get('/mypage/:userId/myPolaroid/artistTab', async(req, res)=>{
                 WHERE pl.userUserId = ?`;
   con.query(sql, [userId], (err, result, fields)=>{
     if(err) throw err;
+    result.forEach(item => {
+      item.groupName = item.groupName.replace(/\([^)]*\)/, '').trim();
+    });
     const r = {
       postArtistTabList: result
     }

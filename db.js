@@ -28,6 +28,7 @@ User.init(
         primaryKey: true,
         autoIncrement: true,
       },
+        id: DataTypes.STRING,
         email: DataTypes.STRING,
         nickname: DataTypes.STRING,
         password: DataTypes.STRING,
@@ -376,14 +377,14 @@ await sequelize.sync();
 // Artist.sync();
 
 // //------------------EXPORT---------------------
-// // export { Artist, 
-// //   Collection, 
-// //   Favorite, 
-// //   Like, 
-// //   PhotoCard, 
-// //   Polaroid, 
-// //   Post, 
-// //   User}
+export { Artist, 
+  Collection, 
+  Favorite, 
+  Like, 
+  PhotoCard, 
+  Polaroid, 
+  Post, 
+  User}
 
 
 
