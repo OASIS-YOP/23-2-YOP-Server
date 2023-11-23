@@ -7,10 +7,10 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
-import { Strategy as JwtStrategy } from 'passport-jwt';
-import { ExtractJwt as ExtracJwt } from 'passport-jwt';
-//import { User } from 'db.js';
-import { DataTypes, Model, Sequelize } from 'sequelize';
+// import { Strategy as JwtStrategy } from 'passport-jwt';
+// import { ExtractJwt as ExtracJwt } from 'passport-jwt';
+// //import { User } from 'db.js';
+// import { DataTypes, Model, Sequelize } from 'sequelize';
 // import { Artist, 
 //   Favorite, 
 //   Collection, 
@@ -45,12 +45,12 @@ const port = 3000;
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage});
 
-//로그인 관련
-const options = {
-  jwtFromRequest: ExtracJwt.fromAuthHeaderAsBearerToken(),
-  secretOrkey: 'secret',
-  algorithms: ['RS256']
-}
+// //로그인 관련
+// const options = {
+//   jwtFromRequest: ExtracJwt.fromAuthHeaderAsBearerToken(),
+//   secretOrkey: 'secret',
+//   algorithms: ['RS256']
+// }
 
 // const strategy = new JwtStrategy(options, (payload, done)=>{
 //   User.findOne({where: {id: payload.sub}})
@@ -85,18 +85,18 @@ app.get('/', async(req, res)=>{
   res.send('Hello World!');
 })
 
-//회원
-app.get('/protected', async(req, res, next)=>{
+// 회원
+// app.get('/protected', async(req, res, next)=>{
 
-});
+// });
 
-app.post('/login', async(req, res, next)=>{
+// app.post('/login', async(req, res, next)=>{
 
-});
+// });
 
-app.post('/register', async(req, res, next)=>{
+// app.post('/register', async(req, res, next)=>{
 
-});
+// });
 
 
 //mainpage
