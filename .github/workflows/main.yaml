@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: .env setup
-      - run: 
+      - run: |
         echo "DB_HOST=$DB_HOST" >> .env
         echo "DB_USER=$DB_USER" >> .env
         echo "DB_PASSWORD=$DB_PASSWORD" >> .env
@@ -22,7 +22,7 @@ jobs:
         echo "S3_PRIVATEKEY=$S3_PRIVATEKEY" >> .env
         echo "S3_REGION=$S3_REGION" >> .env
         echo "BUCKET_NAME=$BUCKET_NAME" >> .env
-      - env: 
+      - env: |
         DB_HOST: ${{ secrets.DB_HOST }}
         DB_USER: ${{ secrets.DB_USER }}
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
