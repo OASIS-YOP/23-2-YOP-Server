@@ -22,7 +22,8 @@ jobs:
         echo "S3_PRIVATEKEY=$S3_PRIVATEKEY" >> .env
         echo "S3_REGION=$S3_REGION" >> .env
         echo "BUCKET_NAME=$BUCKET_NAME" >> .env
-      - env: |
+      - name: Set up environment variables
+        env: |
         DB_HOST: ${{ secrets.DB_HOST }}
         DB_USER: ${{ secrets.DB_USER }}
         DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
