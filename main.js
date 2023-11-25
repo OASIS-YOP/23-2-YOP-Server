@@ -443,12 +443,12 @@ app.get('/community/:artistId/members', async (req, res) => {
 
 //아티스트 멤버별 도안 조회
 app.get('/community/:memberName/memberPost', async (req, res) => { 
-  const memberName ='';
-  if(memberName=='아이유'){
-    memberName = '아이유(IU)';
-  }else{
-    memberName=req.params.memberName;
-  }
+  const memberName =req.params.memberName;
+  // if(memberName=='아이유'){
+  //   memberName = '아이유(IU)';
+  // }else{
+  //   memberName=req.params.memberName;
+  // }
   const sql = `SELECT 
                 p.postId,
                 pl.polaroid,
@@ -465,7 +465,7 @@ app.get('/community/:memberName/memberPost', async (req, res) => {
               WHERE  pc.memberName = ?
               ORDER BY p.postId DESC
               ; `;
-  con.query(sql, [memberName], async (err, result, fields) => {
+  con.query(sql, [memberName === '아이유' ? '아이유(IU)':memberName], async (err, result, fields) => {
     if (err) throw err;
     
     const finalResult = [];
