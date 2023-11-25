@@ -13,7 +13,7 @@ jobs:
 
     steps:
       - name: .env setup
-        run: |
+      - run: |
           echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
           echo "DB_USER=${{ secrets.DB_USER }}" >> .env
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
@@ -32,7 +32,6 @@ jobs:
           S3_PRIVATEKEY: ${{ secrets.S3_PRIVATEKEY }}
           S3_REGION: ${{ secrets.S3_REGION }}
           BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
-
       - run: echo "내용...${{ github.repository }}"
       - uses: actions/checkout@v4
       - name: Setup
