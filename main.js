@@ -1268,7 +1268,7 @@ app.get('/community/:userId/isFavorite/:artistId', async(req, res)=>{
 });
 
 //해당 유저의 포스트 좋아요 여부 확인 API (11.27)
-app.get(':userId/isLike/:postId', async(req, res)=>{
+app.get('/:userId/isLike/:postId', async(req, res)=>{
   const userId = req.params.userId;
   const postId = req.params.postId;
   const sql = `SELECT COUNT(*) AS isLike
