@@ -1279,9 +1279,9 @@ app.get('/:userId/isLike/:postId', async(req, res)=>{
     let isLike = true;
     let response = result[0].isLike;
     if(response>0){
-      isFavorite = true;
+      isLike = true;
     }else{
-      isFavorite = false;
+      isLike = false;
     }
     res.status(200).send(isLike);
   })
