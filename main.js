@@ -1247,6 +1247,22 @@ app.post('/mypage/:userId/myCollection/:albumName/cardActivationRandomly', async
   })
 });
 
+//해당 유저의 아티스트 즐겨찾기 여부 확인 API (11.27)
+app.get('/community/:userId/isFavorite/:artistId', async(req, res)=>{
+  const userId = req.params.userId;
+  const artistId = req.params.artistId;
+  const sql = `SELECT COUNT(*) AS isFavorite
+              FROM Favorites
+              WHERE userId = ? AND artistId = ?;`;
+  con.query(sql, [userId, artistId], (err, result, fields)=>{
+    if(err) throw err;
+    const r = ''
+    if(result>0){
+      r = `userId ${userId} add to favoriteArtist`
+    }
+  })
+});
+
 app.listen(port, ()=>{
   console.log(`Example app listening on ${port}`);
 });
