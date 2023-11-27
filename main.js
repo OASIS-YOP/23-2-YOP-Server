@@ -11,14 +11,19 @@ dotenv.config();
 // import { Strategy as JwtStrategy } from 'passport-jwt';
 // import { ExtractJwt as ExtracJwt } from 'passport-jwt';
 // import { DataTypes, Model, Sequelize } from 'sequelize';
-// import { Artist, 
-//   Favorite, 
-//   Collection, 
-//   Like,
-//   PhotoCard,
-//   Polaroid,
-//   Post,
-//   User } from './db.js';
+import { User } from './db.js';
+import passport from 'passport';
+import { Strategy as LocalStrategy } from 'passport-local';
+import bcrypt from 'bcrypt';
+
+const passportConfig = {
+  useridField: 'userId',
+  passwordField: 'password'
+};
+
+
+
+
 
 const randomImgName = (bytes=32)=> crypto.randomBytes(bytes).toString('hex');
 
@@ -381,8 +386,8 @@ app.delete('/community/:artistId/notFavorite/:userId', async(req,res)=>{
   const artistId = req.params.artistId;
   const userId = req.params.userId;
   const sql = `DELETE 
-              FROM Likes
-              WHERE (artistId=? AND userId=?);
+              FROM Favorites
+              WHERE artistId=? AND userId=?;
   `
   con.query(sql, [artistId, userId], (err, result, fields)=>{
     if(err) throw err;
