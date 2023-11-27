@@ -1256,10 +1256,18 @@ app.get('/community/:userId/isFavorite/:artistId', async(req, res)=>{
               WHERE userId = ? AND artistId = ?;`;
   con.query(sql, [userId, artistId], (err, result, fields)=>{
     if(err) throw err;
-    const r = ''
-    if(result>0){
-      r = `userId ${userId} add to favoriteArtist`
+    let r = ``;
+    let response = result[0].isFavorite;
+    if(response>0){
+      r = `userId: ${userId} 
+      artistId: ${artistId}
+      isFavorite: true!`;
+    }else{
+      r=`userId: ${userId}
+      artistId: ${artistId}
+      isFavorite: false...`;
     }
+    res.status(200).send(r);
   })
 });
 
