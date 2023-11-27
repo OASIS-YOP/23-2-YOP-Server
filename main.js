@@ -11,15 +11,15 @@ dotenv.config();
 // import { Strategy as JwtStrategy } from 'passport-jwt';
 // import { ExtractJwt as ExtracJwt } from 'passport-jwt';
 // import { DataTypes, Model, Sequelize } from 'sequelize';
-import { User } from './db.js';
-import passport from 'passport';
-import { Strategy as LocalStrategy } from 'passport-local';
-import bcrypt from 'bcrypt';
+// import { User } from './db.js';
+// import passport from 'passport';
+// import { Strategy as LocalStrategy } from 'passport-local';
+// import bcrypt from 'bcrypt';
 
-const passportConfig = {
-  useridField: 'userId',
-  passwordField: 'password'
-};
+// const passportConfig = {
+//   useridField: 'userId',
+//   passwordField: 'password'
+// };
 
 
 
