@@ -1259,11 +1259,11 @@ app.get('/community/:userId/isFavorite/:artistId', async(req, res)=>{
     let isFavorite = true;
     let response = result[0].isFavorite;
     if(response>0){
-      r = true;
+      isFavorite = true;
     }else{
-      r= false;
+      isFavorite = false;
     }
-    res.status(200).send(r);
+    res.status(200).send(isFavorite);
   })
 });
 
