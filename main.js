@@ -1256,16 +1256,12 @@ app.get('/community/:userId/isFavorite/:artistId', async(req, res)=>{
               WHERE userId = ? AND artistId = ?;`;
   con.query(sql, [userId, artistId], (err, result, fields)=>{
     if(err) throw err;
-    let r = ``;
+    let isFavorite = true;
     let response = result[0].isFavorite;
     if(response>0){
-      r = `userId: ${userId} 
-      artistId: ${artistId}
-      isFavorite: true!`;
+      r = true;
     }else{
-      r=`userId: ${userId}
-      artistId: ${artistId}
-      isFavorite: false...`;
+      r= false;
     }
     res.status(200).send(r);
   })
