@@ -377,18 +377,7 @@ await sequelize.sync();
 // Artist.sync();
 
 // //------------------EXPORT---------------------
-export { Artist, 
-  Collection, 
-  Favorite, 
-  Like, 
-  PhotoCard, 
-  Polaroid, 
-  Post, 
-  User}
-
-
-
-
+export {User}
 
 // //-------------------DATA-----------------------
 // // const jane = User.build({ firstName: "Jane", lastName: "Doe" });

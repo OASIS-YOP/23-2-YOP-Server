@@ -8,22 +8,23 @@ import crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// import { Strategy as JwtStrategy } from 'passport-jwt';
-// import { ExtractJwt as ExtracJwt } from 'passport-jwt';
-// import { DataTypes, Model, Sequelize } from 'sequelize';
-// import { User } from './db.js';
-// import passport from 'passport';
-// import { Strategy as LocalStrategy } from 'passport-local';
-// import bcrypt from 'bcrypt';
+import { Strategy as JwtStrategy } from 'passport-jwt';
+import { ExtractJwt as ExtracJwt } from 'passport-jwt';
+//import { DataTypes, Model, Sequelize } from 'sequelize';
+import { User } from './db.js';
+import passport from 'passport';
+import { Strategy as LocalStrategy } from 'passport-local';
+import bcrypt from 'bcrypt';
 
-// const passportConfig = {
-//   useridField: 'userId',
-//   passwordField: 'password'
-// };
+const passportConfig = {
+  useridField: 'userId',
+  passwordField: 'password'
+};
 
-
-
-
+const JWTConfig = {
+  jwtFromRequest: ExtracJwt.fromHeader('authorization'),
+  secretOrKey: 'jwt-secret-key'
+};
 
 const randomImgName = (bytes=32)=> crypto.randomBytes(bytes).toString('hex');
 
@@ -50,7 +51,7 @@ const port = 3000;
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage});
 
-// //로그인 관련
+//로그인 관련
 // const options = {
 //   jwtFromRequest: ExtracJwt.fromAuthHeaderAsBearerToken(),
 //   secretOrkey: 'secret',
@@ -73,6 +74,52 @@ const upload = multer({ storage: storage});
 //   passport.use(strategy);
 // }
 
+const passportVerify = async (userId, password, done) => {
+  try{
+    const user = await User.findOne({where: {email: userId}});
+
+    if(!user){
+      done(null, false, {reason: 'ID가 틀렸습니다'});
+      return;
+    }
+
+    const compareResult = await bcrypt.compare(password, user.password);
+
+    if(compareResult){
+      done(null, user);
+      return;
+    }
+
+    done(null, false, {reason:'비밀번호가 틀렸습니다'});
+
+  } catch(error){
+    console.log(error);
+    done(error);
+  }
+};
+
+passport.use('local', new LocalStrategy(passportConfig, passportVerify));
+
+app.use(passport.initialize());
+//passportConfig();
+
+const JWTVerify = async (jwtPayload, done) =>{
+  try{
+    const user = await User.findOne({where: {id: jwtPayload.id}});
+
+    if(user){
+      done(null, user);
+      return;
+    }
+    done(null, false, {reason: '올바르지 않은 인증 정보입니다.'});
+  } catch (error) {
+    console.error(error);
+    done(error);
+  }
+};
+
+passport.use('jwt', new JwtStrategy(JWTConfig, JWTVerify));
+
 app.use(bodyParser.json());
 const corsOptions = {
   origin: "http://localhost:3000",
@@ -94,13 +141,43 @@ app.get('/', async(req, res)=>{
 
 // });
 
-// app.post('/login', async(req, res, next)=>{
+app.post('/login', async(req, res, next)=>{
+  try{
+    passport.authenticate('local', (passportError, user, info)=>{
+      if(passportError || !user){
+        console.log(user);
+        console.log(passportError);
+        res.status(400).json({message: info.reason});
+        //console.log(JSON.stringify(info.reason));
+        return;
+      }
+      req.login(user, {session:false}, (loginError)=>{
+        if(loginError){
+          res.send(loginError);
+          return;
+        }
+        const token = jwt.sign(
+          {id: user.id, name:user.name, auth: user.auth},
+          'jwt-secret-key'
+        );
+        res.json({token});
+      });
+    })(req, res);
+  } catch(error){
+    console.error(error);
+    next(error);
+  }
+});
 
-// });
-
-// app.post('/register', async(req, res, next)=>{
-
-// });
+app.post('/auth', passport.authenticate('jwt', {session: false}),
+  async(req, res, next)=>{
+    try{
+      res.json({result:true});
+    }catch(error){
+      console.error(error);
+      next(error);
+    }
+});
 
 
 //mainpage
@@ -1285,6 +1362,67 @@ app.get('/:userId/isLike/:postId', async(req, res)=>{
     }
     res.status(200).send(isLike);
   })
+});
+
+// 포토카드 업로드하기
+app.post('/photocard/upload/:memberName/:version', upload.single('image'), async(req, res)=>{
+  console.log("req.body", req.body);
+  console.log("req.file", req.file);
+
+  const memberName = req.params.memberName;
+  const version = req.params.version;
+  let albumName = '';
+  let groupName = '';
+  let enterComp = '';
+  if(memberName === '정국' || '뷔' || '지민' || '슈가' || '진' || 'RM' || '제이홉'){
+    groupName = '방탄소년단(BTS)';
+    albumName = '<Butter>';
+    enterComp = '빅히트 엔터테인먼트(Big Hit Entertainment)'
+  }else if(memberName==='윈터' ||'카리나'||'닝닝' || '지젤'){
+    groupName = '에스파(aespa)';
+    albumName = '<MY WORLD - The 3rd Mini Album>';
+    enterComp = '에스엠 엔터테인먼트(SM Entertainment)';
+  }else if(memberName==='민지' ||'하니'||'해린' || '다니엘'){
+    groupName = '뉴진스(NewJeans)';
+    albumName = '<NewJeans 2nd EP \'GET UP\'>';
+    enterComp = '어도어 엔터테인먼트(ADOR Entertainment)';
+  }else{
+    groupName = '아이유(IU)';
+    albumName = '<LILAC>';
+    enterComp = '이담 엔터테인먼트(EDAM Entertainment)';
+  }
+  const folderName = groupName.replace(/\([^)]*\)/, '').trim();
+  const imgName = randomImgName();
+  const params = {
+    Bucket: bucketName,
+    Key: `photocard/${folderName}/${imgName}`,
+    //Body: req.file.buffer,
+    Body: req.file.buffer,
+    ACL: 'public-read',
+    ContentType: req.file.mimetype
+  }
+
+  const command = new PutObjectCommand(params);
+  await s3.send(command);
+  console.log(command);
+
+  const image = `https://${process.env.BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/polaroid/${imgName}`;
+  const sql = `INSERT into photoCards( photocarddId, memberName, version, photocard, albumName, enterComp, groupName)
+              VALUES ( NULL, ?, ?, ?, ?, ?, ?)`;
+
+  con.query(sql, [memberName, version, image, albumName, enterComp, groupName], (err, result, fields) => {
+    if (err) {
+      throw err;
+    }
+
+    const response = {
+      originalResult: result,
+      message: `포토카드 저장됨`,
+    };
+
+    res.status(201).send(response);
+    
+  });
 });
 
 app.listen(port, ()=>{
