@@ -1289,7 +1289,7 @@ app.post('/mypage/:userId/myCollection/:albumName/collectionActivation', async(r
   const code = req.body.code;
 
   const sql = `INSERT INTO UserCollections
-              VALUES (1, ?, ?)`;
+              VALUES (NULL, ?, ?)`;
   con.query( sql, [userId, albumName], (err, result, fields)=>{
     if(err) throw err;
     const msg = "컬렉션 활성화됨"
@@ -1382,7 +1382,7 @@ app.post('/photocard/upload/:memberName/:version', upload.single('image'), async
     groupName = '에스파(aespa)';
     albumName = '<MY WORLD - The 3rd Mini Album>';
     enterComp = '에스엠 엔터테인먼트(SM Entertainment)';
-  }else if(memberName==='민지' ||'하니'||'해린' || '다니엘'){
+  }else if(memberName==='민지' ||'하니'||'해린' || '다니엘'||"혜인"){
     groupName = '뉴진스(NewJeans)';
     albumName = '<NewJeans 2nd EP \'GET UP\'>';
     enterComp = '어도어 엔터테인먼트(ADOR Entertainment)';
@@ -1407,8 +1407,8 @@ app.post('/photocard/upload/:memberName/:version', upload.single('image'), async
   console.log(command);
 
   const image = `https://${process.env.BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/polaroid/${imgName}`;
-  const sql = `INSERT into photoCards( photocarddId, memberName, version, photocard, albumName, enterComp, groupName)
-              VALUES ( NULL, ?, ?, ?, ?, ?, ?)`;
+  const sql = `INSERT into photoCards( photocardId, memberName, version, photocard, albumName, enterComp, groupName, activationCode)
+              VALUES ( NULL, ?, ?, ?, ?, ?, ?, NULL)`;
 
   con.query(sql, [memberName, version, image, albumName, enterComp, groupName], (err, result, fields) => {
     if (err) {

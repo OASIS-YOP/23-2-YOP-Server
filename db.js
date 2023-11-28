@@ -85,7 +85,11 @@ PhotoCard.init(
       photocard: DataTypes.STRING,
       albumName: DataTypes.STRING,
       enterComp: DataTypes.STRING,
-      groupName: DataTypes.STRING
+      groupName: DataTypes.STRING,
+      activationCode: {
+        type: DataTypes.STRING,
+        allowNull: true
+      }
     }
     ,
     {
@@ -315,9 +319,11 @@ class UserCollection extends Model {
 }
 UserCollection.init(
   {
-    collectionQuant: {
+    collectionActId: {
       type: DataTypes.INTEGER,
-      // autoIncrement: true,
+      autoIncrement: true,
+      primaryKey: true,
+      allowNull: true
     }
   },
   {
@@ -342,9 +348,11 @@ class UserPhotoCard extends Model {
 }
 UserPhotoCard.init(
   {
-    photocardQuant: {
+    photocardActId: {
       type: DataTypes.INTEGER,
-      // autoIncrement: true,
+      autoIncrement: true,
+      primaryKey: true,
+      allowNull: true
     }
   },
   {
