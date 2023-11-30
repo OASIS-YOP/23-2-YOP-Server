@@ -8,23 +8,29 @@ import crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { Strategy as JwtStrategy } from 'passport-jwt';
-import { ExtractJwt as ExtracJwt } from 'passport-jwt';
-//import { DataTypes, Model, Sequelize } from 'sequelize';
-import { User } from './db.js';
-import passport from 'passport';
-import { Strategy as LocalStrategy } from 'passport-local';
-import bcrypt from 'bcrypt';
+import { Collection, UserCollection } from './db.js';
+// import { Strategy as JwtStrategy } from 'passport-jwt';
+// import { ExtractJwt as ExtracJwt } from 'passport-jwt';
+// //import { DataTypes, Model, Sequelize } from 'sequelize';
+// import { User } from './db.js';
+// import passport from 'passport';
+// import { Strategy as LocalStrategy } from 'passport-local';
+// import bcrypt from 'bcrypt';
 
-const passportConfig = {
-  useridField: 'userId',
-  passwordField: 'password'
-};
+import { passport } from './auth.js';
+// import passport from 'passport';
+import jwt from 'jsonwebtoken';
+import { DataTypes } from 'sequelize';
 
-const JWTConfig = {
-  jwtFromRequest: ExtracJwt.fromHeader('authorization'),
-  secretOrKey: 'jwt-secret-key'
-};
+// const passportConfig = {
+//   useridField: 'userId',
+//   passwordField: 'password'
+// };
+
+// const JWTConfig = {
+//   jwtFromRequest: ExtracJwt.fromHeader('authorization'),
+//   secretOrKey: 'jwt-secret-key'
+// };
 
 const randomImgName = (bytes=32)=> crypto.randomBytes(bytes).toString('hex');
 
@@ -74,51 +80,51 @@ const upload = multer({ storage: storage});
 //   passport.use(strategy);
 // }
 
-const passportVerify = async (userId, password, done) => {
-  try{
-    const user = await User.findOne({where: {email: userId}});
+// const passportVerify = async (userId, password, done) => {
+//   try{
+//     const user = await User.findOne({where: {email: userId}});
 
-    if(!user){
-      done(null, false, {reason: 'ID가 틀렸습니다'});
-      return;
-    }
+//     if(!user){
+//       done(null, false, {reason: 'ID가 틀렸습니다'});
+//       return;
+//     }
 
-    const compareResult = await bcrypt.compare(password, user.password);
+//     const compareResult = await bcrypt.compare(password, user.password);
 
-    if(compareResult){
-      done(null, user);
-      return;
-    }
+//     if(compareResult){
+//       done(null, user);
+//       return;
+//     }
 
-    done(null, false, {reason:'비밀번호가 틀렸습니다'});
+//     done(null, false, {reason:'비밀번호가 틀렸습니다'});
 
-  } catch(error){
-    console.log(error);
-    done(error);
-  }
-};
+//   } catch(error){
+//     console.log(error);
+//     done(error);
+//   }
+// };
 
-passport.use('local', new LocalStrategy(passportConfig, passportVerify));
+// passport.use('local', new LocalStrategy(passportConfig, passportVerify));
 
-app.use(passport.initialize());
-//passportConfig();
+// app.use(passport.initialize());
+// //passportConfig();
 
-const JWTVerify = async (jwtPayload, done) =>{
-  try{
-    const user = await User.findOne({where: {id: jwtPayload.id}});
+// const JWTVerify = async (jwtPayload, done) =>{
+//   try{
+//     const user = await User.findOne({where: {id: jwtPayload.id}});
 
-    if(user){
-      done(null, user);
-      return;
-    }
-    done(null, false, {reason: '올바르지 않은 인증 정보입니다.'});
-  } catch (error) {
-    console.error(error);
-    done(error);
-  }
-};
+//     if(user){
+//       done(null, user);
+//       return;
+//     }
+//     done(null, false, {reason: '올바르지 않은 인증 정보입니다.'});
+//   } catch (error) {
+//     console.error(error);
+//     done(error);
+//   }
+// };
 
-passport.use('jwt', new JwtStrategy(JWTConfig, JWTVerify));
+// passport.use('jwt', new JwtStrategy(JWTConfig, JWTVerify));
 
 app.use(bodyParser.json());
 const corsOptions = {
@@ -141,33 +147,52 @@ app.get('/', async(req, res)=>{
 
 // });
 
-app.post('/login', async(req, res, next)=>{
-  try{
-    passport.authenticate('local', (passportError, user, info)=>{
-      if(passportError || !user){
-        console.log(user);
-        console.log(passportError);
-        res.status(400).json({message: info.reason});
-        //console.log(JSON.stringify(info.reason));
+app.post('/login', (req, res, next) => {
+  passport.authenticate('signin', (err, user, info) => {
+    if (!user) {
+      return res.status(400).json({ message: info.message });
+    }
+    const token = jwt.sign(
+      { userid: req.body.userid },
+      process.env.JWT_SECRET_KEY
+    );
+    res.json({ token });
+  })(req, res, next);
+});
+
+
+
+app.post('/signup', async (req, res, next) => {
+  try {
+    // 아까 local로 등록한 인증과정 실행
+    passport.authenticate('signup', (passportError, user, info) => {
+      // 인증이 실패했거나 유저 데이터가 없다면 에러 발생
+      if (passportError || !user) {
+        //console.log('JWT Payload:', jwtPayload);
+        console.log('User:', user);
+        res.status(400).json({ message: info.reason });
         return;
       }
-      req.login(user, {session:false}, (loginError)=>{
-        if(loginError){
+      // user 데이터를 통해 로그인 진행
+      req.login(user, { session: false }, (loginError) => {
+        if (loginError) {
           res.send(loginError);
           return;
         }
+        // 클라이언트에게 JWT 생성 후 반환
         const token = jwt.sign(
-          {id: user.id, name:user.name, auth: user.auth},
-          'jwt-secret-key'
+          { id: user.id, name: user.name, auth: user.auth },
+          process.env.JWT_SECRET_KEY
         );
-        res.json({token});
+        res.json({ token });
       });
     })(req, res);
-  } catch(error){
+  } catch (error) {
     console.error(error);
     next(error);
   }
 });
+
 
 app.post('/auth', passport.authenticate('jwt', {session: false}),
   async(req, res, next)=>{
@@ -1287,8 +1312,15 @@ app.post('/mypage/:userId/myCollection/:albumName/collectionActivation', async(r
   const userId = req.params.userId;
   const albumName = req.params.albumName;
   const code = req.body.code;
-
-  const sql = `INSERT INTO UserCollections
+  
+  const collectionalbum = await Collection.findAll({where: {albumName: albumName}});
+  console.log("collectionalbum",collectionalbum);
+  const collectionCode = collectionalbum[0]?.dataValues?.activationCode;
+  console.log("collectionCode", collectionCode);
+  console.log(typeof collectionCode);
+  console.log(typeof code);
+  if(code===collectionCode){
+    const sql = `INSERT INTO UserCollections
               VALUES (NULL, ?, ?)`;
   con.query( sql, [userId, albumName], (err, result, fields)=>{
     if(err) throw err;
@@ -1297,6 +1329,11 @@ app.post('/mypage/:userId/myCollection/:albumName/collectionActivation', async(r
     res.status(201).send(result);
     console.log(result);
   })
+  }else{
+    res.json("[활성화 실패] 잘못된 코드입니다.");
+  }
+
+  
 });
 
 //포토카드 랜덤 부여(활성화 임시 버전)
