@@ -28,10 +28,18 @@ User.init(
         primaryKey: true,
         autoIncrement: true,
       },
-        id: DataTypes.STRING,
-        email: DataTypes.STRING,
-        nickname: DataTypes.STRING,
-        password: DataTypes.STRING,
+        email: {
+          type: DataTypes.STRING,
+          allowNull: false
+        },
+        nickname: {
+          type: DataTypes.STRING,
+          allowNull: false
+        },
+        password: {
+          type: DataTypes.STRING,
+          allowNull: false
+        },
         avatar: DataTypes.STRING,
         biography: DataTypes.TEXT,
     }

@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import passport from 'passport';
+
 import { Strategy as LocalStrategy } from 'passport-local';
 import { ExtractJwt, Strategy as JWTStrategy } from 'passport-jwt';
 import { User } from './db.js';
@@ -14,7 +15,7 @@ const JWTVerify = async (jwtPayload, done) => {
   try {
     // jwtPayload에 유저 정보가 담겨있다.
     // 해당 정보로 유저 식별 로직을 거친다.
-		const user = await User.findOne({where: {email: jwtPayload.userid}});
+		const user = await User.findOne({where: {email: jwtPayload.username}});
     // 유효한 유저라면
     if (user) {
       done(null, user);
@@ -31,20 +32,22 @@ const JWTVerify = async (jwtPayload, done) => {
 passport.use('jwt', new JWTStrategy(JWTConfig, JWTVerify));
 
 // 토큰에 담길 유저명의 key를 지정하는 옵션. 패스워드도 지정할 수 있다.
-const passportConfig = { useridField: 'userid', passwordField: 'password', nicknameField: 'nickname' };
+const passportConfig = { usernameField: 'username', passwordField: 'password'};
 
 passport.use(
   'signup',
-  new LocalStrategy(passportConfig, async (nickname, userid, password, done) => {
+  new LocalStrategy({ ...passportConfig, passReqToCallback: true }, async (req, username, password, done) => {
     // 유저 생성
+    const nickname = req.body.nickname;
+    console.log(nickname);
 		const user = await User.create({ userId: null, 
-			email: userid, nickname: nickname, password: password, 
+			email: username, nickname: nickname, password: password, 
 			avatar: "https://ohnpol.s3.ap-northeast-2.amazonaws.com/users/avatar.png", 
 			biography: "자기소개", id: null });
     console.log("userCreated?", user);
     // 성공하면
 		if(user){
-			return done(null, userid, password);
+			return done(null, user);
 		}
     // 실패하면
 		if(!user){
@@ -56,9 +59,9 @@ passport.use(
 
 passport.use(
   'signin',
-  new LocalStrategy(passportConfig, async (userid, done) => {
+  new LocalStrategy(passportConfig, async (username, password, done) => {
     // 유저가 db 에 존재한다면
-		const user = await User.findOne({where: {email: userid}});
+		const user = await User.findOne({where: {email: username, password: password}});
 		if(user){
 			return done(null, user, { message: 'Sign in Successful' });
 		}

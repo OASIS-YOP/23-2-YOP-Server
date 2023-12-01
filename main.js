@@ -8,29 +8,9 @@ import crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
 
-import { Collection, UserCollection } from './db.js';
-// import { Strategy as JwtStrategy } from 'passport-jwt';
-// import { ExtractJwt as ExtracJwt } from 'passport-jwt';
-// //import { DataTypes, Model, Sequelize } from 'sequelize';
-// import { User } from './db.js';
-// import passport from 'passport';
-// import { Strategy as LocalStrategy } from 'passport-local';
-// import bcrypt from 'bcrypt';
-
+import { Collection } from './db.js';
 import { passport } from './auth.js';
-// import passport from 'passport';
 import jwt from 'jsonwebtoken';
-import { DataTypes } from 'sequelize';
-
-// const passportConfig = {
-//   useridField: 'userId',
-//   passwordField: 'password'
-// };
-
-// const JWTConfig = {
-//   jwtFromRequest: ExtracJwt.fromHeader('authorization'),
-//   secretOrKey: 'jwt-secret-key'
-// };
 
 const randomImgName = (bytes=32)=> crypto.randomBytes(bytes).toString('hex');
 
@@ -39,9 +19,9 @@ const region = process.env.S3_REGION;
 const accessKey = process.env.S3_KEYID;
 const secretAccessKey = process.env.S3_PRIVATEKEY;
 
-console.log('Region:', region);
-console.log('Access Key:', accessKey);
-console.log('Secret Access Key:', secretAccessKey);
+// console.log('Region:', region);
+// console.log('Access Key:', accessKey);
+// console.log('Secret Access Key:', secretAccessKey);
 
 const s3 = new S3Client({
   credentials:{
@@ -57,82 +37,19 @@ const port = 3000;
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage});
 
-//로그인 관련
-// const options = {
-//   jwtFromRequest: ExtracJwt.fromAuthHeaderAsBearerToken(),
-//   secretOrkey: 'secret',
-//   algorithms: ['RS256']
-// }
-
-// const strategy = new JwtStrategy(options, (payload, done)=>{
-//   User.findOne({where: {id: payload.sub}})
-//   .then((user)=>{
-//     if(user){
-//       return done(null, user);
-//     }else{
-//       return done(null, false);
-//     }
-//   })
-//   .catch(err => done(err, null));
-// });
-
-// module.exports = (passport)=>{
-//   passport.use(strategy);
-// }
-
-// const passportVerify = async (userId, password, done) => {
-//   try{
-//     const user = await User.findOne({where: {email: userId}});
-
-//     if(!user){
-//       done(null, false, {reason: 'ID가 틀렸습니다'});
-//       return;
-//     }
-
-//     const compareResult = await bcrypt.compare(password, user.password);
-
-//     if(compareResult){
-//       done(null, user);
-//       return;
-//     }
-
-//     done(null, false, {reason:'비밀번호가 틀렸습니다'});
-
-//   } catch(error){
-//     console.log(error);
-//     done(error);
-//   }
-// };
-
-// passport.use('local', new LocalStrategy(passportConfig, passportVerify));
-
-// app.use(passport.initialize());
-// //passportConfig();
-
-// const JWTVerify = async (jwtPayload, done) =>{
-//   try{
-//     const user = await User.findOne({where: {id: jwtPayload.id}});
-
-//     if(user){
-//       done(null, user);
-//       return;
-//     }
-//     done(null, false, {reason: '올바르지 않은 인증 정보입니다.'});
-//   } catch (error) {
-//     console.error(error);
-//     done(error);
-//   }
-// };
-
-// passport.use('jwt', new JwtStrategy(JWTConfig, JWTVerify));
-
-app.use(bodyParser.json());
+//app.use(bodyParser.json());
 const corsOptions = {
   origin: "http://localhost:3000",
   credentials: true,
 };
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// app.use((req, res, next) => {
+//   console.log('Request Body:', req.body);
+//   next();
+// });
 
 const getRandomInt = (max) => {
   return Math.floor(Math.random() * max);
@@ -142,18 +59,14 @@ app.get('/', async(req, res)=>{
   res.send('Hello World!');
 })
 
-// 회원
-// app.get('/protected', async(req, res, next)=>{
-
-// });
-
+//회원
 app.post('/login', (req, res, next) => {
   passport.authenticate('signin', (err, user, info) => {
     if (!user) {
       return res.status(400).json({ message: info.message });
     }
     const token = jwt.sign(
-      { userid: req.body.userid },
+      { username: user.username },
       process.env.JWT_SECRET_KEY
     );
     res.json({ token });
@@ -162,13 +75,14 @@ app.post('/login', (req, res, next) => {
 
 
 
-app.post('/signup', async (req, res, next) => {
+app.post('/register', async (req, res, next) => {
   try {
+    console.log('Request Body:', req.body);
+    const nickname = req.body.nickname;
     // 아까 local로 등록한 인증과정 실행
     passport.authenticate('signup', (passportError, user, info) => {
       // 인증이 실패했거나 유저 데이터가 없다면 에러 발생
       if (passportError || !user) {
-        //console.log('JWT Payload:', jwtPayload);
         console.log('User:', user);
         res.status(400).json({ message: info.reason });
         return;
@@ -181,7 +95,7 @@ app.post('/signup', async (req, res, next) => {
         }
         // 클라이언트에게 JWT 생성 후 반환
         const token = jwt.sign(
-          { id: user.id, name: user.name, auth: user.auth },
+          { username: user.username },
           process.env.JWT_SECRET_KEY
         );
         res.json({ token });
@@ -959,16 +873,16 @@ app.get('/mypage/:userId/myCollection/:artistId/allCollection', async(req, res)=
 
 //선택한 컬렉션 전체 포토카드 정보 조회
 app.get('/mypage/:userId/myCollection/:albumName/allPhotocard', async (req, res)=>{
-  const userId = req.params.userId;
+  //const userId = req.params.userId;
   //const artistId = req.params.artistId;
   const albumName = req.params.albumName;
   const sql = `SELECT pc.photocardId, pc.photocard, pc.version, pc.memberName
-              FROM UserCollections uc
-              INNER JOIN collections c ON uc.albumName = c.albumName
-              INNER JOIN photoCards pc ON pc.albumName = uc.albumName
-              INNER JOIN UserPhotoCards upc ON uc.userId = upc.userId
-              WHERE uc.userId =?  AND uc.albumName=?;`;
-    con.query(sql, [userId, albumName], (err, result, fields)=>{
+              FROM collections c
+              INNER JOIN photoCards pc ON pc.albumName = c.albumName
+              WHERE c.albumName=?
+              ORDER BY pc.version;
+              `;
+    con.query(sql, [albumName], (err, result, fields)=>{
     if(err) throw err;
     const r = {
       collectionPhotocardList: result
