@@ -82,11 +82,25 @@ app.post('/register', async (req, res, next) => {
     // 아까 local로 등록한 인증과정 실행
     passport.authenticate('signup', (passportError, user, info) => {
       // 인증이 실패했거나 유저 데이터가 없다면 에러 발생
+      // if(emailExist){
+      //   res.status(400).json({
+      //     status: 400,
+      //     message: "이미 가입한 이메일입니다."})
+      //     return;
+      // }
+      // if(nicknameExist){
+      //   res.status(400).json({
+      //     status: 400,
+      //     message: "닉네임이 중복됩니다."
+      //   })
+      //   return;
+      // }
       if (passportError || !user) {
         console.log('User:', user);
-        res.status(400).json({ message: info.reason });
+        res.status(400).json(info);
         return;
       }
+      
       // user 데이터를 통해 로그인 진행
       req.login(user, { session: false }, (loginError) => {
         if (loginError) {

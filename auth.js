@@ -40,20 +40,34 @@ passport.use(
     // 유저 생성
     const nickname = req.body.nickname;
     console.log(nickname);
-		const user = await User.create({ userId: null, 
+    const emailExist = await User.findAll({where:{ email: username}, raw: true});
+    const nicknameExist = await User.findAll({where: {nickname: nickname}, raw: true});
+		console.log("emailExist length", emailExist.length);
+    console.log("nicknameExist length",nicknameExist.length);
+    console.log("nicknameExist",nicknameExist);
+    let user = false;
+    if((emailExist.length===0) && (nicknameExist.length===0)){
+      user = await User.create({ userId: null, 
 			email: username, nickname: nickname, password: password, 
 			avatar: "https://ohnpol.s3.ap-northeast-2.amazonaws.com/users/avatar.png", 
 			biography: "자기소개", id: null });
+    }
     console.log("userCreated?", user);
     // 성공하면
 		if(user){
 			return done(null, user);
 		}
-    // 실패하면
-		if(!user){
-			return done(null, false, { message: 'User creation fail.' });
-		}
+    // 실패하면 혹은 중복
+		// if(!user){
+		// 	return done(null, false, { message: 'User creation fail.' });
+		// }
     
+    if(!user && (emailExist.length > 0)){
+      return done(null, false, {message: "이미 가입한 이메일입니다."})
+    }
+    if(!user && (nicknameExist.length > 0)){
+      return done(null, false, {message: "닉네임이 중복됩니다."})
+    }
   })
 );
 
