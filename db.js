@@ -28,10 +28,18 @@ User.init(
         primaryKey: true,
         autoIncrement: true,
       },
-        id: DataTypes.STRING,
-        email: DataTypes.STRING,
-        nickname: DataTypes.STRING,
-        password: DataTypes.STRING,
+        email: {
+          type: DataTypes.STRING,
+          allowNull: false
+        },
+        nickname: {
+          type: DataTypes.STRING,
+          allowNull: false
+        },
+        password: {
+          type: DataTypes.STRING,
+          allowNull: false
+        },
         avatar: DataTypes.STRING,
         biography: DataTypes.TEXT,
     }
@@ -85,7 +93,11 @@ PhotoCard.init(
       photocard: DataTypes.STRING,
       albumName: DataTypes.STRING,
       enterComp: DataTypes.STRING,
-      groupName: DataTypes.STRING
+      groupName: DataTypes.STRING,
+      activationCode: {
+        type: DataTypes.STRING,
+        allowNull: true
+      }
     }
     ,
     {
@@ -315,9 +327,11 @@ class UserCollection extends Model {
 }
 UserCollection.init(
   {
-    collectionQuant: {
+    collectionActId: {
       type: DataTypes.INTEGER,
-      // autoIncrement: true,
+      autoIncrement: true,
+      primaryKey: true,
+      allowNull: true
     }
   },
   {
@@ -342,9 +356,11 @@ class UserPhotoCard extends Model {
 }
 UserPhotoCard.init(
   {
-    photocardQuant: {
+    photocardActId: {
       type: DataTypes.INTEGER,
-      // autoIncrement: true,
+      autoIncrement: true,
+      primaryKey: true,
+      allowNull: true
     }
   },
   {
@@ -377,18 +393,7 @@ await sequelize.sync();
 // Artist.sync();
 
 // //------------------EXPORT---------------------
-export { Artist, 
-  Collection, 
-  Favorite, 
-  Like, 
-  PhotoCard, 
-  Polaroid, 
-  Post, 
-  User}
-
-
-
-
+export {User, UserCollection, Collection}
 
 // //-------------------DATA-----------------------
 // // const jane = User.build({ firstName: "Jane", lastName: "Doe" });

@@ -8,17 +8,9 @@ import crypto from 'crypto';
 import dotenv from 'dotenv';
 dotenv.config();
 
-// import { Strategy as JwtStrategy } from 'passport-jwt';
-// import { ExtractJwt as ExtracJwt } from 'passport-jwt';
-// import { DataTypes, Model, Sequelize } from 'sequelize';
-// import { Artist, 
-//   Favorite, 
-//   Collection, 
-//   Like,
-//   PhotoCard,
-//   Polaroid,
-//   Post,
-//   User } from './db.js';
+import { Collection } from './db.js';
+import { passport } from './auth.js';
+import jwt from 'jsonwebtoken';
 
 const randomImgName = (bytes=32)=> crypto.randomBytes(bytes).toString('hex');
 
@@ -27,9 +19,9 @@ const region = process.env.S3_REGION;
 const accessKey = process.env.S3_KEYID;
 const secretAccessKey = process.env.S3_PRIVATEKEY;
 
-console.log('Region:', region);
-console.log('Access Key:', accessKey);
-console.log('Secret Access Key:', secretAccessKey);
+// console.log('Region:', region);
+// console.log('Access Key:', accessKey);
+// console.log('Secret Access Key:', secretAccessKey);
 
 const s3 = new S3Client({
   credentials:{
@@ -45,36 +37,19 @@ const port = 3000;
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage});
 
-// //로그인 관련
-// const options = {
-//   jwtFromRequest: ExtracJwt.fromAuthHeaderAsBearerToken(),
-//   secretOrkey: 'secret',
-//   algorithms: ['RS256']
-// }
-
-// const strategy = new JwtStrategy(options, (payload, done)=>{
-//   User.findOne({where: {id: payload.sub}})
-//   .then((user)=>{
-//     if(user){
-//       return done(null, user);
-//     }else{
-//       return done(null, false);
-//     }
-//   })
-//   .catch(err => done(err, null));
-// });
-
-// module.exports = (passport)=>{
-//   passport.use(strategy);
-// }
-
-app.use(bodyParser.json());
+//app.use(bodyParser.json());
 const corsOptions = {
   origin: "http://localhost:3000",
   credentials: true,
 };
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// app.use((req, res, next) => {
+//   console.log('Request Body:', req.body);
+//   next();
+// });
 
 const getRandomInt = (max) => {
   return Math.floor(Math.random() * max);
@@ -84,18 +59,78 @@ app.get('/', async(req, res)=>{
   res.send('Hello World!');
 })
 
-// 회원
-// app.get('/protected', async(req, res, next)=>{
+//회원
+app.post('/login', (req, res, next) => {
+  passport.authenticate('signin', (err, user, info) => {
+    if (!user) {
+      return res.status(400).json({ message: info.message });
+    }
+    const token = jwt.sign(
+      { username: user.username },
+      process.env.JWT_SECRET_KEY
+    );
+    res.json({ token });
+  })(req, res, next);
+});
 
-// });
 
-// app.post('/login', async(req, res, next)=>{
 
-// });
+app.post('/register', async (req, res, next) => {
+  try {
+    console.log('Request Body:', req.body);
+    const nickname = req.body.nickname;
+    // 아까 local로 등록한 인증과정 실행
+    passport.authenticate('signup', (passportError, user, info) => {
+      // 인증이 실패했거나 유저 데이터가 없다면 에러 발생
+      // if(emailExist){
+      //   res.status(400).json({
+      //     status: 400,
+      //     message: "이미 가입한 이메일입니다."})
+      //     return;
+      // }
+      // if(nicknameExist){
+      //   res.status(400).json({
+      //     status: 400,
+      //     message: "닉네임이 중복됩니다."
+      //   })
+      //   return;
+      // }
+      if (passportError || !user) {
+        console.log('User:', user);
+        res.status(400).json(info);
+        return;
+      }
+      
+      // user 데이터를 통해 로그인 진행
+      req.login(user, { session: false }, (loginError) => {
+        if (loginError) {
+          res.send(loginError);
+          return;
+        }
+        // 클라이언트에게 JWT 생성 후 반환
+        const token = jwt.sign(
+          { username: user.username },
+          process.env.JWT_SECRET_KEY
+        );
+        res.json({ token });
+      });
+    })(req, res);
+  } catch (error) {
+    console.error(error);
+    next(error);
+  }
+});
 
-// app.post('/register', async(req, res, next)=>{
 
-// });
+app.post('/auth', passport.authenticate('jwt', {session: false}),
+  async(req, res, next)=>{
+    try{
+      res.json({result:true});
+    }catch(error){
+      console.error(error);
+      next(error);
+    }
+});
 
 
 //mainpage
@@ -381,8 +416,8 @@ app.delete('/community/:artistId/notFavorite/:userId', async(req,res)=>{
   const artistId = req.params.artistId;
   const userId = req.params.userId;
   const sql = `DELETE 
-              FROM Likes
-              WHERE (artistId=? AND userId=?);
+              FROM Favorites
+              WHERE artistId=? AND userId=?;
   `
   con.query(sql, [artistId, userId], (err, result, fields)=>{
     if(err) throw err;
@@ -443,7 +478,12 @@ app.get('/community/:artistId/members', async (req, res) => {
 
 //아티스트 멤버별 도안 조회
 app.get('/community/:memberName/memberPost', async (req, res) => { 
-  const memberName = req.params.memberName;
+  const memberName =req.params.memberName;
+  // if(memberName=='아이유'){
+  //   memberName = '아이유(IU)';
+  // }else{
+  //   memberName=req.params.memberName;
+  // }
   const sql = `SELECT 
                 p.postId,
                 pl.polaroid,
@@ -460,7 +500,7 @@ app.get('/community/:memberName/memberPost', async (req, res) => {
               WHERE  pc.memberName = ?
               ORDER BY p.postId DESC
               ; `;
-  con.query(sql, [memberName], async (err, result, fields) => {
+  con.query(sql, [memberName === '아이유' ? '아이유(IU)':memberName], async (err, result, fields) => {
     if (err) throw err;
     
     const finalResult = [];
@@ -847,16 +887,16 @@ app.get('/mypage/:userId/myCollection/:artistId/allCollection', async(req, res)=
 
 //선택한 컬렉션 전체 포토카드 정보 조회
 app.get('/mypage/:userId/myCollection/:albumName/allPhotocard', async (req, res)=>{
-  const userId = req.params.userId;
+  //const userId = req.params.userId;
   //const artistId = req.params.artistId;
   const albumName = req.params.albumName;
   const sql = `SELECT pc.photocardId, pc.photocard, pc.version, pc.memberName
-              FROM UserCollections uc
-              INNER JOIN collections c ON uc.albumName = c.albumName
-              INNER JOIN photoCards pc ON pc.albumName = uc.albumName
-              INNER JOIN UserPhotoCards upc ON uc.userId = upc.userId
-              WHERE uc.userId =?  AND uc.albumName=?;`;
-    con.query(sql, [userId, albumName], (err, result, fields)=>{
+              FROM collections c
+              INNER JOIN photoCards pc ON pc.albumName = c.albumName
+              WHERE c.albumName=?
+              ORDER BY pc.version;
+              `;
+    con.query(sql, [albumName], (err, result, fields)=>{
     if(err) throw err;
     const r = {
       collectionPhotocardList: result
@@ -1068,7 +1108,7 @@ app.post('/post/:userId/:postId/updateLike', async(req, res)=>{
 
 //포스트 좋아요 클릭 해제하기
 app.delete('/post/notLike/:userId/:postId', async(req, res)=>{
-  const postId = req.params.artistId;
+  const postId = req.params.postId;
   const userId = req.params.userId;
   const sql = `DELETE 
               FROM Likes
@@ -1200,9 +1240,16 @@ app.post('/mypage/:userId/myCollection/:albumName/collectionActivation', async(r
   const userId = req.params.userId;
   const albumName = req.params.albumName;
   const code = req.body.code;
-
-  const sql = `INSERT INTO UserCollections
-              VALUES (1, ?, ?)`;
+  
+  const collectionalbum = await Collection.findAll({where: {albumName: albumName}});
+  console.log("collectionalbum",collectionalbum);
+  const collectionCode = collectionalbum[0]?.dataValues?.activationCode;
+  console.log("collectionCode", collectionCode);
+  console.log(typeof collectionCode);
+  console.log(typeof code);
+  if(code===collectionCode){
+    const sql = `INSERT INTO UserCollections
+              VALUES (NULL, ?, ?)`;
   con.query( sql, [userId, albumName], (err, result, fields)=>{
     if(err) throw err;
     const msg = "컬렉션 활성화됨"
@@ -1210,6 +1257,11 @@ app.post('/mypage/:userId/myCollection/:albumName/collectionActivation', async(r
     res.status(201).send(result);
     console.log(result);
   })
+  }else{
+    res.json("[활성화 실패] 잘못된 코드입니다.");
+  }
+
+  
 });
 
 //포토카드 랜덤 부여(활성화 임시 버전)
@@ -1235,6 +1287,107 @@ app.post('/mypage/:userId/myCollection/:albumName/cardActivationRandomly', async
       console.log(result);
     })
   })
+});
+
+//해당 유저의 아티스트 즐겨찾기 여부 확인 API (11.27)
+app.get('/community/:userId/isFavorite/:artistId', async(req, res)=>{
+  const userId = req.params.userId;
+  const artistId = req.params.artistId;
+  const sql = `SELECT COUNT(*) AS isFavorite
+              FROM Favorites
+              WHERE userId = ? AND artistId = ?;`;
+  con.query(sql, [userId, artistId], (err, result, fields)=>{
+    if(err) throw err;
+    let isFavorite = true;
+    let response = result[0].isFavorite;
+    if(response>0){
+      isFavorite = true;
+    }else{
+      isFavorite = false;
+    }
+    res.status(200).send(isFavorite);
+  })
+});
+
+//해당 유저의 포스트 좋아요 여부 확인 API (11.27)
+app.get('/:userId/isLike/:postId', async(req, res)=>{
+  const userId = req.params.userId;
+  const postId = req.params.postId;
+  const sql = `SELECT COUNT(*) AS isLike
+              FROM Likes
+              WHERE userId = ? AND postId = ?;`;
+  con.query(sql, [userId, postId], (err, result, fields)=>{
+    if(err) throw err;
+    let isLike = true;
+    let response = result[0].isLike;
+    if(response>0){
+      isLike = true;
+    }else{
+      isLike = false;
+    }
+    res.status(200).send(isLike);
+  })
+});
+
+// 포토카드 업로드하기
+app.post('/photocard/upload/:memberName/:version', upload.single('image'), async(req, res)=>{
+  console.log("req.body", req.body);
+  console.log("req.file", req.file);
+
+  const memberName = req.params.memberName;
+  const version = req.params.version;
+  let albumName = '';
+  let groupName = '';
+  let enterComp = '';
+  if(memberName === '정국' || '뷔' || '지민' || '슈가' || '진' || 'RM' || '제이홉'){
+    groupName = '방탄소년단(BTS)';
+    albumName = '<Butter>';
+    enterComp = '빅히트 엔터테인먼트(Big Hit Entertainment)'
+  }else if(memberName==='윈터' ||'카리나'||'닝닝' || '지젤'){
+    groupName = '에스파(aespa)';
+    albumName = '<MY WORLD - The 3rd Mini Album>';
+    enterComp = '에스엠 엔터테인먼트(SM Entertainment)';
+  }else if(memberName==='민지' ||'하니'||'해린' || '다니엘'||"혜인"){
+    groupName = '뉴진스(NewJeans)';
+    albumName = '<NewJeans 2nd EP \'GET UP\'>';
+    enterComp = '어도어 엔터테인먼트(ADOR Entertainment)';
+  }else{
+    groupName = '아이유(IU)';
+    albumName = '<LILAC>';
+    enterComp = '이담 엔터테인먼트(EDAM Entertainment)';
+  }
+  const folderName = groupName.replace(/\([^)]*\)/, '').trim();
+  const imgName = randomImgName();
+  const params = {
+    Bucket: bucketName,
+    Key: `photocard/${folderName}/${imgName}`,
+    //Body: req.file.buffer,
+    Body: req.file.buffer,
+    ACL: 'public-read',
+    ContentType: req.file.mimetype
+  }
+
+  const command = new PutObjectCommand(params);
+  await s3.send(command);
+  console.log(command);
+
+  const image = `https://${process.env.BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/polaroid/${imgName}`;
+  const sql = `INSERT into photoCards( photocardId, memberName, version, photocard, albumName, enterComp, groupName, activationCode)
+              VALUES ( NULL, ?, ?, ?, ?, ?, ?, NULL)`;
+
+  con.query(sql, [memberName, version, image, albumName, enterComp, groupName], (err, result, fields) => {
+    if (err) {
+      throw err;
+    }
+
+    const response = {
+      originalResult: result,
+      message: `포토카드 저장됨`,
+    };
+
+    res.status(201).send(response);
+    
+  });
 });
 
 app.listen(port, ()=>{
