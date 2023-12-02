@@ -417,7 +417,7 @@ app.delete('/community/:artistId/notFavorite/:userId', async(req,res)=>{
   const userId = req.params.userId;
   const sql = `DELETE 
               FROM Favorites
-              WHERE artistId=? AND userId=?;
+              WHERE (artistId=? AND userId=?);
   `
   con.query(sql, [artistId, userId], (err, result, fields)=>{
     if(err) throw err;
@@ -1130,7 +1130,8 @@ app.post('/community/:artistId/updateFavorite/:userId', async(req, res)=>{
     const artistId = req.params.artistId;
 
     // Use prepared statement to prevent SQL injection
-    const sql = 'INSERT INTO Favorites (userId, artistId) VALUES (?, ?)';
+    const sql = `INSERT INTO Favorites (userId, artistId) 
+                  VALUES (?, ?)`;
     con.query(sql, [userId, artistId], (err, result, fields) => {
       if (err) {
         // Handle SQL error
