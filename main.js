@@ -1094,7 +1094,7 @@ app.post('/post/:userId/:postId/updateLike', async(req, res)=>{
 
 //포스트 좋아요 클릭 해제하기
 app.delete('/post/notLike/:userId/:postId', async(req, res)=>{
-  const postId = req.params.artistId;
+  const postId = req.params.postId;
   const userId = req.params.userId;
   const sql = `DELETE 
               FROM Likes
