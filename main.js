@@ -1277,12 +1277,14 @@ app.post('/mypage/:userId/myCollection/:albumName/cardActivationRandomly', async
     console.log(result);
     const randomIndex = getRandomInt(result.length);
     const randomCard = parseInt(result[randomIndex-1].photocardId);
+    console.log("randomCard: ", randomCard);
+    console.log("randomIndex: ", randomIndex);
     const sql2 = `INSERT UserPhotoCards
-                  VALUES (1, ?, ?)`;
+                  VALUES (NULL, ?, ?)`;
     con.query(sql2, [userId, randomCard], (err, result, fields)=>{
       if(err) throw err;
       
-      const msg = "랜덤 포토카드 부여"
+      const msg = ` ${randomCard} 번 포토카드 부여`
       result.message = msg;
       res.status(201).send(result);
       console.log(result);
