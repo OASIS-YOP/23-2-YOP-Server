@@ -56,7 +56,8 @@ const getRandomInt = (max) => {
 }
 
 app.get('/', async(req, res)=>{
-  res.send('Hello World!');
+  let randomNumber = getRandomInt(3);
+  res.status(200).send(`randomNumber: ${randomNumber}`);
 })
 
 //회원
@@ -1276,7 +1277,7 @@ app.post('/mypage/:userId/myCollection/:albumName/cardActivationRandomly', async
     if(err) throw err;
     console.log(result);
     const randomIndex = getRandomInt(result.length);
-    const randomCard = parseInt(result[randomIndex-1].photocardId);
+    const randomCard = parseInt(result[randomIndex].photocardId);
     console.log("randomCard: ", randomCard);
     console.log("randomIndex: ", randomIndex);
     const sql2 = `INSERT UserPhotoCards
