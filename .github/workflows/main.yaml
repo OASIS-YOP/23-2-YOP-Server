@@ -29,7 +29,7 @@ jobs:
           echo "S3_PRIVATEKEY=${{ secrets.S3_PRIVATEKEY }}" >> .env
           echo "S3_REGION=${{ secrets.S3_REGION }}" >> .env
           echo "BUCKET_NAME=${{ secrets.BUCKET_NAME }}" >> .env
-          echo "BUCKET_NAME=${{ secrets.JWT_SECRET_KEY }}" >> .env
+          echo "JWT_BUCKET_NAME=${{ secrets.JWT_SECRET_KEY }}" >> .env
       
         env: 
           DB_HOST: ${{ secrets.DB_HOST }}
