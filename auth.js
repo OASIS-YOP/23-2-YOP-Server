@@ -8,7 +8,7 @@ dotenv.config();
 
 const JWTConfig = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-  secretOrKey: process.env.JWT_SECRET_KEY,
+  secretOrKey: process.env.JWT_SECRET_KEY
 };
 
 const JWTVerify = async (jwtPayload, done) => {
