@@ -11,6 +11,7 @@ dotenv.config();
 import { Collection } from './db.js';
 import { passport } from './auth.js';
 import jwt from 'jsonwebtoken';
+import { verifyToken } from './jwt.js';
 
 const randomImgName = (bytes=32)=> crypto.randomBytes(bytes).toString('hex');
 
@@ -74,8 +75,6 @@ app.post('/login', (req, res, next) => {
   })(req, res, next);
 });
 
-
-
 app.post('/register', async (req, res, next) => {
   try {
     console.log('Request Body:', req.body);
@@ -122,6 +121,9 @@ app.post('/register', async (req, res, next) => {
   }
 });
 
+app.get('/test', verifyToken, (req, res) => {
+  res.json(req.decoded);
+});
 
 app.post('/auth', passport.authenticate('jwt', {session: false}),
   async(req, res, next)=>{
@@ -136,7 +138,7 @@ app.post('/auth', passport.authenticate('jwt', {session: false}),
 
 //mainpage
 //즐겨찾는 아티스트
-app.get('/mainpage/:userId/favArtist', async (req, res) => {
+app.get('/mainpage/:userId/favArtist', verifyToken, async (req, res) => {
   const userId = req.params.userId; // 요청된 userId
 
   const sql = `SELECT artists.photo, artists.artistId, artists.groupName
@@ -1347,13 +1349,13 @@ app.post('/photocard/upload/:memberName/:version', upload.single('image'), async
     groupName = '방탄소년단(BTS)';
     albumName = '<Butter>';
     enterComp = '빅히트 엔터테인먼트(Big Hit Entertainment)'
-  }else if(memberName==='윈터' ||'카리나'||'닝닝' || '지젤'){
+  }else if(memberName === '윈터' || '카리나' || '닝닝' || '지젤'){
     groupName = '에스파(aespa)';
     albumName = '<MY WORLD - The 3rd Mini Album>';
     enterComp = '에스엠 엔터테인먼트(SM Entertainment)';
-  }else if(memberName==='민지' ||'하니'||'해린' || '다니엘'||"혜인"){
+  }else if(memberName === '민지' ||'하니' || '해린' || '다니엘'|| '혜인'){
     groupName = '뉴진스(NewJeans)';
-    albumName = '<NewJeans 2nd EP \'GET UP\'>';
+    albumName = `<NewJeans 2nd EP 'GET UP'>`;
     enterComp = '어도어 엔터테인먼트(ADOR Entertainment)';
   }else{
     groupName = '아이유(IU)';
