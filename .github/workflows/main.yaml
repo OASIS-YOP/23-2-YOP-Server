@@ -48,9 +48,10 @@ jobs:
           echo "${{ secrets.S3_PRIVATEKEY }}"
           echo "${{ secrets.S3_REGION }}"
           echo "${{ secrets.BUCKET_NAME }}"
-      
-      - run: npm install
-      - run: node main.js
+      - name: Install dependencies and run script
+        run: |
+          npm install
+          node main.js
 
       # 백엔드
       # 업데이트 하는 과정을 명령어로 구성하기
