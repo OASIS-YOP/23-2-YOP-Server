@@ -138,7 +138,7 @@ app.post('/auth', passport.authenticate('jwt', {session: false}),
 
 //mainpage
 //즐겨찾는 아티스트
-app.get('/mainpage/:userId/favArtist', verifyToken, async (req, res) => {
+app.get('/mainpage/:userId/favArtist', /*verifyToken,*/ async (req, res) => {
   const userId = req.params.userId; // 요청된 userId
 
   const sql = `SELECT artists.photo, artists.artistId, artists.groupName
