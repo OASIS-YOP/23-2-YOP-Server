@@ -985,7 +985,8 @@ app.get('/mypage/:userId/myPolaroid/:albumName/polaroids', async(req, res)=>{
   const sql = `SELECT polaroidId, polaroid, saveDateTime
               FROM polaroidBackups plb
               INNER JOIN photoCards pc ON pc.photocardId = plb.photocardId
-              WHERE plb.userId = ? AND pc.albumName = ?`;
+              WHERE plb.userId = ? AND pc.albumName = ?
+              ORDER BY polaroidId DESC`;
   con.query(sql, [userId, albumName], (err, result, fields)=>{
     if(err) throw err;
     const r = {
