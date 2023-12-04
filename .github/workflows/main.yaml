@@ -18,17 +18,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 18
-
-      - name: .env setup
-        run: |
-          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env
-          echo "S3_KEYID=${{ secrets.S3_KEYID }}" >> .env
-          echo "S3_PRIVATEKEY=${{ secrets.S3_PRIVATEKEY }}" >> .env
-          echo "S3_REGION=${{ secrets.S3_REGION }}" >> .env
-          echo "BUCKET_NAME=${{ secrets.BUCKET_NAME }}" >> .env
       - name: Set up environment variables
         env: 
           DB_HOST: ${{ secrets.DB_HOST }}
@@ -39,6 +28,26 @@ jobs:
           S3_PRIVATEKEY: ${{ secrets.S3_PRIVATEKEY }}
           S3_REGION: ${{ secrets.S3_REGION }}
           BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+        run: |
+          echo "${{ secrets.DB_HOST }}"
+          echo "${{ secrets.DB_USER }}"
+          echo "${{ secrets.DB_PASSWORD }}"
+          echo "${{ secrets.DB_DATABASE }}"
+          echo "${{ secrets.S3_KEYID }}"
+          echo "${{ secrets.S3_PRIVATEKEY }}"
+          echo "${{ secrets.S3_REGION }}"
+          echo "${{ secrets.BUCKET_NAME }}"
+      - name: .env setup
+        run: |
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "DB_DATABASE=${{ secrets.DB_DATABASE }}" >> .env
+          echo "S3_KEYID=${{ secrets.S3_KEYID }}" >> .env
+          echo "S3_PRIVATEKEY=${{ secrets.S3_PRIVATEKEY }}" >> .env
+          echo "S3_REGION=${{ secrets.S3_REGION }}" >> .env
+          echo "BUCKET_NAME=${{ secrets.BUCKET_NAME }}" >> .env
+      
       
       - run: npm install
       - run: node main.js
