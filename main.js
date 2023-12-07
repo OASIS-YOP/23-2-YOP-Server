@@ -67,8 +67,9 @@ app.post('/login', (req, res, next) => {
     if (!user) {
       return res.status(400).json({ message: info.message });
     }
+    const payload = {userId: user.userId};
     const token = jwt.sign(
-      { username: user.username },
+      payload,
       process.env.JWT_SECRET_KEY
     );
     res.json({ token });
@@ -108,8 +109,9 @@ app.post('/register', async (req, res, next) => {
           return;
         }
         // 클라이언트에게 JWT 생성 후 반환
+        const payload = {userId: user.userId};
         const token = jwt.sign(
-          { username: user.username },
+          payload,
           process.env.JWT_SECRET_KEY
         );
         res.json({ token });
@@ -138,8 +140,8 @@ app.post('/auth', passport.authenticate('jwt', {session: false}),
 
 //mainpage
 //즐겨찾는 아티스트
-app.get('/mainpage/:userId/favArtist', /*verifyToken,*/ async (req, res) => {
-  const userId = req.params.userId; // 요청된 userId
+app.get('/mainpage/favArtist', verifyToken, async (req, res) => {
+  const userId = req.decoded.userId; // 요청된 userId
 
   const sql = `SELECT artists.photo, artists.artistId, artists.groupName
               FROM Favorites
@@ -994,7 +996,8 @@ app.get('/mypage/:userId/myPolaroid/:albumName/polaroids', async(req, res)=>{
     }
     res.status(200).send(r);
   })
-});
+});    
+
 
 //내 도안 삭제하기
 app.delete('/mypage/:userId/myPolaroid/delete/:polaroidId', async(req, res)=>{

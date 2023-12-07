@@ -4,6 +4,7 @@ export const verifyToken = (req, res, next) => {
   // 인증 완료
   try {
     req.decoded = jwt.verify(req.headers.authorization, process.env.JWT_SECRET_KEY);
+    console.log(req.decoded);
     return next();
   }
   
