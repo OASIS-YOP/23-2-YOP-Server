@@ -196,7 +196,7 @@ app.get('/mainpage/favArtist', verifyToken, async (req, res) => {
 // })
 
 //hot 10 좋아요 합친 버전
-app.get('/mainpage/hot10', async(req, res)=>{
+app.get('/mainpage/hot10', verifyToken, async(req, res)=>{
   const sql = `SELECT l.postId, COUNT(*) AS likeQuant,
                       pl.polaroid, 
                       pc.enterComp, pc.groupName, pc.memberName, pc.albumName,
