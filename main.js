@@ -1090,7 +1090,7 @@ app.post('/post/:postId/updateLike',verifyToken, async(req, res)=>{
     const postId = req.params.postId;
 
     // Use prepared statement to prevent SQL injection
-    const sql = 'INSERT INTO Likes (userId, postId) VALUES ( ?, ?)';
+    const sql = 'INSERT INTO Likes (likeId, userId, postId) VALUES ( NULL, ?, ?)';
     con.query(sql, [userId, postId], (err, result, fields) => {
       if (err) {
         // Handle SQL error
@@ -1115,8 +1115,8 @@ app.post('/post/:postId/updateLike',verifyToken, async(req, res)=>{
 
 //포스트 좋아요 클릭 해제하기
 app.delete('/post/notLike/:postId', verifyToken, async(req, res)=>{
-  const postId = req.decoded.postId;
-  const userId = req.params.userId;
+  const postId = req.params.postId;
+  const userId = req.decoded.userId;
   const sql = `DELETE 
               FROM Likes
               WHERE (postId=? AND userId=?);
