@@ -1249,7 +1249,7 @@ app.post('/mypage/myCollection/:albumName/collectionActivation', verifyToken, as
   const albumName = req.params.albumName;
   const code = req.body.code;
   
-  const collectionalbum = await Collection.findAll({where: {albumName: albumName}});
+  const collectionalbum = await Collection.sync({force:false}).then(findAll({where: {albumName: albumName}}));
   console.log("collectionalbum",collectionalbum);
   const collectionCode = collectionalbum[0]?.dataValues?.activationCode;
   console.log("collectionCode", collectionCode);
