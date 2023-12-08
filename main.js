@@ -432,7 +432,7 @@ app.delete('/community/:artistId/notFavorite', verifyToken, async(req,res)=>{
 });
 
 //아티스트 내가 가진 컬렉션 조회
-app.get('/community/:artistId/:userId/collectionQuant', verifyToken, async (req, res) => {
+app.get('/community/:artistId/collectionQuant', verifyToken, async (req, res) => {
   const userId = req.decoded.userId;
   const artistId = req.params.artistId;
   const sql = `SELECT COUNT(*) AS collectionQuant
