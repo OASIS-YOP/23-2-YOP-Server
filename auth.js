@@ -15,7 +15,7 @@ const JWTVerify = async (jwtPayload, done) => {
   try {
     // jwtPayload에 유저 정보가 담겨있다.
     // 해당 정보로 유저 식별 로직을 거친다.
-		const user = await User.sync({force:false}).then(findOne({where: {email: jwtPayload.username}}));
+		const user = await User.findOne({where: {email: jwtPayload.username}});
     // 유효한 유저라면
     if (user) {
       done(null, user);
@@ -40,17 +40,17 @@ passport.use(
     // 유저 생성
     const nickname = req.body.nickname;
     console.log(nickname);
-    const emailExist = await User.sync({force:false}).then(findAll({where:{ email: username}, raw: true}));
-    const nicknameExist = await User.sync({force:false}).then(findAll({where: {nickname: nickname}, raw: true}));
+    const emailExist = await User.findAll({where:{ email: username}, raw: true});
+    const nicknameExist = await User.findAll({where: {nickname: nickname}, raw: true});
 		console.log("emailExist length", emailExist.length);
     console.log("nicknameExist length",nicknameExist.length);
     console.log("nicknameExist",nicknameExist);
     let user = false;
     if((emailExist.length===0) && (nicknameExist.length===0)){
-      user = await User.sync({force:false}).then(create({ userId: null, 
+      user = await User.create({ userId: null, 
 			email: username, nickname: nickname, password: password, 
 			avatar: "https://ohnpol.s3.ap-northeast-2.amazonaws.com/users/avatar.png", 
-			biography: "자기소개", id: null }));
+			biography: "자기소개", id: null });
     }
     console.log("userCreated?", user);
     // 성공하면
