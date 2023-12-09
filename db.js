@@ -119,7 +119,7 @@ Collection.init(
       },
       albumJacket: DataTypes.STRING,
       photoCardQuant: DataTypes.INTEGER,
-      activeDateTime: DataTypes.DATE,
+      // DatactiveeTime: DataTypes.DATE,
       activationCode: DataTypes.STRING
     }
     ,
@@ -129,7 +129,7 @@ Collection.init(
         timestamps: false
     }
 );
-// await sequelize.sync();
+  await sequelize.sync();
 
 //도안
 class Polaroid extends Model {
@@ -207,7 +207,7 @@ Post.init(
         timestamps: false
     }
   );
-// await sequelize.sync();
+    await sequelize.sync();
 
 // 릴레이션
 // 회원 : 도안 = 일대다
@@ -332,7 +332,8 @@ UserCollection.init(
       autoIncrement: true,
       primaryKey: true,
       allowNull: true
-    }
+    },
+    activeDateTime: DataTypes.DATE
   },
   {
       sequelize,
@@ -349,7 +350,7 @@ Collection.belongsToMany(User, {
   through: 'UserCollection',
   foreignKey: 'albumName',
 });
-// await sequelize.sync();
+await sequelize.sync();
 
 // 회원: 포토카드 = 다대다
 class UserPhotoCard extends Model {
