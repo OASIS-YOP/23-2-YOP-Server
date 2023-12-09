@@ -67,12 +67,15 @@ app.post('/login', (req, res, next) => {
     if (!user) {
       return res.status(400).json({ message: info.message });
     }
-    const payload = {userId: user.userId};
+    
+    const userProfile = { userId: user.userId,
+      nickname: user.nickname, avatar: user.avatar, biography: user.biography}
+  
     const token = jwt.sign(
-      payload,
+      userProfile,
       process.env.JWT_SECRET_KEY
     );
-    res.json({ token });
+    res.json({ userProfile, token });
   })(req, res, next);
 });
 
