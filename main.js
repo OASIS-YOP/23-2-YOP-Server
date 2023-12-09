@@ -1392,15 +1392,17 @@ app.post('/photocard/upload/:memberName/:version', upload.single('image'), verif
   let albumName = '';
   let groupName = '';
   let enterComp = '';
-  if(memberName === '정국' || '뷔' || '지민' || '슈가' || '진' || 'RM' || '제이홉'){
-    groupName = '방탄소년단(BTS)';
-    albumName = '<Butter>';
-    enterComp = '빅히트 엔터테인먼트(Big Hit Entertainment)'
-  }else if(memberName === '윈터' || '카리나' || '닝닝' || '지젤'){
-    groupName = '에스파(aespa)';
-    albumName = '<MY WORLD - The 3rd Mini Album>';
-    enterComp = '에스엠 엔터테인먼트(SM Entertainment)';
-  }else if(memberName === '민지' ||'하니' || '해린' || '다니엘'|| '혜인'){
+  // if(memberName === '정국' || '뷔' || '지민' || '슈가' || '진' || 'RM' || '제이홉'){
+  //   groupName = '방탄소년단(BTS)';
+  //   albumName = '<Butter>';
+  //   enterComp = '빅히트 엔터테인먼트(Big Hit Entertainment)'
+  // }else 
+  // if(memberName === '윈터' || '카리나' || '닝닝' || '지젤'){
+  //   groupName = '에스파(aespa)';
+  //   albumName = '<MY WORLD - The 3rd Mini Album>';
+  //   enterComp = '에스엠 엔터테인먼트(SM Entertainment)';
+  // }else 
+  if(memberName === '민지' ||'하니' || '해린' || '다니엘'|| '혜인'){
     groupName = '뉴진스(NewJeans)';
     albumName = `<NewJeans 2nd EP 'GET UP'>`;
     enterComp = '어도어 엔터테인먼트(ADOR Entertainment)';
@@ -1424,7 +1426,7 @@ app.post('/photocard/upload/:memberName/:version', upload.single('image'), verif
   await s3.send(command);
   console.log(command);
 
-  const image = `https://${process.env.BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/polaroid/${imgName}`;
+  const image = `https://${process.env.BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/photocard/${folderName}/${imgName}`;
   const sql = `INSERT into photoCards( photocardId, memberName, version, photocard, albumName, enterComp, groupName, activationCode)
               VALUES ( NULL, ?, ?, ?, ?, ?, ?, NULL)`;
 
