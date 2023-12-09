@@ -1428,8 +1428,11 @@ app.get('/:albumName/activePhotocardQuant', verifyToken, async(req, res)=>{
               WHERE upc.userId = ? AND pc.albumName = ?
               `
   con.query(sql, [userId, albumName], (err, result, fields)=>{
-    if(err) throw err;
-    res.status(200).send(result[0]);
+    if(result[0]){
+      res.status(200).send(result[0]);
+    }else{
+      res.status(200).json({"activeCardQuant":0});
+    }
   })
 
 })
