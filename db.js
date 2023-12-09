@@ -207,7 +207,7 @@ Post.init(
         timestamps: false
     }
   );
-    await sequelize.sync();
+    // await sequelize.sync();
 
 // 릴레이션
 // 회원 : 도안 = 일대다

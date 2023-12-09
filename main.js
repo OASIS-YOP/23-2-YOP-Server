@@ -906,8 +906,33 @@ app.get('/mypage/myCollection/:albumName/allPhotocard', verifyToken, async (req,
               `;
     con.query(sql, [albumName], (err, result, fields)=>{
     if(err) throw err;
+    
+    const result1 = [];
+    const result2 = [];
+    const result3 = [];
+    for(let i=0;i<result.length; i++){
+      if(result[i].version === "a"){
+        result1.push(result[i]);
+      }else if(result[i].version === "b"){
+        result2.push(result[i]);
+      }else if(result[i].version === "c"){
+        result3.push(result[i]);
+      }
+    }
+    const r1 = {
+      verA: result1
+    }
+    const r2 = {
+      verB: result2
+    }
+    const r3 = {
+      verC: result3
+    }
+    const re = {
+      ...r1, ...r2, ...r3
+    }
     const r = {
-      collectionPhotocardList: result
+      collectionPhotocardList: re
     }
     res.status(200).send(r);
   })
