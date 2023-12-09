@@ -1400,6 +1400,7 @@ app.post('/photocard/upload/:memberName/:version', upload.single('image'), verif
   });
 });
 
+// 포스트아이디로 포스트 좋아요 개수 확인하는 API
 app.get('/postLikeQuant/:postId', verifyToken, async(req, res)=>{
   const postId = req.params.postId;
   const sql = `SELECT COUNT(*) AS postLikeQuant
@@ -1414,6 +1415,23 @@ app.get('/postLikeQuant/:postId', verifyToken, async(req, res)=>{
       res.status(200).json({"postLikeQuant":0});
     }
   })
+});
+
+// 앨범이름으로 앨범에 활성화된 포토카드 개수 확인하는 API
+app.get('/:albumName/activePhotocardQuant', verifyToken, async(req, res)=>{
+  const albumName = req.params.albumName;
+  const userId = req.decoded.userId;
+
+  const sql = `SELECT COUNT(*) AS activeCardQuant
+              FROM UserPhotoCards upc
+              INNER JOIN photoCards pc ON pc.photocardId = upc.photocardId
+              WHERE upc.userId = ? AND pc.albumName = ?
+              `
+  con.query(sql, [userId, albumName], (err, result, fields)=>{
+    if(err) throw err;
+    res.status(200).send(result[0]);
+  })
+
 })
 
 app.listen(port, ()=>{
