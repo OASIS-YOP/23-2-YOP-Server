@@ -863,7 +863,7 @@ app.get('/mypage/myCollection/artistTab', verifyToken, async (req, res)=>{
 app.get('/mypage/myCollection/:artistId/active', verifyToken, async (req, res)=>{
   const userId = req.decoded.userId;
   const artistId = req.params.artistId;
-  const sql = `SELECT c.albumJacket, c.albumName, c.activeDateTime, c.photoCardQuant
+  const sql = `SELECT c.albumJacket, c.albumName, uc.activeDateTime, c.photoCardQuant
               FROM collections c
               INNER JOIN UserCollections uc ON uc.albumName = c.albumName 
               INNER JOIN users u ON u.userId = uc.userId
