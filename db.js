@@ -129,7 +129,7 @@ Collection.init(
         timestamps: false
     }
 );
-  await sequelize.sync();
+  // await sequelize.sync();
 
 //도안
 class Polaroid extends Model {
@@ -350,7 +350,7 @@ Collection.belongsToMany(User, {
   through: 'UserCollection',
   foreignKey: 'albumName',
 });
-await sequelize.sync();
+// await sequelize.sync();
 
 // 회원: 포토카드 = 다대다
 class UserPhotoCard extends Model {

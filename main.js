@@ -1252,6 +1252,21 @@ app.post('/mypage/myCollection/:albumName/collectionActivation', verifyToken, as
   const albumName = req.params.albumName;
   const code = req.body.code;
   
+  let today = new Date();   
+
+  let year = today.getFullYear();
+  let month = today.getMonth() + 1; 
+  let date = today.getDate(); 
+
+  let nowdate = `${year}-${month}-${date}`;
+
+  let hours = today.getHours(); 
+  let minutes = today.getMinutes();  
+  let seconds = today.getSeconds();  
+
+  let time = `${hours}:${minutes}:${seconds}`;
+  let dateTime = `${nowdate} ${time}`;
+
   const collectionalbum = await Collection.findAll({where: {albumName: albumName}});
   console.log("collectionalbum",collectionalbum);
   const collectionCode = collectionalbum[0]?.dataValues?.activationCode;
@@ -1260,8 +1275,8 @@ app.post('/mypage/myCollection/:albumName/collectionActivation', verifyToken, as
   console.log(typeof code);
   if(code===collectionCode){
     const sql = `INSERT INTO UserCollections
-              VALUES (NULL, ?, ?)`;
-  con.query( sql, [userId, albumName], (err, result, fields)=>{
+              VALUES (NULL, ?, ?, ?)`;
+  con.query( sql, [userId, albumName, dateTime], (err, result, fields)=>{
     if(err) throw err;
     const msg = "컬렉션 활성화됨"
     result.message  = msg;
