@@ -1400,6 +1400,22 @@ app.post('/photocard/upload/:memberName/:version', upload.single('image'), verif
   });
 });
 
+app.get('/postLikeQuant/:postId', verifyToken, async(req, res)=>{
+  const postId = req.params.postId;
+  const sql = `SELECT COUNT(*) AS postLikeQuant
+              FROM Likes
+              WHERE postId = ?
+              GROUP BY postId;`;
+  con.query(sql, [postId], (err, result, fields)=>{
+    if(err) throw err;
+    if(result[0]){
+    res.status(200).send(result[0]);
+    }else{
+      res.status(200).json({"postLikeQuant":0});
+    }
+  })
+})
+
 app.listen(port, ()=>{
   console.log(`Example app listening on ${port}`);
 });
