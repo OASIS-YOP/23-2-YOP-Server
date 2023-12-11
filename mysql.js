@@ -11,13 +11,13 @@ const con = mysql.createConnection({
 
 con.connect();
 
-con.query('SELECT * from users', (error, results, fields)=> {
-  if (error){
-    console.log(error);
-  };
-  console.log(results);
-  //console.log(process.env.DB_HOST);
-});
+// con.query('SELECT * from users', (error, results, fields)=> {
+//   if (error){
+//     console.log(error);
+//   };
+//   console.log(results);
+//   //console.log(process.env.DB_HOST);
+// });
 
 //connection.end();
 

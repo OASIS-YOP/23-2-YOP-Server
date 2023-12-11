@@ -12,8 +12,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - run: echo "내용...${{ github.repository }}"
+      - uses: actions/checkout@v4
+      - name: Setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      
       - name: .env setup
-      - run: |
+        run: |
           echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
           echo "DB_USER=${{ secrets.DB_USER }}" >> .env
           echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
@@ -22,7 +29,8 @@ jobs:
           echo "S3_PRIVATEKEY=${{ secrets.S3_PRIVATEKEY }}" >> .env
           echo "S3_REGION=${{ secrets.S3_REGION }}" >> .env
           echo "BUCKET_NAME=${{ secrets.BUCKET_NAME }}" >> .env
-      - name: Set up environment variables
+          echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
+      
         env: 
           DB_HOST: ${{ secrets.DB_HOST }}
           DB_USER: ${{ secrets.DB_USER }}
@@ -32,14 +40,20 @@ jobs:
           S3_PRIVATEKEY: ${{ secrets.S3_PRIVATEKEY }}
           S3_REGION: ${{ secrets.S3_REGION }}
           BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
-      - run: echo "내용...${{ github.repository }}"
-      - uses: actions/checkout@v4
-      - name: Setup
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-      - run: npm install
-      - run: node main.js
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+      #   run: |
+      #     echo "${{ secrets.DB_HOST }}"
+      #     echo "${{ secrets.DB_USER }}"
+      #     echo "${{ secrets.DB_PASSWORD }}"
+      #     echo "${{ secrets.DB_DATABASE }}"
+      #     echo "${{ secrets.S3_KEYID }}"
+      #     echo "${{ secrets.S3_PRIVATEKEY }}"
+      #     echo "${{ secrets.S3_REGION }}"
+      #     echo "${{ secrets.BUCKET_NAME }}"
+      - name: Install dependencies and run script
+        run: |
+          npm install
+          node main.js
 
       # 백엔드
       # 업데이트 하는 과정을 명령어로 구성하기

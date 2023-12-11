@@ -11,6 +11,7 @@ dotenv.config();
 import { Collection } from './db.js';
 import { passport } from './auth.js';
 import jwt from 'jsonwebtoken';
+import { verifyToken } from './jwt.js';
 
 const randomImgName = (bytes=32)=> crypto.randomBytes(bytes).toString('hex');
 
@@ -56,7 +57,8 @@ const getRandomInt = (max) => {
 }
 
 app.get('/', async(req, res)=>{
-  res.send('Hello World!');
+  let randomNumber = getRandomInt(3);
+  res.status(200).send(`randomNumber: ${randomNumber}`);
 })
 
 //회원
@@ -65,15 +67,17 @@ app.post('/login', (req, res, next) => {
     if (!user) {
       return res.status(400).json({ message: info.message });
     }
+    
+    const userProfile = { userId: user.userId,
+      nickname: user.nickname, avatar: user.avatar, biography: user.biography}
+  
     const token = jwt.sign(
-      { username: user.username },
+      userProfile,
       process.env.JWT_SECRET_KEY
     );
-    res.json({ token });
+    res.json({ userProfile, token });
   })(req, res, next);
 });
-
-
 
 app.post('/register', async (req, res, next) => {
   try {
@@ -108,8 +112,9 @@ app.post('/register', async (req, res, next) => {
           return;
         }
         // 클라이언트에게 JWT 생성 후 반환
+        const payload = {userId: user.userId};
         const token = jwt.sign(
-          { username: user.username },
+          payload,
           process.env.JWT_SECRET_KEY
         );
         res.json({ token });
@@ -121,6 +126,9 @@ app.post('/register', async (req, res, next) => {
   }
 });
 
+app.get('/test', verifyToken, (req, res) => {
+  res.json(req.decoded);
+});
 
 app.post('/auth', passport.authenticate('jwt', {session: false}),
   async(req, res, next)=>{
@@ -135,8 +143,8 @@ app.post('/auth', passport.authenticate('jwt', {session: false}),
 
 //mainpage
 //즐겨찾는 아티스트
-app.get('/mainpage/:userId/favArtist', async (req, res) => {
-  const userId = req.params.userId; // 요청된 userId
+app.get('/mainpage/favArtist', verifyToken, async (req, res) => {
+  const userId = req.decoded.userId; // 요청된 userId
 
   const sql = `SELECT artists.photo, artists.artistId, artists.groupName
               FROM Favorites
@@ -191,7 +199,7 @@ app.get('/mainpage/:userId/favArtist', async (req, res) => {
 // })
 
 //hot 10 좋아요 합친 버전
-app.get('/mainpage/:userId/hot10', async(req, res)=>{
+app.get('/mainpage/hot10', verifyToken, async(req, res)=>{
   const sql = `SELECT l.postId, COUNT(*) AS likeQuant,
                       pl.polaroid, 
                       pc.enterComp, pc.groupName, pc.memberName, pc.albumName,
@@ -215,7 +223,7 @@ app.get('/mainpage/:userId/hot10', async(req, res)=>{
 
 
 //실시간도안
-app.get('/mainpage/:userId/now5', async (req, res) => {
+app.get('/mainpage/now5', verifyToken, async (req, res) => {
   
   const sql = `
               SELECT p.postId, pl.polaroid
@@ -236,7 +244,7 @@ app.get('/mainpage/:userId/now5', async (req, res) => {
 });
 
 //랜덤 아티스트
-app.get('/mainpage/:userId/randomArtist', async (req, res) => {
+app.get('/mainpage/randomArtist', verifyToken, async (req, res) => {
   const sql = `SELECT DISTINCT enterComp FROM artists;`;
   
   con.query(sql, (err, results, fields) => {
@@ -263,7 +271,7 @@ app.get('/mainpage/:userId/randomArtist', async (req, res) => {
 
 
 //artistpage
-app.get('/artistpage/allArtist', async (req, res) => {
+app.get('/artistpage/allArtist', verifyToken, async (req, res) => {
   const sql1 = `SELECT enterComp FROM artists ORDER BY enterComp DESC`;
   con.query(sql1, (err, result1) => {
     if (err) throw err;
@@ -376,7 +384,7 @@ app.get('/artistpage/allArtist', async (req, res) => {
 // });
 
 // 아티스트 프로필 조회
-app.get('/community/:artistId/artistProfile', async (req, res) => {
+app.get('/community/:artistId/artistProfile', verifyToken, async (req, res) => {
   const artistId = req.params.artistId; 
   const sql = `SELECT 
                 artists.groupName,
@@ -396,7 +404,7 @@ app.get('/community/:artistId/artistProfile', async (req, res) => {
 });
 
 //아티스트 즐겨찾기 수 조회
-app.get('/community/:artistId/favoriteQuant', async (req, res) => {
+app.get('/community/:artistId/favoriteQuant', verifyToken, async (req, res) => {
   const artistId = req.params.artistId; 
   const sql = `SELECT COUNT(*) AS favoriteQuant
                 FROM Favorites
@@ -412,12 +420,12 @@ app.get('/community/:artistId/favoriteQuant', async (req, res) => {
 });
 
 //아티스트 즐겨찾기 해제
-app.delete('/community/:artistId/notFavorite/:userId', async(req,res)=>{
+app.delete('/community/:artistId/notFavorite', verifyToken, async(req,res)=>{
   const artistId = req.params.artistId;
-  const userId = req.params.userId;
+  const userId = req.decoded.userId;
   const sql = `DELETE 
               FROM Favorites
-              WHERE artistId=? AND userId=?;
+              WHERE (artistId=? AND userId=?);
   `
   con.query(sql, [artistId, userId], (err, result, fields)=>{
     if(err) throw err;
@@ -427,8 +435,8 @@ app.delete('/community/:artistId/notFavorite/:userId', async(req,res)=>{
 });
 
 //아티스트 내가 가진 컬렉션 조회
-app.get('/community/:artistId/:userId/collectionQuant', async (req, res) => {
-  const userId = req.params.userId;
+app.get('/community/:artistId/collectionQuant', verifyToken, async (req, res) => {
+  const userId = req.decoded.userId;
   const artistId = req.params.artistId;
   const sql = `SELECT COUNT(*) AS collectionQuant
                 FROM UserCollections uc
@@ -444,7 +452,7 @@ app.get('/community/:artistId/:userId/collectionQuant', async (req, res) => {
 });
 
 //멤버별 이름 및 사진 조회
-app.get('/community/:artistId/members', async (req, res) => {
+app.get('/community/:artistId/members', verifyToken, async (req, res) => {
   const artistId = req.params.artistId;
   //const artistId = 1;
   const sql = `SELECT 
@@ -477,7 +485,7 @@ app.get('/community/:artistId/members', async (req, res) => {
 });
 
 //아티스트 멤버별 도안 조회
-app.get('/community/:memberName/memberPost', async (req, res) => { 
+app.get('/community/:memberName/memberPost', verifyToken, async (req, res) => { 
   const memberName =req.params.memberName;
   // if(memberName=='아이유'){
   //   memberName = '아이유(IU)';
@@ -559,7 +567,7 @@ app.get('/community/:memberName/memberPost', async (req, res) => {
 // });
 
 //아티스트 전체 도안 조회
-app.get('/community/:artistId/allPost', async (req, res) => {
+app.get('/community/:artistId/allPost', verifyToken, async (req, res) => {
   const artistId = req.params.artistId; 
   const sql = `SELECT
                 p.postId,
@@ -620,7 +628,7 @@ app.get('/community/:artistId/allPost', async (req, res) => {
 });
 
 // 아티스트 전체 도안 좋아요 수 조회
-app.get('/community/:artistId/allPost/:postId/like', async(req, res)=>{
+app.get('/community/:artistId/allPost/:postId/like', verifyToken, async(req, res)=>{
   const artistId = req.params.artistId;
   const postId = req.params.postId;
   const sql = `SELECT postId, COUNT(*) AS likeQuant
@@ -672,7 +680,7 @@ app.get('/community/:artistId/allPost/:postId/like', async(req, res)=>{
 // });
 
 // 도안 게시(포스팅)
-app.post('/community/:userId/uploadPost/:polaroidId/upload', async(req, res)=>{
+app.post('/community/uploadPost/:polaroidId/upload', verifyToken, async(req, res)=>{
   
   let today = new Date();   
 
@@ -690,7 +698,7 @@ app.post('/community/:userId/uploadPost/:polaroidId/upload', async(req, res)=>{
   let dateTime = `${nowdate} ${time}`;
 
   //const image = `https://${process.env.BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/polaroid/${imgName}`;
-  const userId = req.params.userId;
+  const userId = req.decoded.userId;
   const polaroidId = req.params.polaroidId;
   const sql = `INSERT into Posts( postId, postDateTime, userId, polaroidId)
               VALUES ( NULL, ?, ?, ?) `
@@ -705,8 +713,8 @@ app.post('/community/:userId/uploadPost/:polaroidId/upload', async(req, res)=>{
 
 //mypage
 //프로필 정보 조회
-app.get('/mypage/:userId/myProfile', async(req, res)=>{
-  const userId = req.params.userId;
+app.get('/mypage/myProfile', verifyToken, async(req, res)=>{
+  const userId = req.decoded.userId;
   const sql = `SELECT userId, avatar, nickname, biography
               FROM users
               WHERE userId = ?
@@ -724,8 +732,8 @@ app.get('/mypage/:userId/myProfile', async(req, res)=>{
 });
 
 //아티스트 탭 조회(포스트 유무 기준)
-app.get('/mypage/:userId/myPost/artistTab', async(req, res)=>{
-  const userId = req.params.userId;
+app.get('/mypage/myPost/artistTab', verifyToken, async(req, res)=>{
+  const userId = req.decoded.userId;
   const sql =  `SELECT DISTINCT pc.groupName, a.artistId
                 FROM Posts p
                 INNER JOIN Polaroids pl ON p.polaroidId = pl.polaroidId
@@ -747,8 +755,8 @@ app.get('/mypage/:userId/myPost/artistTab', async(req, res)=>{
 });
 
 //아티스트 별 포스트(게시 도안) 모아보기
-app.get('/mypage/:userId/myPost/:artistId/post', async (req, res)=>{
-  const userId = req.params.userId;
+app.get('/mypage/myPost/:artistId/post', verifyToken, async (req, res)=>{
+  const userId = req.decoded.userId;
   const artistId = req.params.artistId;
   const sql = `SELECT DISTINCT p.postId, p.postDateTime, pl.polaroid, 
               pc.enterComp, pc.groupName, pc.memberName, pc.albumName,
@@ -800,25 +808,25 @@ app.get('/mypage/:userId/myPost/:artistId/post', async (req, res)=>{
     res.status(200).send(r);
   });
 });
-//아티스트 별 게시 도안 좋아요 개수
-app.get('/mypage/:userId/myPost/:artistId/:postId/like', async(req, res)=>{
-  const userId = req.params.userId;
-  const artistId = req.params.artistId;
-  const postId = req.params.postId;
-  const sql = `SELECT COUNT(*) AS LikeQuant
-                FROM Likes
-                WHERE postId = ?;`;
-  con.query(sql, [postId], (err, result, fields)=>{
-    if(err) throw err;
-    // const r = {
-    //   postOfArtistList: result
-    // }
-    res.status(200).send(result[0]);
-  });
-});
+// //아티스트 별 게시 도안 좋아요 개수
+// app.get('/mypage/:userId/myPost/:artistId/:postId/like', async(req, res)=>{
+//   const userId = req.params.userId;
+//   const artistId = req.params.artistId;
+//   const postId = req.params.postId;
+//   const sql = `SELECT COUNT(*) AS LikeQuant
+//                 FROM Likes
+//                 WHERE postId = ?;`;
+//   con.query(sql, [postId], (err, result, fields)=>{
+//     if(err) throw err;
+//     // const r = {
+//     //   postOfArtistList: result
+//     // }
+//     res.status(200).send(result[0]);
+//   });
+// });
 
 //포스트 삭제하기
-app.delete('/mypage/:userId/myPost/delete/:postId', async (req, res)=>{
+app.delete('/mypage/myPost/delete/:postId', verifyToken, async (req, res)=>{
   const postId = req.params.postId;
   const sql =  `DELETE FROM Posts WHERE postId = ?;`;
   con.query(sql, [postId], (err, result, fields)=>{
@@ -832,8 +840,8 @@ app.delete('/mypage/:userId/myPost/delete/:postId', async (req, res)=>{
 });
 
 //아티스트 탭 정보 조회(즐겨찾기 기준)
-app.get('/mypage/:userId/myCollection/artistTab', async (req, res)=>{
-  const userId = req.params.userId;
+app.get('/mypage/myCollection/artistTab', verifyToken, async (req, res)=>{
+  const userId = req.decoded.userId;
   const sql = `SELECT f.artistId, a.groupName
               FROM Favorites f
               INNER JOIN artists a ON f.artistId = a.artistId
@@ -852,10 +860,10 @@ app.get('/mypage/:userId/myCollection/artistTab', async (req, res)=>{
 });
 
 //활성화한 컬렉션 정보 조회
-app.get('/mypage/:userId/myCollection/:artistId/active', async (req, res)=>{
-  const userId = req.params.userId;
+app.get('/mypage/myCollection/:artistId/active', verifyToken, async (req, res)=>{
+  const userId = req.decoded.userId;
   const artistId = req.params.artistId;
-  const sql = `SELECT c.albumJacket, c.albumName, c.activeDateTime, c.photoCardQuant
+  const sql = `SELECT c.albumJacket, c.albumName, uc.activeDateTime, c.photoCardQuant
               FROM collections c
               INNER JOIN UserCollections uc ON uc.albumName = c.albumName 
               INNER JOIN users u ON u.userId = uc.userId
@@ -870,7 +878,7 @@ app.get('/mypage/:userId/myCollection/:artistId/active', async (req, res)=>{
 });
 
 //전체 컬렉션 정보 조회
-app.get('/mypage/:userId/myCollection/:artistId/allCollection', async(req, res)=>{
+app.get('/mypage/myCollection/:artistId/allCollection', verifyToken, async(req, res)=>{
   //const userId = req.params.userId;
   const artistId = req.params.artistId;
   const sql = `SELECT DISTINCT c.albumJacket, c.albumName
@@ -886,7 +894,7 @@ app.get('/mypage/:userId/myCollection/:artistId/allCollection', async(req, res)=
 });
 
 //선택한 컬렉션 전체 포토카드 정보 조회
-app.get('/mypage/:userId/myCollection/:albumName/allPhotocard', async (req, res)=>{
+app.get('/mypage/myCollection/:albumName/allPhotocard', verifyToken, async (req, res)=>{
   //const userId = req.params.userId;
   //const artistId = req.params.artistId;
   const albumName = req.params.albumName;
@@ -898,8 +906,33 @@ app.get('/mypage/:userId/myCollection/:albumName/allPhotocard', async (req, res)
               `;
     con.query(sql, [albumName], (err, result, fields)=>{
     if(err) throw err;
+    
+    const result1 = [];
+    const result2 = [];
+    const result3 = [];
+    for(let i=0;i<result.length; i++){
+      if(result[i].version === "a"){
+        result1.push(result[i]);
+      }else if(result[i].version === "b"){
+        result2.push(result[i]);
+      }else if(result[i].version === "c"){
+        result3.push(result[i]);
+      }
+    }
+    const r1 = {
+      verA: result1
+    }
+    const r2 = {
+      verB: result2
+    }
+    const r3 = {
+      verC: result3
+    }
+    const re = {
+      ...r1, ...r2, ...r3
+    }
     const r = {
-      collectionPhotocardList: result
+      collectionPhotocardList: re
     }
     res.status(200).send(r);
   })
@@ -907,8 +940,8 @@ app.get('/mypage/:userId/myCollection/:albumName/allPhotocard', async (req, res)
 });
 
 //선택한 컬렉션 활성화된 포토카드 정보 조회
-app.get('/mypage/:userId/myCollection/:albumName/activePhotocard', async (req, res)=>{
-  const userId = req.params.userId;
+app.get('/mypage/myCollection/:albumName/activePhotocard', verifyToken, async (req, res)=>{
+  const userId = req.decoded.userId;
   //const artistId = req.params.artistId;
   const albumName = req.params.albumName;
   const sql = `SELECT upc.photocardId, pc.photocard, pc.version, pc.memberName
@@ -925,8 +958,8 @@ app.get('/mypage/:userId/myCollection/:albumName/activePhotocard', async (req, r
 });
 
 //아티스트 탭 정보 조회(도안이 하나라도 있는 경우)
-app.get('/mypage/:userId/myPolaroid/artistTab', async(req, res)=>{
-  const userId = req.params.userId;
+app.get('/mypage/myPolaroid/artistTab', verifyToken, async(req, res)=>{
+  const userId = req.decoded.userId;
   const sql =  `SELECT DISTINCT a.artistId, a.groupName FROM artists a
                 INNER JOIN photoCards pc ON pc.enterComp = a.enterComp
                 INNER JOIN Polaroids pl ON pl.photocardId = pc.photocardId
@@ -944,8 +977,8 @@ app.get('/mypage/:userId/myPolaroid/artistTab', async(req, res)=>{
 });
 
 //아티스트 별 활성화한 컬렉션 조회
-app.get('/mypage/:userId/myPolaroid/:artistId/collection', async(req, res)=>{
-  const userId = req.params.userId;
+app.get('/mypage/myPolaroid/:artistId/collection', verifyToken, async(req, res)=>{
+  const userId = req.decoded.userId;
   const artistId = req.params.artistId;
   const sql = `SELECT c.albumJacket, c.albumName
               FROM collections c
@@ -962,8 +995,8 @@ app.get('/mypage/:userId/myPolaroid/:artistId/collection', async(req, res)=>{
 });
 
 // 컬렉션 별 도안 개수 조회
-app.get('/mypage/:userId/myPolaroid/:albumName/polaroidQuant', async(req, res)=>{
-  const userId = req.params.userId;
+app.get('/mypage/myPolaroid/:albumName/polaroidQuant', verifyToken, async(req, res)=>{
+  const userId = req.decoded.userId;
   const albumName = req.params.albumName;
   const sql =  `SELECT COUNT(*) AS polaroidBackupQuant
                 FROM polaroidBackups plb
@@ -976,13 +1009,14 @@ app.get('/mypage/:userId/myPolaroid/:albumName/polaroidQuant', async(req, res)=>
 })
 
 //내 도안 보기
-app.get('/mypage/:userId/myPolaroid/:albumName/polaroids', async(req, res)=>{
-  const userId = req.params.userId;
+app.get('/mypage/myPolaroid/:albumName/polaroids', verifyToken, async(req, res)=>{
+  const userId = req.decoded.userId;
   const albumName = req.params.albumName;
   const sql = `SELECT polaroidId, polaroid, saveDateTime
               FROM polaroidBackups plb
               INNER JOIN photoCards pc ON pc.photocardId = plb.photocardId
-              WHERE plb.userId = ? AND pc.albumName = ?`;
+              WHERE plb.userId = ? AND pc.albumName = ?
+              ORDER BY polaroidId DESC`;
   con.query(sql, [userId, albumName], (err, result, fields)=>{
     if(err) throw err;
     const r = {
@@ -990,10 +1024,11 @@ app.get('/mypage/:userId/myPolaroid/:albumName/polaroids', async(req, res)=>{
     }
     res.status(200).send(r);
   })
-});
+});    
+
 
 //내 도안 삭제하기
-app.delete('/mypage/:userId/myPolaroid/delete/:polaroidId', async(req, res)=>{
+app.delete('/mypage/myPolaroid/delete/:polaroidId', verifyToken, async(req, res)=>{
   const userId = req.params.userId;
   //const albumName = req.params.albumName;
   const polaroidId = req.params.polaroidId;
@@ -1008,8 +1043,8 @@ app.delete('/mypage/:userId/myPolaroid/delete/:polaroidId', async(req, res)=>{
 })
 
 // 좋아요한 포스트 모아보기
-app.get('/mypage/:userId/myLike', async(req, res)=>{
-  const userId = req.params.userId;
+app.get('/mypage/myLike', verifyToken, async(req, res)=>{
+  const userId = req.decoded.userId;
   const sql = `SELECT DISTINCT p.postId, p.postDateTime, pl.polaroid, 
               pc.enterComp, pc.groupName, pc.memberName, pc.albumName,
               u.userId, u.nickname
@@ -1077,13 +1112,13 @@ app.get('/mypage/:userId/myLike', async(req, res)=>{
 // })
 
 // 포스트 좋아요 누르기
-app.post('/post/:userId/:postId/updateLike', async(req, res)=>{
+app.post('/post/:postId/updateLike',verifyToken, async(req, res)=>{
   try {
-    const userId = req.params.userId;
+    const userId = req.decoded.userId;
     const postId = req.params.postId;
 
     // Use prepared statement to prevent SQL injection
-    const sql = 'INSERT INTO Likes (userId, postId) VALUES ( ?, ?)';
+    const sql = 'INSERT INTO Likes (likeId, userId, postId) VALUES ( NULL, ?, ?)';
     con.query(sql, [userId, postId], (err, result, fields) => {
       if (err) {
         // Handle SQL error
@@ -1107,9 +1142,9 @@ app.post('/post/:userId/:postId/updateLike', async(req, res)=>{
 });
 
 //포스트 좋아요 클릭 해제하기
-app.delete('/post/notLike/:userId/:postId', async(req, res)=>{
+app.delete('/post/notLike/:postId', verifyToken, async(req, res)=>{
   const postId = req.params.postId;
-  const userId = req.params.userId;
+  const userId = req.decoded.userId;
   const sql = `DELETE 
               FROM Likes
               WHERE (postId=? AND userId=?);
@@ -1124,13 +1159,14 @@ app.delete('/post/notLike/:userId/:postId', async(req, res)=>{
 });
 
 //아티스트 즐겨찾기 누르기
-app.post('/community/:artistId/updateFavorite/:userId', async(req, res)=>{
+app.post('/community/:artistId/updateFavorite', verifyToken, async(req, res)=>{
   try {
-    const userId = req.params.userId;
+    const userId = req.decoded.userId;
     const artistId = req.params.artistId;
 
     // Use prepared statement to prevent SQL injection
-    const sql = 'INSERT INTO Favorites (userId, artistId) VALUES (?, ?)';
+    const sql = `INSERT INTO Favorites (userId, artistId) 
+                  VALUES (?, ?)`;
     con.query(sql, [userId, artistId], (err, result, fields) => {
       if (err) {
         // Handle SQL error
@@ -1155,7 +1191,7 @@ app.post('/community/:artistId/updateFavorite/:userId', async(req, res)=>{
 
 //edit
 //polaroid 도안 저장
-app.post('/edit/save/:userId/:photocardId', upload.single('image'), async(req, res)=>{
+app.post('/edit/save/:photocardId', upload.single('image'), verifyToken, async(req, res)=>{
   console.log("req.body", req.body);
   console.log("req.file", req.file);
 
@@ -1192,7 +1228,7 @@ app.post('/edit/save/:userId/:photocardId', upload.single('image'), async(req, r
   console.log(dateTime);
 
   const image = `https://${process.env.BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/polaroid/${imgName}`;
-  const userId = req.params.userId;
+  const userId = req.decoded.userId;
   const photocardId = req.params.photocardId;
   const sql = `INSERT into Polaroids( polaroidId, polaroid, saveDateTime, userUserId, photocardId)
               VALUES ( NULL, ?, ?, ?, ?)`;
@@ -1236,11 +1272,26 @@ app.post('/edit/save/:userId/:photocardId', upload.single('image'), async(req, r
 });
 
 //컬렉션 활성화
-app.post('/mypage/:userId/myCollection/:albumName/collectionActivation', async(req, res)=>{
-  const userId = req.params.userId;
+app.post('/mypage/myCollection/:albumName/collectionActivation', verifyToken, async(req, res)=>{
+  const userId = req.decoded.userId;
   const albumName = req.params.albumName;
   const code = req.body.code;
   
+  let today = new Date();   
+
+  let year = today.getFullYear();
+  let month = today.getMonth() + 1; 
+  let date = today.getDate(); 
+
+  let nowdate = `${year}-${month}-${date}`;
+
+  let hours = today.getHours(); 
+  let minutes = today.getMinutes();  
+  let seconds = today.getSeconds();  
+
+  let time = `${hours}:${minutes}:${seconds}`;
+  let dateTime = `${nowdate} ${time}`;
+
   const collectionalbum = await Collection.findAll({where: {albumName: albumName}});
   console.log("collectionalbum",collectionalbum);
   const collectionCode = collectionalbum[0]?.dataValues?.activationCode;
@@ -1249,8 +1300,8 @@ app.post('/mypage/:userId/myCollection/:albumName/collectionActivation', async(r
   console.log(typeof code);
   if(code===collectionCode){
     const sql = `INSERT INTO UserCollections
-              VALUES (NULL, ?, ?)`;
-  con.query( sql, [userId, albumName], (err, result, fields)=>{
+              VALUES (NULL, ?, ?, ?)`;
+  con.query( sql, [userId, albumName, dateTime], (err, result, fields)=>{
     if(err) throw err;
     const msg = "컬렉션 활성화됨"
     result.message  = msg;
@@ -1265,8 +1316,8 @@ app.post('/mypage/:userId/myCollection/:albumName/collectionActivation', async(r
 });
 
 //포토카드 랜덤 부여(활성화 임시 버전)
-app.post('/mypage/:userId/myCollection/:albumName/cardActivationRandomly', async(req, res)=>{
-  const userId = req.params.userId;
+app.post('/mypage/myCollection/:albumName/cardActivationRandomly', verifyToken, async(req, res)=>{
+  const userId = req.decoded.userId;
   const albumName = req.params.albumName;
   const sql = `SELECT photocardId
               FROM photoCards
@@ -1275,13 +1326,15 @@ app.post('/mypage/:userId/myCollection/:albumName/cardActivationRandomly', async
     if(err) throw err;
     console.log(result);
     const randomIndex = getRandomInt(result.length);
-    const randomCard = parseInt(result[randomIndex-1].photocardId);
+    const randomCard = parseInt(result[randomIndex].photocardId);
+    console.log("randomCard: ", randomCard);
+    console.log("randomIndex: ", randomIndex);
     const sql2 = `INSERT UserPhotoCards
-                  VALUES (1, ?, ?)`;
+                  VALUES (NULL, ?, ?)`;
     con.query(sql2, [userId, randomCard], (err, result, fields)=>{
       if(err) throw err;
       
-      const msg = "랜덤 포토카드 부여"
+      const msg = ` ${randomCard} 번 포토카드 부여`
       result.message = msg;
       res.status(201).send(result);
       console.log(result);
@@ -1290,8 +1343,8 @@ app.post('/mypage/:userId/myCollection/:albumName/cardActivationRandomly', async
 });
 
 //해당 유저의 아티스트 즐겨찾기 여부 확인 API (11.27)
-app.get('/community/:userId/isFavorite/:artistId', async(req, res)=>{
-  const userId = req.params.userId;
+app.get('/community/isFavorite/:artistId', verifyToken, async(req, res)=>{
+  const userId = req.decoded.userId;
   const artistId = req.params.artistId;
   const sql = `SELECT COUNT(*) AS isFavorite
               FROM Favorites
@@ -1310,8 +1363,8 @@ app.get('/community/:userId/isFavorite/:artistId', async(req, res)=>{
 });
 
 //해당 유저의 포스트 좋아요 여부 확인 API (11.27)
-app.get('/:userId/isLike/:postId', async(req, res)=>{
-  const userId = req.params.userId;
+app.get('/isLike/:postId', verifyToken, async(req, res)=>{
+  const userId = req.decoded.userId;
   const postId = req.params.postId;
   const sql = `SELECT COUNT(*) AS isLike
               FROM Likes
@@ -1330,7 +1383,7 @@ app.get('/:userId/isLike/:postId', async(req, res)=>{
 });
 
 // 포토카드 업로드하기
-app.post('/photocard/upload/:memberName/:version', upload.single('image'), async(req, res)=>{
+app.post('/photocard/upload/:memberName/:version', upload.single('image'), verifyToken, async(req, res)=>{
   console.log("req.body", req.body);
   console.log("req.file", req.file);
 
@@ -1339,17 +1392,19 @@ app.post('/photocard/upload/:memberName/:version', upload.single('image'), async
   let albumName = '';
   let groupName = '';
   let enterComp = '';
-  if(memberName === '정국' || '뷔' || '지민' || '슈가' || '진' || 'RM' || '제이홉'){
-    groupName = '방탄소년단(BTS)';
-    albumName = '<Butter>';
-    enterComp = '빅히트 엔터테인먼트(Big Hit Entertainment)'
-  }else if(memberName==='윈터' ||'카리나'||'닝닝' || '지젤'){
-    groupName = '에스파(aespa)';
-    albumName = '<MY WORLD - The 3rd Mini Album>';
-    enterComp = '에스엠 엔터테인먼트(SM Entertainment)';
-  }else if(memberName==='민지' ||'하니'||'해린' || '다니엘'||"혜인"){
+  // if(memberName === '정국' || '뷔' || '지민' || '슈가' || '진' || 'RM' || '제이홉'){
+  //   groupName = '방탄소년단(BTS)';
+  //   albumName = '<Butter>';
+  //   enterComp = '빅히트 엔터테인먼트(Big Hit Entertainment)'
+  // }else 
+  // if(memberName === '윈터' || '카리나' || '닝닝' || '지젤'){
+  //   groupName = '에스파(aespa)';
+  //   albumName = '<MY WORLD - The 3rd Mini Album>';
+  //   enterComp = '에스엠 엔터테인먼트(SM Entertainment)';
+  // }else 
+  if(memberName === '민지' ||'하니' || '해린' || '다니엘'|| '혜인'){
     groupName = '뉴진스(NewJeans)';
-    albumName = '<NewJeans 2nd EP \'GET UP\'>';
+    albumName = `<NewJeans 2nd EP 'GET UP'>`;
     enterComp = '어도어 엔터테인먼트(ADOR Entertainment)';
   }else{
     groupName = '아이유(IU)';
@@ -1371,7 +1426,7 @@ app.post('/photocard/upload/:memberName/:version', upload.single('image'), async
   await s3.send(command);
   console.log(command);
 
-  const image = `https://${process.env.BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/polaroid/${imgName}`;
+  const image = `https://${process.env.BUCKET_NAME}.s3.${process.env.S3_REGION}.amazonaws.com/photocard/${folderName}/${imgName}`;
   const sql = `INSERT into photoCards( photocardId, memberName, version, photocard, albumName, enterComp, groupName, activationCode)
               VALUES ( NULL, ?, ?, ?, ?, ?, ?, NULL)`;
 
@@ -1389,6 +1444,43 @@ app.post('/photocard/upload/:memberName/:version', upload.single('image'), async
     
   });
 });
+
+// 포스트아이디로 포스트 좋아요 개수 확인하는 API
+app.get('/postLikeQuant/:postId', verifyToken, async(req, res)=>{
+  const postId = req.params.postId;
+  const sql = `SELECT COUNT(*) AS postLikeQuant
+              FROM Likes
+              WHERE postId = ?
+              GROUP BY postId;`;
+  con.query(sql, [postId], (err, result, fields)=>{
+    if(err) throw err;
+    if(result[0]){
+    res.status(200).send(result[0]);
+    }else{
+      res.status(200).json({"postLikeQuant":0});
+    }
+  })
+});
+
+// 앨범이름으로 앨범에 활성화된 포토카드 개수 확인하는 API
+app.get('/:albumName/activePhotocardQuant', verifyToken, async(req, res)=>{
+  const albumName = req.params.albumName;
+  const userId = req.decoded.userId;
+
+  const sql = `SELECT COUNT(*) AS activeCardQuant
+              FROM UserPhotoCards upc
+              INNER JOIN photoCards pc ON pc.photocardId = upc.photocardId
+              WHERE upc.userId = ? AND pc.albumName = ?
+              `
+  con.query(sql, [userId, albumName], (err, result, fields)=>{
+    if(result[0]){
+      res.status(200).send(result[0]);
+    }else{
+      res.status(200).json({"activeCardQuant":0});
+    }
+  })
+
+})
 
 app.listen(port, ()=>{
   console.log(`Example app listening on ${port}`);

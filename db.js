@@ -50,7 +50,7 @@ User.init(
         timestamps: false
     }
 );
-await sequelize.sync();
+//await sequelize.sync();
 
 //아티스트
 class Artist extends Model {}
@@ -76,7 +76,7 @@ Artist.init(
         timestamps: false
     }
 );
-await sequelize.sync();
+// await sequelize.sync();
 
 //포토카드
 class PhotoCard extends Model {
@@ -106,7 +106,7 @@ PhotoCard.init(
         timestamps: false
     }
 );
-await sequelize.sync();
+// await sequelize.sync();
 
 //컬렉션
 class Collection extends Model {
@@ -119,7 +119,7 @@ Collection.init(
       },
       albumJacket: DataTypes.STRING,
       photoCardQuant: DataTypes.INTEGER,
-      activeDateTime: DataTypes.DATE,
+      // DatactiveeTime: DataTypes.DATE,
       activationCode: DataTypes.STRING
     }
     ,
@@ -129,7 +129,7 @@ Collection.init(
         timestamps: false
     }
 );
-await sequelize.sync();
+  // await sequelize.sync();
 
 //도안
 class Polaroid extends Model {
@@ -152,7 +152,7 @@ Polaroid.init(
         timestamps: false
     }
 );
-await sequelize.sync();
+// await sequelize.sync();
 
 // 도안백업
 class PolaroidBackup extends Model {
@@ -177,7 +177,7 @@ PolaroidBackup.init(
         timestamps: false
     }
 );
-await sequelize.sync();
+// await sequelize.sync();
 
 //포스트
 class Post extends Model {
@@ -206,8 +206,8 @@ Post.init(
         modelName: "Post", 
         timestamps: false
     }
-);
-await sequelize.sync();
+  );
+    // await sequelize.sync();
 
 // 릴레이션
 // 회원 : 도안 = 일대다
@@ -221,7 +221,7 @@ User.hasMany(Post, {
 Post.belongsTo(User,{
   foreignKey: 'userId'
 });
-await sequelize.sync();
+// await sequelize.sync();
 
 // 좋아요 ( 회원: 포스트 = 다대다)
 class Like extends Model {
@@ -241,7 +241,7 @@ Like.init(
       timestamps: false
   }
 );
-await sequelize.sync();
+// await sequelize.sync();
 User.belongsToMany(Post, {
   through: 'Like',
   foreignKey: 'userId',
@@ -251,7 +251,7 @@ Post.belongsToMany(User, {
   through: 'Like',
   foreignKey: 'postId',
 });
-await sequelize.sync();
+// await sequelize.sync();
 
 // 즐겨찾기 (회원: 아티스트 = 다대다)
 class Favorite extends Model {
@@ -281,7 +281,7 @@ Artist.belongsToMany(User, {
   through: 'Favorite',
   foreignKey: 'artistId',
 });
-await sequelize.sync();
+// await sequelize.sync();
 
 
 // 컬렉션
@@ -320,7 +320,7 @@ PhotoCard.belongsTo(Collection,{
   foreignKey: 'albumName'
 });
 
-await sequelize.sync();
+// await sequelize.sync();
 
 // 회원: 컬렉션 = 다대다
 class UserCollection extends Model {
@@ -332,7 +332,8 @@ UserCollection.init(
       autoIncrement: true,
       primaryKey: true,
       allowNull: true
-    }
+    },
+    activeDateTime: DataTypes.DATE
   },
   {
       sequelize,
@@ -349,7 +350,7 @@ Collection.belongsToMany(User, {
   through: 'UserCollection',
   foreignKey: 'albumName',
 });
-await sequelize.sync();
+// await sequelize.sync();
 
 // 회원: 포토카드 = 다대다
 class UserPhotoCard extends Model {
@@ -382,7 +383,7 @@ PhotoCard.belongsToMany(User, {
   through: 'UserPhotoCard',
   foreignKey: 'photocardId',
 });
-await sequelize.sync();
+// await sequelize.sync();
 
 // //----일대일----
 // Polaroid.sync();
@@ -604,41 +605,41 @@ const newJeans = Artist.build(
 // })
 
 //-------user----------
-const userTemp = User.build(
-  {
-    // userId: 1,
-    email: 'ohnpol1004@naver.com',
-    nickname: 'ohnpol1004',
-    password: '1111',
-    avatar: 'https://ohnpol.s3.ap-northeast-2.amazonaws.com/users/avatar.png',
-    biography: '자기소개'
-})
+// const userTemp = User.build(
+//   {
+//     // userId: 1,
+//     email: 'ohnpol1004@naver.com',
+//     nickname: 'ohnpol1004',
+//     password: '1111',
+//     avatar: 'https://ohnpol.s3.ap-northeast-2.amazonaws.com/users/avatar.png',
+//     biography: '자기소개'
+// })
 
-const userTemp2 = User.build(
-  {
-    // userId: 1,
-    email: 'user2@naver.com',
-    nickname: 'user2',
-    password: '2222',
-    avatar: 'https://ohnpol.s3.ap-northeast-2.amazonaws.com/users/avatar.png',
-    biography: 'user2입니다'
-})
+// const userTemp2 = User.build(
+//   {
+//     // userId: 1,
+//     email: 'user2@naver.com',
+//     nickname: 'user2',
+//     password: '2222',
+//     avatar: 'https://ohnpol.s3.ap-northeast-2.amazonaws.com/users/avatar.png',
+//     biography: 'user2입니다'
+// })
 
-//-------favorite----------
+// //-------favorite----------
 
-const fav1 = Favorite.build(
-  {
-    favoriteQuant: 1,
-    userId: 1,
-    artistId: 1
-  }
-)
-//------like---------------
-const like1 = Like.build({
-  likeQuant: 1,
-  userId:1,
-  postId:1
-})
+// const fav1 = Favorite.build(
+//   {
+//     favoriteQuant: 1,
+//     userId: 1,
+//     artistId: 1
+//   }
+// )
+// //------like---------------
+// const like1 = Like.build({
+//   likeQuant: 1,
+//   userId:1,
+//   postId:1
+// })
 
 //----------------------saved---------------------------------
 // await BTS.save();
